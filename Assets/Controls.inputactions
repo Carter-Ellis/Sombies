@@ -46,7 +46,7 @@
                     "name": "Switch Item",
                     "type": "Value",
                     "id": "24882096-d069-4292-9662-0ff57a8d2e49",
-                    "expectedControlType": "Integer",
+                    "expectedControlType": "Axis",
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": true
@@ -55,6 +55,24 @@
                     "name": "Reload Scene",
                     "type": "Button",
                     "id": "eb6ef052-ef0c-4e40-a2b1-9c302a449833",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Switch Spell",
+                    "type": "Value",
+                    "id": "039852a2-b85b-491a-bfef-de62ecd44be1",
+                    "expectedControlType": "Axis",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "Interact",
+                    "type": "Button",
+                    "id": "f02e0f2e-a74c-4f3f-83e4-c8a734bd2693",
                     "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
@@ -142,7 +160,7 @@
                 {
                     "name": "",
                     "id": "b26521ac-f694-48fa-a3e5-f95681c662ee",
-                    "path": "<Keyboard>/e",
+                    "path": "<Keyboard>/space",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
@@ -153,7 +171,7 @@
                 {
                     "name": "",
                     "id": "016b3fa1-8faa-472d-aea0-0e3228160894",
-                    "path": "<Keyboard>/1",
+                    "path": "<Keyboard>/z",
                     "interactions": "",
                     "processors": "Scale(factor=0)",
                     "groups": "",
@@ -164,7 +182,7 @@
                 {
                     "name": "",
                     "id": "2dd04b3c-404c-4908-a433-fc1cb02dbe90",
-                    "path": "<Keyboard>/2",
+                    "path": "<Keyboard>/x",
                     "interactions": "",
                     "processors": "Scale",
                     "groups": "",
@@ -175,7 +193,7 @@
                 {
                     "name": "",
                     "id": "c907073a-6cf3-4c79-ac27-112d2d8fc028",
-                    "path": "<Keyboard>/3",
+                    "path": "<Keyboard>/c",
                     "interactions": "",
                     "processors": "Scale(factor=2)",
                     "groups": "",
@@ -191,6 +209,50 @@
                     "processors": "",
                     "groups": "",
                     "action": "Reload Scene",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "cc8724fb-d3cc-4846-a2b0-34123957e6a4",
+                    "path": "<Keyboard>/1",
+                    "interactions": "",
+                    "processors": "Scale(factor=0)",
+                    "groups": "",
+                    "action": "Switch Spell",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "b69ef8c1-fe9c-480a-b21e-db32ad97394a",
+                    "path": "<Keyboard>/2",
+                    "interactions": "",
+                    "processors": "Scale",
+                    "groups": "",
+                    "action": "Switch Spell",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "64c57cb1-b177-412b-8d84-4bf660d7fd0c",
+                    "path": "<Keyboard>/3",
+                    "interactions": "",
+                    "processors": "Scale(factor=2)",
+                    "groups": "",
+                    "action": "Switch Spell",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "fe73f07b-bf77-415c-83df-730500ff615c",
+                    "path": "<Keyboard>/e",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Interact",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

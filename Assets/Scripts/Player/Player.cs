@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using Unity.VectorGraphics;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
@@ -43,15 +42,26 @@ public class Player : MonoBehaviour
     [Header("Magic")]
     public Spell activeSpell;
     public Transform firepoint;
+    [SerializeField] private List<Spell> spells = new List<Spell>();
+    [SerializeField] private int selectedSpellIndex = 0;
+    [SerializeField] private int maxSpellSlots = 2;
 
     [Header("Currency Components")]
     [SerializeField] private int coins = 0;
+
+    [Header("Interaction")]
+    private PurchaseSystem nearbyPurchaseSystem = null;
 
     private void Awake()
     {
         for (int i = 0; i < maxInventorySlots; i++)
         {
             inventory.Add(null);
+        }
+
+        for (int i = 0; i < maxSpellSlots; i++)
+        {
+            spells.Add(null);
         }
     }
 
@@ -75,11 +85,39 @@ public class Player : MonoBehaviour
         }
     }
 
+    public void AddSpell(Spell spell)
+    {
+        int openSlot = FindOpenSpellSlot();
+        if (openSlot != -1)
+        {
+            spells[openSlot] = spell;
+            
+        }
+        else
+        {
+            spells[selectedSpellIndex] = spell;
+            Debug.Log("Spell overridden learned!");
+        }
+        activeSpell = spells[selectedSpellIndex];
+
+    }
     private int FindOpenInventorySlot()
     {
         for (int i = 0; i < inventory.Count; i++)
         {
             if (inventory[i] == null)
+            {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    private int FindOpenSpellSlot()
+    {
+        for (int i = 0; i < spells.Count; i++)
+        {
+            if (spells[i] == null)
             {
                 return i;
             }
@@ -95,6 +133,36 @@ public class Player : MonoBehaviour
         {
             AddItem(hitItem);
             hitItem.gameObject.SetActive(false);
+        }
+
+        PurchaseSystem shop = collision.GetComponent<PurchaseSystem>();
+        if (shop != null)
+        {
+            nearbyPurchaseSystem = shop;
+            Debug.Log("Press E to purchase!");
+        }
+    }
+
+    private void OnTriggerExit2D(Collider2D collision)
+    {
+        // Clear the reference if the player walks away
+        PurchaseSystem shop = collision.GetComponent<PurchaseSystem>();
+        if (shop != null && shop == nearbyPurchaseSystem)
+        {
+            nearbyPurchaseSystem = null;
+        }
+    }
+
+    public void OnInteract(InputAction.CallbackContext context)
+    {
+        // Only trigger once when the button is fully pressed down
+        if (context.performed)
+        {
+            if (nearbyPurchaseSystem != null)
+            {
+                // Send THIS player's data to the purchase system
+                nearbyPurchaseSystem.AttemptPurchase(this);
+            }
         }
     }
 
@@ -150,6 +218,39 @@ public class Player : MonoBehaviour
     {
         int buildIndex = SceneManager.GetActiveScene().buildIndex;
         SceneManager.LoadScene(buildIndex);
+    }
+
+
+    public void SwitchSpell(InputAction.CallbackContext context)
+    {
+        if (context.performed)
+        {
+            int index = Mathf.RoundToInt(context.ReadValue<float>());
+
+            ChangeSelectedSpell(index);
+        }
+    }
+
+    private void ChangeSelectedSpell(int newIndex)
+    {
+        if (newIndex >= 0 && newIndex < maxSpellSlots)
+        {
+            if (!spells[newIndex])
+            {
+                return;
+            }
+            selectedSpellIndex = newIndex;
+        }
+    }
+
+    public bool TrySpendCoins(int price)
+    {
+        if (coins < price)
+        {
+            return false;
+        }
+        coins -= price;
+        return true;
     }
 
 }
