@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
@@ -6,15 +7,18 @@ using UnityEngine.SceneManagement;
 
 public class Player : MonoBehaviour
 {
+
     [Header("Health")]
     private int _maxHealth = 100;
     [SerializeField] private int _health;
 
-    
     public int MaxHealth
     {
         get => _maxHealth;
-        set => _maxHealth = value;
+        set
+        {
+            _maxHealth = value;
+        }
     }
 
     public int Health
@@ -31,6 +35,22 @@ public class Player : MonoBehaviour
         }
     }
 
+    [Header("Movement")]
+    private PlayerMovement _movement;
+    public float BaseWalkSpeed => _movement.baseWalkSpeed;
+    public float BaseSprintSpeed => _movement.baseSprintSpeed;
+    public float WalkSpeed
+    {
+        get => _movement.walkSpeed;
+        set => _movement.walkSpeed = value;
+    }
+
+    public float SprintSpeed
+    {
+        get => _movement.sprintSpeed;
+        set => _movement.sprintSpeed = value;
+    }
+
     [Header("Perks")]
     public bool isHidden = false;
 
@@ -45,6 +65,14 @@ public class Player : MonoBehaviour
     [SerializeField] private List<Spell> spells = new List<Spell>();
     [SerializeField] private int selectedSpellIndex = 0;
     [SerializeField] private int maxSpellSlots = 2;
+    [SerializeField] private int _mana = 0;
+    [SerializeField] private int _maxMana = 100;
+
+    public int Mana
+    {
+        get => _mana;
+        set => _mana = Mathf.Clamp(value, 0, _maxMana);
+    }
 
     [Header("Currency Components")]
     [SerializeField] private int coins = 0;
@@ -54,6 +82,8 @@ public class Player : MonoBehaviour
 
     private void Awake()
     {
+        _movement = GetComponent<PlayerMovement>();
+
         for (int i = 0; i < maxInventorySlots; i++)
         {
             inventory.Add(null);
@@ -68,6 +98,7 @@ public class Player : MonoBehaviour
     void Start()
     {
         Health = MaxHealth;
+        Mana = _maxMana;
     }
 
 
@@ -77,7 +108,10 @@ public class Player : MonoBehaviour
         if (openSlot != -1)
         {
             inventory[openSlot] = item;
+            item.gameObject.SetActive(false);
+
             Debug.Log("Item picked up!");
+            
         }
         else
         {
@@ -131,8 +165,7 @@ public class Player : MonoBehaviour
 
         if (hitItem != null)
         {
-            AddItem(hitItem);
-            hitItem.gameObject.SetActive(false);
+            AddItem(hitItem);  
         }
 
         PurchaseSystem shop = collision.GetComponent<PurchaseSystem>();
@@ -171,6 +204,7 @@ public class Player : MonoBehaviour
         if (inventory[selectedItemIndex] != null)
         {
             inventory[selectedItemIndex].Use(this);
+            Destroy(inventory[selectedItemIndex].gameObject);
             inventory[selectedItemIndex] = null;
         }
     }
@@ -240,6 +274,7 @@ public class Player : MonoBehaviour
                 return;
             }
             selectedSpellIndex = newIndex;
+            activeSpell = spells[selectedSpellIndex];
         }
     }
 

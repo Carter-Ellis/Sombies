@@ -2,14 +2,15 @@ using UnityEngine;
 
 public abstract class Projectile : MonoBehaviour
 {
-    [SerializeField] protected int damage = 10;
+    
     [SerializeField] protected float lifetime = 3f;
-
+    protected int damage;
     protected Player owner;
 
-    public void Initialize(Player player)
+    public void Initialize(Player player, int damage)
     {
         owner = player;
+        this.damage = damage;
     }
 
     protected virtual void Start()

@@ -4,28 +4,34 @@ using UnityEngine.InputSystem;
 
 public class PlayerMovement : MonoBehaviour
 {
-    
-    [SerializeField] private float walkSpeed = 5f;
-    [SerializeField] private float sprintSpeed = 7f;
-    private float speed;
+    [Header("Base Settings")]
+    public float baseWalkSpeed = 5f;
+    public float baseSprintSpeed = 7f;
+
+    public float walkSpeed;
+    public float sprintSpeed;
+
     Rigidbody2D rb;
     private Vector2 moveInput;
     private bool isKnockedBack;
+    private bool _isSprinting;
+
+
+    public float CurrentSpeed => _isSprinting ? sprintSpeed : walkSpeed;
 
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
+
+        walkSpeed = baseWalkSpeed;
+        sprintSpeed = baseSprintSpeed;
     }
 
-    public void Start()
-    {
-        speed = walkSpeed;
-    }
 
     void FixedUpdate()
     {
         if (isKnockedBack) return;
-        rb.linearVelocity = moveInput * speed;
+        rb.linearVelocity = moveInput * CurrentSpeed;
     }
 
     public void OnMove(InputAction.CallbackContext context)
@@ -44,11 +50,11 @@ public class PlayerMovement : MonoBehaviour
     {
         if (context.started)
         {
-            speed = sprintSpeed;
+            _isSprinting = true;
         }
         else if (context.canceled)
         {
-            speed = walkSpeed;
+            _isSprinting = false;
         }
     }
 
@@ -65,6 +71,12 @@ public class PlayerMovement : MonoBehaviour
         yield return new WaitForSeconds(duration);
 
         isKnockedBack = false;
+    }
+
+    public void SetSpeedToDefault()
+    {
+        walkSpeed = baseWalkSpeed;
+        sprintSpeed = baseSprintSpeed;
     }
 
 }

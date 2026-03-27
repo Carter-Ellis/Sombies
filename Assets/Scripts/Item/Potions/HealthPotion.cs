@@ -7,7 +7,6 @@ public class HealthPotion : Item
     public override void Use(Player player)
     {
         player.Health += healAmount;
-        Destroy(gameObject);
     }
 
 }

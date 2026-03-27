@@ -10,11 +10,11 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9237208a43eacb04dac91d6b37d413a9, type: 3}
-  m_Name: Fireball
+  m_Name: Snowball
   m_EditorClassIdentifier: Assembly-CSharp::ProjectileSpell
-  _name: Fireball
-  _description: Shoot a Fireball
-  _manaCost: 4
-  damage: 20
-  projectilePrefab: {fileID: 2797691783092432233, guid: e4216e69b68961946a402704b85282e9, type: 3}
-  launchForce: 15
+  _name: Snowball
+  _description: Throw a snowball at unsuspecting enemies brrrr...
+  _manaCost: 1
+  damage: 5
+  projectilePrefab: {fileID: 2797691783092432233, guid: c878fdd7696ada644aca21d4a52def4f, type: 3}
+  launchForce: 5

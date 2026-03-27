@@ -1,5 +1,37 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &772255293950516183
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1154652294159357974}
+  m_Layer: 0
+  m_Name: Pivot
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1154652294159357974
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 772255293950516183}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 7199531929347405292}
+  m_Father: {fileID: 8584342022392115057}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &4328980771923239501
 GameObject:
   m_ObjectHideFlags: 0
@@ -24,12 +56,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4328980771923239501}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 1.04, y: 0, z: 0}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 1, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 8584342022392115057}
+  m_Father: {fileID: 1154652294159357974}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &4411116556212734287
 GameObject:
@@ -45,6 +77,7 @@ GameObject:
   - component: {fileID: 8007500877819934515}
   - component: {fileID: 2956555394039448100}
   - component: {fileID: 679429566734730214}
+  - component: {fileID: 1621959512621734935}
   - component: {fileID: 4671400500304408989}
   - component: {fileID: 2828103765466306134}
   m_Layer: 0
@@ -67,7 +100,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 7199531929347405292}
+  - {fileID: 1154652294159357974}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!212 &7884636646253627986
@@ -146,9 +179,14 @@ MonoBehaviour:
   inventory: []
   maxInventorySlots: 3
   selectedItemIndex: 0
-  activeSpell: {fileID: 11400000, guid: 46a326e2af9f6cf4ca7eb0ab94e3c324, type: 2}
+  activeSpell: {fileID: 0}
   firepoint: {fileID: 7199531929347405292}
-  coins: 0
+  spells: []
+  selectedSpellIndex: 0
+  maxSpellSlots: 2
+  mana: 0
+  maxMana: 100
+  coins: 20
 --- !u!114 &8007500877819934515
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -161,6 +199,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f365f3bbe8aaa38478f1e7f76c6ce543, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerMovement
+  baseWalkSpeed: 5
+  baseSprintSpeed: 7
   walkSpeed: 5
   sprintSpeed: 8
 --- !u!114 &2956555394039448100
@@ -175,6 +215,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e2f0f08bf4f64494d89c2eb58911f05c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerAim
+  pivot: {fileID: 1154652294159357974}
 --- !u!114 &679429566734730214
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -295,11 +336,55 @@ MonoBehaviour:
         m_CallState: 2
     m_ActionId: eb6ef052-ef0c-4e40-a2b1-9c302a449833
     m_ActionName: 'Player/Reload Scene[/Keyboard/r]'
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 2922282686609498777}
+        m_TargetAssemblyTypeName: Player, Assembly-CSharp
+        m_MethodName: SwitchSpell
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: 039852a2-b85b-491a-bfef-de62ecd44be1
+    m_ActionName: 'Player/Switch Spell[/Keyboard/1,/Keyboard/2,/Keyboard/3]'
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 2922282686609498777}
+        m_TargetAssemblyTypeName: Player, Assembly-CSharp
+        m_MethodName: OnInteract
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: f02e0f2e-a74c-4f3f-83e4-c8a734bd2693
+    m_ActionName: 'Player/Interact[/Keyboard/e]'
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: 
   m_DefaultActionMap: Player
   m_SplitScreenIndex: -1
   m_Camera: {fileID: 0}
+--- !u!114 &1621959512621734935
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4411116556212734287}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 02b765ff1b681ae42955d5f92d2f3f62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BuffManager
 --- !u!50 &4671400500304408989
 Rigidbody2D:
   serializedVersion: 5
