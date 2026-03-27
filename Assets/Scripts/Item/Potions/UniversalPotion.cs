@@ -14,9 +14,8 @@ public class UniversalPotion : Item
         {
             StatBuff newBuff = new StatBuff(player, buffToApply, buffAmount);
 
-            ApplyTimeEffect(player,
-                () => buffs.AddBuff(newBuff),
-                () => buffs.RemoveBuff(newBuff));
+            buffs.AddTemporaryBuff(newBuff, duration);
+            IsUsed = true;
         }
     }
 }

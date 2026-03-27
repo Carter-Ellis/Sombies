@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 7075359737154527953}
   - component: {fileID: 3563655710406161605}
   - component: {fileID: 4002571793902810397}
+  - component: {fileID: 7590307235161388329}
   m_Layer: 0
   m_Name: Tank Sombie
   m_TagString: Untagged
@@ -179,6 +180,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 12fd6716733d53e4682da0e20c529859, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Sombie
+  _maxHealth: 100
   _health: 500
   _damageAmount: 5
   _knockbackForce: 8
@@ -188,3 +190,15 @@ MonoBehaviour:
   targetUpdateInterval: 0.2
   hitPrice: 0
   killPrice: 15
+--- !u!114 &7590307235161388329
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7106208267067289559}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 02b765ff1b681ae42955d5f92d2f3f62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BuffManager

@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &3562820172482350850
+--- !u!1 &1546866165318473166
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -8,42 +8,40 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 5148219685988368092}
-  - component: {fileID: 1531044428206330225}
-  - component: {fileID: 8684097020170496360}
-  - component: {fileID: 3277684767582023657}
-  - component: {fileID: 8778292145451889993}
-  - component: {fileID: 7268400246437503077}
+  - component: {fileID: 4873745023738267641}
+  - component: {fileID: 5221231522905290765}
+  - component: {fileID: 9188962704031666274}
+  - component: {fileID: 25931170526279509}
   m_Layer: 0
-  m_Name: Sombie
+  m_Name: Health Potion I
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &5148219685988368092
+--- !u!4 &4873745023738267641
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3562820172482350850}
+  m_GameObject: {fileID: 1546866165318473166}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -10.24, y: 0.69, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalPosition: {x: 2.7993, y: 0.34, z: 0}
+  m_LocalScale: {x: 0.4185223, y: 0.8578377, z: 0.7028}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!212 &1531044428206330225
+--- !u!212 &5221231522905290765
 SpriteRenderer:
   serializedVersion: 2
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3562820172482350850}
+  m_GameObject: {fileID: 1546866165318473166}
   m_Enabled: 1
   m_CastShadows: 0
   m_ReceiveShadows: 0
@@ -86,7 +84,7 @@ SpriteRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_Sprite: {fileID: 7482667652216324306, guid: 311925a002f4447b3a28927169b83ea6, type: 3}
-  m_Color: {r: 0.3653504, g: 0.08036668, b: 0.3962264, a: 1}
+  m_Color: {r: 0.9622642, g: 0.36765754, b: 0.36765754, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -95,13 +93,13 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
---- !u!61 &8684097020170496360
+--- !u!61 &9188962704031666274
 BoxCollider2D:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3562820172482350850}
+  m_GameObject: {fileID: 1546866165318473166}
   m_Enabled: 1
   serializedVersion: 3
   m_Density: 1
@@ -125,7 +123,7 @@ BoxCollider2D:
   m_CallbackLayers:
     serializedVersion: 2
     m_Bits: 4294967295
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
@@ -141,64 +139,19 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 1, y: 1}
   m_EdgeRadius: 0
---- !u!50 &3277684767582023657
-Rigidbody2D:
-  serializedVersion: 5
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3562820172482350850}
-  m_BodyType: 0
-  m_Simulated: 1
-  m_UseFullKinematicContacts: 1
-  m_UseAutoMass: 0
-  m_Mass: 1
-  m_LinearDamping: 0
-  m_AngularDamping: 0.05
-  m_GravityScale: 0
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_Interpolate: 1
-  m_SleepingMode: 1
-  m_CollisionDetection: 1
-  m_Constraints: 4
---- !u!114 &8778292145451889993
+--- !u!114 &25931170526279509
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3562820172482350850}
+  m_GameObject: {fileID: 1546866165318473166}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 12fd6716733d53e4682da0e20c529859, type: 3}
+  m_Script: {fileID: 11500000, guid: 735202ca9f931d74793f403f31a154a9, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Sombie
-  _maxHealth: 100
-  _health: 100
-  _damageAmount: 10
-  _knockbackForce: 8
-  _knockbackDuration: 0.08
-  speed: 1.5
-  stoppingDistance: 0.5
-  targetUpdateInterval: 0.2
-  hitPrice: 1
-  killPrice: 5
---- !u!114 &7268400246437503077
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3562820172482350850}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 02b765ff1b681ae42955d5f92d2f3f62, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::BuffManager
+  m_EditorClassIdentifier: Assembly-CSharp::HealthPotion
+  _itemName: Health Potion I
+  _itemDescription: Heals +20
+  duration: 0
+  healAmount: 20

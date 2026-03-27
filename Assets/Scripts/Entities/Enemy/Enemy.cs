@@ -1,18 +1,7 @@
 using UnityEngine;
 
-public abstract class Enemy : MonoBehaviour
+public abstract class Enemy : Entity
 {
-    [Header("Health")]
-    private int _maxHealth = 100;
-    [SerializeField] private int _health;
-
-    public int MaxHealth
-    {
-        get => _maxHealth;
-        set => _maxHealth = value;
-    }
-
-    public int Health => _health;
 
     [Header("Attack")]
     [SerializeField] private int _damageAmount = 10;
@@ -25,6 +14,15 @@ public abstract class Enemy : MonoBehaviour
 
     [Header("Movement")]
     [SerializeField] protected float speed = 2f;
+    protected float currentSpeed = 2f;
+
+    public override float BaseWalkSpeed => speed;
+    public override float WalkSpeed
+    {
+        get => currentSpeed;
+        set => currentSpeed = value;
+    }
+    
     [SerializeField] protected float stoppingDistance = 0.5f;
 
 
@@ -45,7 +43,7 @@ public abstract class Enemy : MonoBehaviour
     protected virtual void Start()
     {
         rb = GetComponent<Rigidbody2D>();
-
+        currentSpeed = speed;
     }
 
     protected virtual void FixedUpdate()
@@ -69,11 +67,6 @@ public abstract class Enemy : MonoBehaviour
         }
     }
 
-    protected void Die()
-    {
-        Destroy(gameObject);
-    }
-
     private void MoveTowardTarget(Transform target)
     {
         float distance = Vector2.Distance(transform.position, target.position);
@@ -81,7 +74,7 @@ public abstract class Enemy : MonoBehaviour
         if (distance > stoppingDistance)
         {
             Vector2 direction = (target.position - transform.position).normalized;
-            rb.linearVelocity = direction * speed;
+            rb.linearVelocity = direction * currentSpeed;
         }
         else
         {
@@ -122,13 +115,17 @@ public abstract class Enemy : MonoBehaviour
 
     public void TakeDamage(int amount, Player player)
     {
-        _health -= amount;
+        Health -= amount;
 
-        if (_health <= 0)
+        if (Health <= 0)
         {
             player.AddCoins(killPrice);
-            Die();
         }
+    }
+
+    public override void Die()
+    {
+        Destroy(gameObject);
     }
 
 }

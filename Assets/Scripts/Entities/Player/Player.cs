@@ -5,47 +5,20 @@ using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
 
 
-public class Player : MonoBehaviour
+public class Player : Entity
 {
-
-    [Header("Health")]
-    private int _maxHealth = 100;
-    [SerializeField] private int _health;
-
-    public int MaxHealth
-    {
-        get => _maxHealth;
-        set
-        {
-            _maxHealth = value;
-        }
-    }
-
-    public int Health
-    {
-        get => _health;
-        set
-        {
-            _health = Mathf.Clamp(value, 0, MaxHealth);
-
-            if (_health <= 0)
-            {
-                Die();
-            }
-        }
-    }
 
     [Header("Movement")]
     private PlayerMovement _movement;
-    public float BaseWalkSpeed => _movement.baseWalkSpeed;
-    public float BaseSprintSpeed => _movement.baseSprintSpeed;
-    public float WalkSpeed
+    public override float BaseWalkSpeed => _movement.baseWalkSpeed;
+    public override float BaseSprintSpeed => _movement.baseSprintSpeed;
+    public override float WalkSpeed
     {
         get => _movement.walkSpeed;
         set => _movement.walkSpeed = value;
     }
 
-    public float SprintSpeed
+    public override float SprintSpeed
     {
         get => _movement.sprintSpeed;
         set => _movement.sprintSpeed = value;
@@ -80,8 +53,9 @@ public class Player : MonoBehaviour
     [Header("Interaction")]
     private PurchaseSystem nearbyPurchaseSystem = null;
 
-    private void Awake()
+    protected override void Awake()
     {
+        base.Awake();
         _movement = GetComponent<PlayerMovement>();
 
         for (int i = 0; i < maxInventorySlots; i++)
@@ -109,8 +83,6 @@ public class Player : MonoBehaviour
         {
             inventory[openSlot] = item;
             item.gameObject.SetActive(false);
-
-            Debug.Log("Item picked up!");
             
         }
         else
@@ -207,23 +179,6 @@ public class Player : MonoBehaviour
             Destroy(inventory[selectedItemIndex].gameObject);
             inventory[selectedItemIndex] = null;
         }
-    }
-
-    public void Heal(int amount)
-    {
-        Health = Mathf.Min(Health + amount, MaxHealth);
-        Debug.Log("Healed! Current health: " + Health);
-    }
-
-    public void TakeDamage(int amount)
-    {
-        Health = Mathf.Max(Health - amount, 0);
-        Debug.Log("Took damage! Current health: " + Health);
-    }
-
-    public void Die()
-    {
-        gameObject.SetActive(false);
     }
 
     public void SwitchItem(InputAction.CallbackContext context)
