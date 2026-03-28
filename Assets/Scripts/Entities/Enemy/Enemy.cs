@@ -1,7 +1,9 @@
 using UnityEngine;
+using UnityEngine.AI;
 
 public abstract class Enemy : Entity
 {
+    private RoundManager roundManager;
 
     [Header("Attack")]
     [SerializeField] private int _damageAmount = 10;
@@ -21,11 +23,14 @@ public abstract class Enemy : Entity
     public override float WalkSpeed
     {
         get => currentSpeed;
-        set => currentSpeed = value;
+        set
+        {
+            currentSpeed = value;
+            if (agent != null) agent.speed = currentSpeed;
+        }
     }
-    
-    [SerializeField] protected float stoppingDistance = 0.5f;
 
+    [SerializeField] protected float stoppingDistance = 0.5f;
 
     [Header("Targeting")]
     [SerializeField] private float targetUpdateInterval = 0.2f;
@@ -33,75 +38,75 @@ public abstract class Enemy : Entity
     private Transform currentTarget;
 
     protected Transform playerTransform;
-    protected Rigidbody2D rb;
+    protected NavMeshAgent agent;
 
     [Header("Currency Components")]
     public int hitPrice = 1;
     public int killPrice = 5;
 
-
-
     protected virtual void Start()
     {
-        rb = GetComponent<Rigidbody2D>();
+        agent = GetComponent<NavMeshAgent>();
+
+        agent.updateRotation = false;
+        agent.updateUpAxis = false;
+
+        agent.speed = speed;
+        agent.stoppingDistance = stoppingDistance;
+
         currentSpeed = speed;
+
+        NavMeshHit hit;
+        if (NavMesh.SamplePosition(transform.position, out hit, 2f, NavMesh.AllAreas))
+        {
+            agent.Warp(hit.position);
+        }
+        Debug.Log(agent.isOnNavMesh);
     }
 
-    protected virtual void FixedUpdate()
+    protected virtual void Update()
     {
-        // 1. Only look for the closest player every X seconds
-        targetUpdateTimer -= Time.fixedDeltaTime;
+        targetUpdateTimer -= Time.deltaTime;
         if (targetUpdateTimer <= 0f)
         {
             currentTarget = GetClosestPlayer();
-            targetUpdateTimer = targetUpdateInterval; // Reset timer
+            targetUpdateTimer = targetUpdateInterval;
         }
 
-        // 2. If we have a target, move toward it
         if (currentTarget != null)
         {
-            MoveTowardTarget(currentTarget);
+            if (agent.isOnNavMesh)
+            {
+                agent.SetDestination(currentTarget.position);
+            }
         }
-        else
+        else if (agent.hasPath)
         {
-            rb.linearVelocity = Vector2.zero;
+            if (agent.isOnNavMesh)
+            {
+                agent.ResetPath();
+            }
         }
     }
 
-    private void MoveTowardTarget(Transform target)
+    public void SetManager(RoundManager manager)
     {
-        float distance = Vector2.Distance(transform.position, target.position);
-
-        if (distance > stoppingDistance)
-        {
-            Vector2 direction = (target.position - transform.position).normalized;
-            rb.linearVelocity = direction * currentSpeed;
-        }
-        else
-        {
-            rb.linearVelocity = Vector2.zero;
-        }
+        roundManager = manager;
     }
 
     private Transform GetClosestPlayer()
     {
-        // 1. Find all objects in the scene with the Player component
         Player[] allPlayers = Object.FindObjectsByType<Player>(FindObjectsInactive.Exclude);
 
-        // 2. Setup variables to track the "Winner"
         Transform bestTarget = null;
-        float closestDistanceSqr = Mathf.Infinity; // Use infinity so the first check always wins
+        float closestDistanceSqr = Mathf.Infinity;
         Vector3 currentPos = transform.position;
 
-        // 3. Loop through every player found
         foreach (Player player in allPlayers)
         {
-            if (player.isHidden) return null;
+            if (player.isHidden) continue;
 
-            // Calculate the vector between Enemy and this Player
             Vector3 directionToPlayer = player.transform.position - currentPos;
-
-            // Use sqrMagnitude instead of Vector2.Distance for better performance
             float dSqrToPlayer = directionToPlayer.sqrMagnitude;
 
             if (dSqrToPlayer < closestDistanceSqr)
@@ -127,7 +132,10 @@ public abstract class Enemy : Entity
 
     public override void Die()
     {
+        if (roundManager != null)
+        {
+            roundManager.RemoveEnemy(this);
+        }
         Destroy(gameObject);
     }
-
 }
