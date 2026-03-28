@@ -7,6 +7,7 @@ public abstract class Enemy : Entity
     [SerializeField] private int _damageAmount = 10;
     [SerializeField] private int _knockbackForce = 5;
     [SerializeField] private float _knockbackDuration = .2f;
+    [SerializeField] private int manaReward = 20;
 
     public int DamageAmount => _damageAmount;
     public int KnockbackForce => _knockbackForce;
@@ -120,6 +121,7 @@ public abstract class Enemy : Entity
         if (Health <= 0)
         {
             player.AddCoins(killPrice);
+            player.AddMana(manaReward);
         }
     }
 

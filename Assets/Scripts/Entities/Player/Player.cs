@@ -203,6 +203,12 @@ public class Player : Entity
     {
         coins += amount;
     }
+
+    public void AddMana(int amount)
+    {
+        Mana += amount;
+    }
+
     public void ReloadScene()
     {
         int buildIndex = SceneManager.GetActiveScene().buildIndex;

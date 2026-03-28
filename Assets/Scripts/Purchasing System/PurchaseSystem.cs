@@ -7,8 +7,9 @@ public abstract class PurchaseSystem : MonoBehaviour
 
     [SerializeField] protected int price;
     [SerializeField] protected Spell spell;
-
-    private bool hasBeenPurchased = false;
+    [SerializeField] protected bool disableOnPurchase = true;
+    protected bool hasBeenPurchased = false;
+    
 
     public virtual void AttemptPurchase(Player buyingPlayer)
     {
@@ -23,13 +24,21 @@ public abstract class PurchaseSystem : MonoBehaviour
 
             GrantPurchase(buyingPlayer);
 
-            // Disable the object so it can't be interacted with anymore
-            gameObject.SetActive(false);
+            if (disableOnPurchase)
+            {
+                gameObject.SetActive(false);
+            }
+            
         }
         else
         {
             Debug.Log("Not enough coins to purchase this!");
         }
+    }
+
+    public void MakeFree()
+    {
+        price = 0;
     }
 
     protected abstract void GrantPurchase(Player player);

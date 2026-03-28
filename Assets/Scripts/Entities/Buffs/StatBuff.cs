@@ -6,11 +6,9 @@ public class StatBuff : Buff
 
     public override void Apply()
     {
-        Debug.Log($"{targetEntity.name}: {Type} buff started: +{Amount}");
     }
 
     public override void Undo()
     {
-        Debug.Log($"{targetEntity.name}: {Type} buff ended.");
     }
 }

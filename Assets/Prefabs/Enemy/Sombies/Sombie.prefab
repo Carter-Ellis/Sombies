@@ -185,6 +185,7 @@ MonoBehaviour:
   _damageAmount: 10
   _knockbackForce: 8
   _knockbackDuration: 0.08
+  manaReward: 20
   speed: 1.5
   stoppingDistance: 0.5
   targetUpdateInterval: 0.2
