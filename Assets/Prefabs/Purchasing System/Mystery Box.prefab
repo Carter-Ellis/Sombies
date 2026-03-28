@@ -44,6 +44,7 @@ GameObject:
   - component: {fileID: 1301386523367627561}
   - component: {fileID: 1442976964101180353}
   - component: {fileID: 4437579669299327034}
+  - component: {fileID: 5558422096047317099}
   m_Layer: 0
   m_Name: Mystery Box
   m_TagString: Untagged
@@ -114,7 +115,7 @@ SpriteRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 1
   m_MaskInteraction: 0
   m_Sprite: {fileID: 7482667652216324306, guid: 311925a002f4447b3a28927169b83ea6, type: 3}
   m_Color: {r: 0.4716981, g: 0.31636596, b: 0.18467425, a: 1}
@@ -221,7 +222,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c4dcba9d3cbb213498c0a65a27fe2459, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MysteryBox
-  price: 950
+  price: 0
   spell: {fileID: 0}
   disableOnPurchase: 0
   possibleSpells:
@@ -230,3 +231,19 @@ MonoBehaviour:
   - {fileID: 2190518828535621509, guid: fd3ce7f8be5cd7b4695725324c63da69, type: 3}
   spawnPoint: {fileID: 6538108966015445307}
   displayDuration: 7.5
+--- !u!114 &5558422096047317099
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1038688590517540060}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9809bf1345abc5648af68b3a82653f08, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: NavMeshPlus::NavMeshPlus.Components.NavMeshModifier
+  m_OverrideArea: 1
+  m_Area: 1
+  m_IgnoreFromBuild: 0
+  m_AffectedAgents: ffffffff

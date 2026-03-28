@@ -10,7 +10,8 @@ public abstract class Enemy : Entity
     [SerializeField] private int _knockbackForce = 5;
     [SerializeField] private float _knockbackDuration = .2f;
     [SerializeField] private int manaReward = 20;
-
+    [SerializeField] protected float attackCooldown = 1f;
+    protected float lastAttackTime;
     public int DamageAmount => _damageAmount;
     public int KnockbackForce => _knockbackForce;
     public float KnockbackDuration => _knockbackDuration;
@@ -138,4 +139,29 @@ public abstract class Enemy : Entity
         }
         Destroy(gameObject);
     }
+
+    protected void TryDamagePlayer(Collider2D collider)
+    {
+        // Check if enough time has passed since the last attack
+        if (Time.time >= lastAttackTime + attackCooldown)
+        {
+            Player player = collider.GetComponent<Player>();
+
+            if (player != null)
+            {
+                PlayerMovement playerMovement = player.GetComponent<PlayerMovement>();
+
+                // Calculate direction and apply knockback
+                Vector2 knockbackDirection = (player.transform.position - transform.position).normalized;
+                playerMovement.ApplyKnockback(knockbackDirection * KnockbackForce, KnockbackDuration);
+
+                // Deal damage
+                player.TakeDamage(DamageAmount);
+
+                // Record the time of this attack so the cooldown starts
+                lastAttackTime = Time.time;
+            }
+        }
+    }
+
 }

@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class Entity : MonoBehaviour
 {
@@ -54,5 +55,8 @@ public class Entity : MonoBehaviour
     public virtual void Die()
     {
         gameObject.SetActive(false);
+
+        // This is temp 
+        SceneManager.LoadScene("MainMenu");
     }
 }
