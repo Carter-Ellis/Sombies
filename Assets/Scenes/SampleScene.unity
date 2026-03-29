@@ -1184,6 +1184,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: NavMesh Manager
       objectReference: {fileID: 0}
+    - target: {fileID: 3145014601008058998, guid: 9a1b7b02eb2c3d347b2681d92e10f5fd, type: 3}
+      propertyPath: m_NavMeshData
+      value: 
+      objectReference: {fileID: 23800000, guid: 459c8a6b50fdbbc4ca2fca68c8653719, type: 2}
     - target: {fileID: 6538939355919063590, guid: 9a1b7b02eb2c3d347b2681d92e10f5fd, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0

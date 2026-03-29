@@ -45,12 +45,19 @@ public abstract class Enemy : Entity
     public int hitPrice = 1;
     public int killPrice = 5;
 
+    [Header("Components")]
+    protected Rigidbody2D rb;
+
     protected virtual void Start()
     {
         agent = GetComponent<NavMeshAgent>();
+        rb = GetComponent<Rigidbody2D>();
+
 
         agent.updateRotation = false;
         agent.updateUpAxis = false;
+
+        agent.updatePosition = false;
 
         agent.speed = speed;
         agent.stoppingDistance = stoppingDistance;
@@ -79,6 +86,11 @@ public abstract class Enemy : Entity
             if (agent.isOnNavMesh)
             {
                 agent.SetDestination(currentTarget.position);
+
+                rb.linearVelocity = agent.desiredVelocity;
+
+                agent.nextPosition = transform.position;
+
             }
         }
         else if (agent.hasPath)
@@ -86,6 +98,7 @@ public abstract class Enemy : Entity
             if (agent.isOnNavMesh)
             {
                 agent.ResetPath();
+                rb.linearVelocity = Vector2.zero;
             }
         }
     }
