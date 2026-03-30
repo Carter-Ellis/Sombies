@@ -48,6 +48,10 @@ public abstract class Enemy : Entity
     [Header("Components")]
     protected Rigidbody2D rb;
 
+    [Header("Loot Drops")]
+    [SerializeField, Range(0f, 1f)] private float _dropChance = 0.25f;
+    [SerializeField] private Item[] _possibleDrops;
+
     protected virtual void Start()
     {
         agent = GetComponent<NavMeshAgent>();
@@ -69,7 +73,6 @@ public abstract class Enemy : Entity
         {
             agent.Warp(hit.position);
         }
-        Debug.Log(agent.isOnNavMesh);
     }
 
     protected virtual void Update()
@@ -146,6 +149,8 @@ public abstract class Enemy : Entity
 
     public override void Die()
     {
+        TryDropItem();
+
         if (roundManager != null)
         {
             roundManager.RemoveEnemy(this);
@@ -173,6 +178,27 @@ public abstract class Enemy : Entity
 
                 // Record the time of this attack so the cooldown starts
                 lastAttackTime = Time.time;
+            }
+        }
+    }
+
+    protected void TryDropItem()
+    {
+        // 1. Check if the drop chance succeeds
+        if (UnityEngine.Random.value <= _dropChance)
+        {
+            // 2. Ensure we actually have items in the array to drop
+            if (_possibleDrops != null && _possibleDrops.Length > 0)
+            {
+                // 3. Pick a random item from the pool
+                int randomIndex = UnityEngine.Random.Range(0, _possibleDrops.Length);
+                Item itemPrefab = _possibleDrops[randomIndex];
+
+                // 4. Instantiate the item at the enemy's death position
+                if (itemPrefab != null)
+                {
+                    Instantiate(itemPrefab, transform.position, Quaternion.identity);
+                }
             }
         }
     }
