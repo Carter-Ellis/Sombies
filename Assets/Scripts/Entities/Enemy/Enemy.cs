@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -52,6 +53,9 @@ public abstract class Enemy : Entity
     [SerializeField, Range(0f, 1f)] private float _dropChance = 0.25f;
     [SerializeField] private Item[] _possibleDrops;
 
+    [Header("States")]
+    protected bool isKnockedBack = false;
+
     protected virtual void Start()
     {
         agent = GetComponent<NavMeshAgent>();
@@ -84,24 +88,33 @@ public abstract class Enemy : Entity
             targetUpdateTimer = targetUpdateInterval;
         }
 
-        if (currentTarget != null)
+        // ONLY process AI movement if we aren't currently flying backward from a knife hit
+        if (!isKnockedBack)
         {
-            if (agent.isOnNavMesh)
+            if (currentTarget != null)
             {
-                agent.SetDestination(currentTarget.position);
-
-                rb.linearVelocity = agent.desiredVelocity;
-
-                agent.nextPosition = transform.position;
-
+                if (agent.isOnNavMesh)
+                {
+                    agent.SetDestination(currentTarget.position);
+                    rb.linearVelocity = agent.desiredVelocity;
+                    agent.nextPosition = transform.position;
+                }
+            }
+            else if (agent.hasPath)
+            {
+                if (agent.isOnNavMesh)
+                {
+                    agent.ResetPath();
+                    rb.linearVelocity = Vector2.zero;
+                }
             }
         }
-        else if (agent.hasPath)
+        else
         {
+            // Keep the NavMeshAgent glued to the enemy while the Rigidbody gets knocked back
             if (agent.isOnNavMesh)
             {
-                agent.ResetPath();
-                rb.linearVelocity = Vector2.zero;
+                agent.nextPosition = transform.position;
             }
         }
     }
@@ -201,6 +214,25 @@ public abstract class Enemy : Entity
                 }
             }
         }
+    }
+
+    public void ApplyKnockback(Vector2 force, float duration)
+    {
+        StartCoroutine(KnockbackRoutine(force, duration));
+    }
+
+    private IEnumerator KnockbackRoutine(Vector2 force, float duration)
+    {
+        isKnockedBack = true;
+
+        // Apply the sudden force
+        rb.linearVelocity = force;
+
+        yield return new WaitForSeconds(duration);
+
+        // End knockback, stop sliding
+        rb.linearVelocity = Vector2.zero;
+        isKnockedBack = false;
     }
 
 }

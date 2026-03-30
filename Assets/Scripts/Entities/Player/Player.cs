@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -52,6 +53,16 @@ public class Player : Entity
 
     [Header("Interaction")]
     private PurchaseSystem nearbyPurchaseSystem = null;
+
+    [Header("Melee Attack (Knife)")]
+    [SerializeField] private int meleeDamage = 150; // Insta-kill early rounds!
+    [SerializeField] private float meleeRange = 1.5f; // How far forward the knife reaches
+    [SerializeField] private float meleeRadius = 0.5f; // How wide the hit detection is
+    [SerializeField] private float meleeKnockbackForce = 15f;
+    [SerializeField] private float meleeKnockbackDuration = 0.2f;
+    [SerializeField] private float meleeCooldown = 0.8f;
+    private float lastMeleeTime;
+    [SerializeField] private GameObject meleeVisual;
 
     protected override void Awake()
     {
@@ -247,6 +258,77 @@ public class Player : Entity
         }
         coins -= price;
         return true;
+    }
+    public void OnMelee(InputAction.CallbackContext context)
+    {
+        // Only trigger on the initial button press, and check the cooldown
+        if (context.performed && Time.time >= lastMeleeTime + meleeCooldown)
+        {
+            StartCoroutine(ShowMeleeVisual());
+            PerformMeleeAttack();
+            lastMeleeTime = Time.time;
+        }
+    }
+
+    private void PerformMeleeAttack()
+    {
+        // 1. Figure out which way the player is looking (towards the mouse)
+        Vector2 direction = firepoint.right;
+
+        // 2. Calculate the exact point in space where the knife hits
+        Vector2 attackPoint = (Vector2)transform.position + direction * meleeRange;
+
+        // 3. Draw a circle at that point and grab everything inside it
+        Collider2D[] hitObjects = Physics2D.OverlapCircleAll(attackPoint, meleeRadius);
+
+        foreach (Collider2D hitCollider in hitObjects)
+        {
+            Enemy enemy = hitCollider.GetComponent<Enemy>();
+            if (enemy != null)
+            {
+                // Deal Damage
+                enemy.TakeDamage(meleeDamage, this);
+
+                // Apply Knockback (pushing them away from the player)
+                Vector2 knockbackDir = (enemy.transform.position - transform.position).normalized;
+                enemy.ApplyKnockback(knockbackDir * meleeKnockbackForce, meleeKnockbackDuration);
+
+                // Black Ops Zombies knife usually only hits one enemy per swing, so we break here!
+                break;
+            }
+        }
+    }
+
+    // Optional: This draws a visual circle in the Unity Editor so you can easily see/tune your knife range!
+    private void OnDrawGizmosSelected()
+    {
+        // 1. Set the color (Red for attack)
+        Gizmos.color = Color.red;
+
+        Vector2 direction = Vector2.up; // Default direction for the editor
+
+        // 2. If the game is running, show the actual aim direction
+        if (Application.isPlaying && Camera.main != null)
+        {
+            Vector3 mousePos = Camera.main.ScreenToWorldPoint(Mouse.current.position.ReadValue());
+            direction = ((Vector2)mousePos - (Vector2)transform.position).normalized;
+        }
+
+        // 3. Calculate the center of the hit circle
+        Vector3 attackPoint = transform.position + (Vector3)direction * meleeRange;
+
+        // 4. Draw the reach (a line from player to the circle)
+        Gizmos.DrawLine(transform.position, attackPoint);
+
+        // 5. Draw the hit detection bubble
+        Gizmos.DrawWireSphere(attackPoint, meleeRadius);
+    }
+
+    private IEnumerator ShowMeleeVisual()
+    {
+        meleeVisual.SetActive(true);
+        yield return new WaitForSeconds(0.1f); // Flash it for a split second
+        meleeVisual.SetActive(false);
     }
 
 }
