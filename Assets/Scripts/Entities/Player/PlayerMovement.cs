@@ -15,12 +15,24 @@ public class PlayerMovement : MonoBehaviour
     private Vector2 moveInput;
     private bool isKnockedBack;
     private bool _isSprinting;
+    private ReviveController _revive;
 
 
-    public float CurrentSpeed => _isSprinting ? sprintSpeed : walkSpeed;
+    public float CurrentSpeed
+    {
+        get
+        {
+            if (_revive != null && _revive.IsDowned)
+            {
+                return _revive.CrawlSpeed;
+            }
+            return _isSprinting ? sprintSpeed : walkSpeed;
+        }
+    }
 
     private void Awake()
     {
+        _revive = GetComponent<ReviveController>();
         rb = GetComponent<Rigidbody2D>();
 
         walkSpeed = baseWalkSpeed;
@@ -30,8 +42,10 @@ public class PlayerMovement : MonoBehaviour
 
     void FixedUpdate()
     {
+
         if (isKnockedBack) return;
         rb.linearVelocity = moveInput * CurrentSpeed;
+
     }
 
     public void OnMove(InputAction.CallbackContext context)

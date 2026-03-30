@@ -173,10 +173,13 @@ public abstract class Enemy : Entity
 
     protected void TryDamagePlayer(Collider2D collider)
     {
+        Player player = collider.GetComponent<Player>();
+        if (player != null && player.isHidden) return;
+
         // Check if enough time has passed since the last attack
         if (Time.time >= lastAttackTime + attackCooldown)
         {
-            Player player = collider.GetComponent<Player>();
+            
 
             if (player != null)
             {

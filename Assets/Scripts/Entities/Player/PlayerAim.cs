@@ -6,12 +6,13 @@ public class PlayerAim : MonoBehaviour
 {
     private Player player;
     private Camera _mainCam;
-
+    private ReviveController _revive;
     [SerializeField] private Transform pivot;
 
     private void Awake()
     {
         player = GetComponent<Player>();
+        _revive = GetComponent<ReviveController>();
         _mainCam = Camera.main;
     }
 
@@ -37,6 +38,8 @@ public class PlayerAim : MonoBehaviour
 
     public void OnClick(InputAction.CallbackContext context)
     {
+        if (_revive != null && _revive.IsDowned) return;
+
         if (!context.started) return;
 
         if (player.activeSpell == null) return;

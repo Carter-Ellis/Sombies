@@ -1,6 +1,5 @@
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
@@ -64,10 +63,16 @@ public class Player : Entity
     private float lastMeleeTime;
     [SerializeField] private GameObject meleeVisual;
 
+    private ReviveController _revive;
+    private Player nearbyDownedPlayer = null;
+    private Player revivingTarget = null;
+
     protected override void Awake()
     {
         base.Awake();
         _movement = GetComponent<PlayerMovement>();
+
+        _revive = GetComponent<ReviveController>();
 
         for (int i = 0; i < maxInventorySlots; i++)
         {
@@ -86,6 +91,13 @@ public class Player : Entity
         Mana = _maxMana;
     }
 
+    public override void Die()
+    {
+        if (_revive != null)
+        {
+            _revive.GoDown();
+        }
+    }
 
     public void AddItem(Item item)
     {
@@ -157,6 +169,17 @@ public class Player : Entity
             nearbyPurchaseSystem = shop;
             Debug.Log("Press E to purchase!");
         }
+
+        Player other = collision.GetComponent<Player>();
+        if (other != null && other != this)
+        {
+            ReviveController otherRevive = other.GetComponent<ReviveController>();
+            if (otherRevive != null && otherRevive.IsDowned)
+            {
+                nearbyDownedPlayer = other;
+            }
+        }
+
     }
 
     private void OnTriggerExit2D(Collider2D collision)
@@ -167,23 +190,48 @@ public class Player : Entity
         {
             nearbyPurchaseSystem = null;
         }
+
+        Player other = collision.GetComponent<Player>();
+        if (other != null && other == nearbyDownedPlayer)
+        {
+            CancelMyReviveAction();
+            nearbyDownedPlayer = null;
+        }
+
     }
 
     public void OnInteract(InputAction.CallbackContext context)
     {
-        // Only trigger once when the button is fully pressed down
-        if (context.performed)
+
+        if (_revive.IsDowned) return;
+
+        if (context.started)
         {
-            if (nearbyPurchaseSystem != null)
+            if (nearbyDownedPlayer != null)
             {
-                // Send THIS player's data to the purchase system
+                revivingTarget = nearbyDownedPlayer;
+                nearbyDownedPlayer.GetComponent<ReviveController>().StartBeingRevived(this);
+            }
+            else if (nearbyPurchaseSystem != null)
+            {
                 nearbyPurchaseSystem.AttemptPurchase(this);
             }
         }
     }
 
+    public void CancelMyReviveAction()
+    {
+        if (revivingTarget != null)
+        {
+            revivingTarget.GetComponent<ReviveController>().StopBeingRevived();
+            revivingTarget = null;
+        }
+    }
+
     public void UseItem()
     {
+        if (_revive.IsDowned) return;
+
         if (inventory[selectedItemIndex] != null)
         {
             inventory[selectedItemIndex].Use(this);
@@ -194,6 +242,8 @@ public class Player : Entity
 
     public void SwitchItem(InputAction.CallbackContext context)
     {
+        if (_revive.IsDowned) return;
+
         if (context.performed)
         {
             int index = Mathf.RoundToInt(context.ReadValue<float>());
@@ -229,6 +279,8 @@ public class Player : Entity
 
     public void SwitchSpell(InputAction.CallbackContext context)
     {
+        if (_revive.IsDowned) return;
+
         if (context.performed)
         {
             int index = Mathf.RoundToInt(context.ReadValue<float>());
@@ -261,6 +313,9 @@ public class Player : Entity
     }
     public void OnMelee(InputAction.CallbackContext context)
     {
+
+        if (_revive.IsDowned) return;
+
         // Only trigger on the initial button press, and check the cooldown
         if (context.performed && Time.time >= lastMeleeTime + meleeCooldown)
         {
@@ -293,35 +348,9 @@ public class Player : Entity
                 Vector2 knockbackDir = (enemy.transform.position - transform.position).normalized;
                 enemy.ApplyKnockback(knockbackDir * meleeKnockbackForce, meleeKnockbackDuration);
 
-                // Black Ops Zombies knife usually only hits one enemy per swing, so we break here!
                 break;
             }
         }
-    }
-
-    // Optional: This draws a visual circle in the Unity Editor so you can easily see/tune your knife range!
-    private void OnDrawGizmosSelected()
-    {
-        // 1. Set the color (Red for attack)
-        Gizmos.color = Color.red;
-
-        Vector2 direction = Vector2.up; // Default direction for the editor
-
-        // 2. If the game is running, show the actual aim direction
-        if (Application.isPlaying && Camera.main != null)
-        {
-            Vector3 mousePos = Camera.main.ScreenToWorldPoint(Mouse.current.position.ReadValue());
-            direction = ((Vector2)mousePos - (Vector2)transform.position).normalized;
-        }
-
-        // 3. Calculate the center of the hit circle
-        Vector3 attackPoint = transform.position + (Vector3)direction * meleeRange;
-
-        // 4. Draw the reach (a line from player to the circle)
-        Gizmos.DrawLine(transform.position, attackPoint);
-
-        // 5. Draw the hit detection bubble
-        Gizmos.DrawWireSphere(attackPoint, meleeRadius);
     }
 
     private IEnumerator ShowMeleeVisual()
