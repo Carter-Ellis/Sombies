@@ -1,4 +1,5 @@
 using System.Collections;
+using Unity.Netcode;
 using UnityEngine;
 
 public class MysteryBox : PurchaseSystem
@@ -23,6 +24,8 @@ public class MysteryBox : PurchaseSystem
         int randomIndex = Random.Range(0, possibleSpells.Length);
         SpellPurchase spawnedSpell = Instantiate(possibleSpells[randomIndex], spawnPoint.position, spawnPoint.rotation);
 
+        spawnedSpell.GetComponent<NetworkObject>().Spawn();
+
         spawnedSpell.MakeFree();
 
         // 2. Wait
@@ -32,7 +35,7 @@ public class MysteryBox : PurchaseSystem
         while (timer < displayDuration)
         {
             // If the player picked up the spell, it will be destroyed or disabled.
-            if (spawnedSpell == null || !spawnedSpell.gameObject.activeInHierarchy)
+            if (spawnedSpell == null || !spawnedSpell.GetComponent<NetworkObject>().IsSpawned)
             {
                 break; // Player grabbed it early!
             }
@@ -41,14 +44,14 @@ public class MysteryBox : PurchaseSystem
         }
 
         // 3. Clean up
-        if (spawnedSpell != null)
+        if (spawnedSpell != null && spawnedSpell.GetComponent<NetworkObject>().IsSpawned)
         {
-            Destroy(spawnedSpell.gameObject);
+            spawnedSpell.GetComponent<NetworkObject>().Despawn();
         }
 
         // 4. Reset the Box
         Debug.Log("Box is ready for another spin!");
-        hasBeenPurchased = false;
+        hasBeenPurchased.Value = false;
     }
 
 }

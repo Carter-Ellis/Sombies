@@ -3,10 +3,16 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
+using Unity.Netcode;
 
 
 public class Player : Entity
 {
+
+    [Header("Network State")]
+    public NetworkVariable<int> SyncCoins = new NetworkVariable<int>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+    public NetworkVariable<int> SyncMana = new NetworkVariable<int>(100, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+    public NetworkVariable<int> SyncActiveSpellID = new NetworkVariable<int>(-1, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 
     [Header("Movement")]
     private PlayerMovement _movement;
@@ -25,7 +31,7 @@ public class Player : Entity
     }
 
     [Header("Perks")]
-    public bool isHidden = false;
+    public NetworkVariable<bool> isHidden = new NetworkVariable<bool>(false, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 
     [Header("Inventory")]
     [SerializeField] private List<Item> inventory = new List<Item>();
@@ -41,14 +47,38 @@ public class Player : Entity
     [SerializeField] private int _mana = 0;
     [SerializeField] private int _maxMana = 100;
 
+    public int SelectedSpellIndex => selectedSpellIndex;
+
     public int Mana
     {
         get => _mana;
-        set => _mana = Mathf.Clamp(value, 0, _maxMana);
+        set
+        {
+            _mana = Mathf.Clamp(value, 0, _maxMana);
+
+            if (IsServer)
+            {
+                SyncMana.Value = _mana;
+            }
+        }
     }
 
     [Header("Currency Components")]
     [SerializeField] private int coins = 0;
+
+    public int Coins
+    {
+        get => coins;
+        set
+        {
+            coins = value;
+
+            if (IsServer)
+            {
+                SyncCoins.Value = coins;
+            }
+        }
+    }
 
     [Header("Interaction")]
     private PurchaseSystem nearbyPurchaseSystem = null;
@@ -87,8 +117,34 @@ public class Player : Entity
 
     void Start()
     {
-        Health = MaxHealth;
         Mana = _maxMana;
+    }
+    public override void OnNetworkSpawn()
+    {
+        base.OnNetworkSpawn();
+
+        if (!IsServer)
+        {
+            SyncCoins.OnValueChanged += (oldVal, newVal) => coins = newVal;
+            SyncMana.OnValueChanged += (oldVal, newVal) => _mana = newVal;
+
+            coins = SyncCoins.Value;
+            _mana = SyncMana.Value;
+        }
+
+        SyncActiveSpellID.OnValueChanged += (oldID, newID) => {
+            if (newID != -1)
+            {
+                activeSpell = SpellDatabase.Instance.GetSpellByID(newID);
+                Debug.Log($"Client synced spell: {activeSpell.Name}");
+            }
+        };
+
+        // Initial check for late-joiners
+        if (SyncActiveSpellID.Value != -1)
+        {
+            activeSpell = SpellDatabase.Instance.GetSpellByID(SyncActiveSpellID.Value);
+        }
     }
 
     public override void Die()
@@ -117,19 +173,18 @@ public class Player : Entity
     public void AddSpell(Spell spell)
     {
         int openSlot = FindOpenSpellSlot();
-        if (openSlot != -1)
-        {
-            spells[openSlot] = spell;
-            
-        }
-        else
-        {
-            spells[selectedSpellIndex] = spell;
-            Debug.Log("Spell overridden learned!");
-        }
+        int slotToUse = openSlot != -1 ? openSlot : selectedSpellIndex;
+
+        // 1. Add it to the Server's list
+        spells[slotToUse] = spell;
+
+        // 2. Make it the active spell locally for the server
         activeSpell = spells[selectedSpellIndex];
 
+        // 3. Tell the clients to add it to THEIR lists
+        GrantSpellClientRpc(spell.spellID, slotToUse);
     }
+
     private int FindOpenInventorySlot()
     {
         for (int i = 0; i < inventory.Count; i++)
@@ -156,11 +211,14 @@ public class Player : Entity
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
+        if (!IsOwner) return;
+
         Item hitItem = collision.GetComponent<Item>();
 
         if (hitItem != null)
         {
-            AddItem(hitItem);  
+            var itemNetObj = hitItem.GetComponent<NetworkObject>();
+            RequestPickupServerRpc(itemNetObj.NetworkObjectId);
         }
 
         PurchaseSystem shop = collision.GetComponent<PurchaseSystem>();
@@ -174,7 +232,7 @@ public class Player : Entity
         if (other != null && other != this)
         {
             ReviveController otherRevive = other.GetComponent<ReviveController>();
-            if (otherRevive != null && otherRevive.IsDowned)
+            if (otherRevive != null && otherRevive.IsDownedSync.Value)
             {
                 nearbyDownedPlayer = other;
             }
@@ -203,18 +261,34 @@ public class Player : Entity
     public void OnInteract(InputAction.CallbackContext context)
     {
 
-        if (_revive.IsDowned) return;
+        if (_revive.IsDownedSync.Value) return;
 
         if (context.started)
         {
             if (nearbyDownedPlayer != null)
             {
                 revivingTarget = nearbyDownedPlayer;
-                nearbyDownedPlayer.GetComponent<ReviveController>().StartBeingRevived(this);
+                nearbyDownedPlayer.GetComponent<ReviveController>().StartBeingRevivedServerRpc(NetworkObjectId);
             }
             else if (nearbyPurchaseSystem != null)
             {
-                nearbyPurchaseSystem.AttemptPurchase(this);
+                RequestPurchaseServerRpc(nearbyPurchaseSystem.NetworkObjectId);
+            }
+        }
+    }
+    [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
+    public void RequestPurchaseServerRpc(ulong purchaseSystemId)
+    {
+        // Find the network object the player is looking at
+        if (NetworkManager.Singleton.SpawnManager.SpawnedObjects.TryGetValue(purchaseSystemId, out NetworkObject netObj))
+        {
+            PurchaseSystem shop = netObj.GetComponent<PurchaseSystem>();
+
+            if (shop != null)
+            {
+                // The server now attempts the purchase. 
+                // This means TrySpendCoins will successfully update the NetworkVariable!
+                shop.AttemptPurchase(this);
             }
         }
     }
@@ -223,26 +297,22 @@ public class Player : Entity
     {
         if (revivingTarget != null)
         {
-            revivingTarget.GetComponent<ReviveController>().StopBeingRevived();
+            revivingTarget.GetComponent<ReviveController>().StopBeingRevivedServerRpc();
             revivingTarget = null;
         }
     }
 
-    public void UseItem()
+    public void TryUseSelectedItem()
     {
-        if (_revive.IsDowned) return;
+        if (_revive.IsDownedSync.Value) return;
 
-        if (inventory[selectedItemIndex] != null)
-        {
-            inventory[selectedItemIndex].Use(this);
-            Destroy(inventory[selectedItemIndex].gameObject);
-            inventory[selectedItemIndex] = null;
-        }
+        // Ask the server to use the item
+        RequestUseItemServerRpc(selectedItemIndex);
     }
 
     public void SwitchItem(InputAction.CallbackContext context)
     {
-        if (_revive.IsDowned) return;
+        if (_revive.IsDownedSync.Value) return;
 
         if (context.performed)
         {
@@ -262,7 +332,7 @@ public class Player : Entity
 
     public void AddCoins(int amount)
     {
-        coins += amount;
+        Coins += amount;
     }
 
     public void AddMana(int amount)
@@ -279,7 +349,7 @@ public class Player : Entity
 
     public void SwitchSpell(InputAction.CallbackContext context)
     {
-        if (_revive.IsDowned) return;
+        if (_revive.IsDownedSync.Value) return;
 
         if (context.performed)
         {
@@ -293,47 +363,49 @@ public class Player : Entity
     {
         if (newIndex >= 0 && newIndex < maxSpellSlots)
         {
-            if (!spells[newIndex])
+            if (spells[newIndex] == null)
             {
                 return;
             }
             selectedSpellIndex = newIndex;
             activeSpell = spells[selectedSpellIndex];
+
+            UpdateSelectedSpellServerRpc(activeSpell.spellID);
         }
     }
 
     public bool TrySpendCoins(int price)
     {
-        if (coins < price)
+        if (Coins < price)
         {
             return false;
         }
-        coins -= price;
+        Coins -= price;
         return true;
     }
+
     public void OnMelee(InputAction.CallbackContext context)
     {
+        if (_revive.IsDownedSync.Value || !IsOwner) return;
 
-        if (_revive.IsDowned) return;
-
-        // Only trigger on the initial button press, and check the cooldown
+        // 1. Check local cooldown
         if (context.performed && Time.time >= lastMeleeTime + meleeCooldown)
         {
-            StartCoroutine(ShowMeleeVisual());
-            PerformMeleeAttack();
             lastMeleeTime = Time.time;
+
+            // 2. Immediate local visual (for the player attacking)
+            StartCoroutine(ShowMeleeVisual());
+
+            // 3. Tell the server to actually perform the hit
+            PerformMeleeServerRpc(firepoint.right);
         }
     }
 
-    private void PerformMeleeAttack()
+    [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
+    private void PerformMeleeServerRpc(Vector2 direction)
     {
-        // 1. Figure out which way the player is looking (towards the mouse)
-        Vector2 direction = firepoint.right;
-
-        // 2. Calculate the exact point in space where the knife hits
+        // 4. Server-side Hit Detection
         Vector2 attackPoint = (Vector2)transform.position + direction * meleeRange;
-
-        // 3. Draw a circle at that point and grab everything inside it
         Collider2D[] hitObjects = Physics2D.OverlapCircleAll(attackPoint, meleeRadius);
 
         foreach (Collider2D hitCollider in hitObjects)
@@ -341,23 +413,145 @@ public class Player : Entity
             Enemy enemy = hitCollider.GetComponent<Enemy>();
             if (enemy != null)
             {
-                // Deal Damage
+                // Damage and Knockback happen on the Server
                 enemy.TakeDamage(meleeDamage, this);
 
-                // Apply Knockback (pushing them away from the player)
                 Vector2 knockbackDir = (enemy.transform.position - transform.position).normalized;
                 enemy.ApplyKnockback(knockbackDir * meleeKnockbackForce, meleeKnockbackDuration);
 
+                // Break if you only want to hit one enemy, or remove to hit all in radius
                 break;
             }
         }
+
+        // 5. Tell other clients to show the visual (so they see you swing)
+        ShowMeleeVisualClientRpc();
+    }
+
+    [Rpc(SendTo.Everyone, InvokePermission = RpcInvokePermission.Server)]
+    private void ShowMeleeVisualClientRpc()
+    {
+        if (IsOwner) return;    
+        // This plays the animation for everyone EXCEPT the person who already played it locally
+        StartCoroutine(ShowMeleeVisual());
     }
 
     private IEnumerator ShowMeleeVisual()
     {
-        meleeVisual.SetActive(true);
-        yield return new WaitForSeconds(0.1f); // Flash it for a split second
-        meleeVisual.SetActive(false);
+        if (meleeVisual != null)
+        {
+            meleeVisual.SetActive(true);
+            yield return new WaitForSeconds(0.1f);
+            meleeVisual.SetActive(false);
+        }
+    }
+
+    [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
+    public void RequestCastSpellServerRpc(int spellIndex)
+    {
+
+        print("STEP 1");
+        // 1. Server grabs the spell from ITS own list using the index
+        if (spellIndex < 0 || spellIndex >= spells.Count || spells[spellIndex] == null) return;
+
+        Spell spellToCast = spells[spellIndex];
+
+        // 2. Server validates resources
+        if (Mana < spellToCast.ManaCost) return;
+
+        // 3. Server spends the mana (this automatically syncs back to the client)
+        Mana -= spellToCast.ManaCost;
+        print("STEP 2");
+        // 4. Server executes your ProjectileSpell.Cast() logic
+        spellToCast.Cast(this);
+    }
+
+    [Rpc(SendTo.Everyone, InvokePermission = RpcInvokePermission.Server)]
+    public void GrantSpellClientRpc(int spellID, int slotIndex)
+    {
+        if (IsServer) return; // The server already added it above!
+
+        // The client looks up the spell in the database
+        Spell unlockedSpell = SpellDatabase.Instance.GetSpellByID(spellID);
+
+        if (unlockedSpell != null)
+        {
+            // The client adds it to their local list so SwitchSpell will work
+            spells[slotIndex] = unlockedSpell;
+            Debug.Log($"Client added {unlockedSpell.Name} to slot {slotIndex}");
+        }
+    }
+
+    [Rpc(SendTo.Server)]
+    public void UpdateSelectedSpellServerRpc(int spellID)
+    {
+        // The server updates the NetworkVariable, which then syncs to everyone
+        SyncActiveSpellID.Value = spellID;
+    }
+
+
+    [Rpc(SendTo.Server)]
+    private void RequestPickupServerRpc(ulong itemNetId, RpcParams rpcParams = default)
+    {
+        if (NetworkManager.Singleton.SpawnManager.SpawnedObjects.TryGetValue(itemNetId, out var netObj))
+        {
+            Item worldItem = netObj.GetComponent<Item>();
+            if (worldItem != null)
+            {
+                int id = worldItem.itemID;
+                Item prefab = ItemDatabase.Instance.GetItemByID(id);
+
+                if (prefab != null)
+                {
+                    AddItem(prefab);
+
+                    var targetParams = RpcTarget.Single(rpcParams.Receive.SenderClientId, RpcTargetUse.Temp);
+                    SyncPickupClientRpc(id, targetParams);
+
+                    netObj.Despawn();
+                }
+            }
+        }
+    }
+
+    [Rpc(SendTo.SpecifiedInParams)]
+    private void SyncPickupClientRpc(int itemID, RpcParams rpcParams = default)
+    {
+        if (IsServer) return;
+
+        // Look up the item prefab in your new database
+        Item itemPrefab = ItemDatabase.Instance.GetItemByID(itemID);
+
+        if (itemPrefab != null)
+        {
+            // Add the stable prefab reference to the local inventory
+            AddItem(itemPrefab);
+            Debug.Log($"Client: Successfully added {itemPrefab.ItemName} to inventory via ID {itemID}");
+        }
+    }
+
+    [Rpc(SendTo.Server)]
+    private void RequestUseItemServerRpc(int index)
+    {
+        if (inventory[index] == null) return;
+
+        Debug.Log($"Server executing use for: {inventory[index].ItemName}");
+
+        // 1. Execute the item logic (this will update NetworkVariables like Mana)
+        inventory[index].Use(this);
+
+        // 2. Remove it from the Server's list
+        inventory[index] = null;
+
+        // 3. Tell the Client to remove it from their list too
+        RemoveItemClientRpc(index);
+    }
+
+    [Rpc(SendTo.Everyone)] // Or SendTo.Owner
+    private void RemoveItemClientRpc(int index)
+    {
+        if (IsServer) return; // Server already did this
+        inventory[index] = null;
     }
 
 }

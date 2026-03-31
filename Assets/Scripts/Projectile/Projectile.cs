@@ -1,6 +1,7 @@
+using Unity.Netcode;
 using UnityEngine;
 
-public abstract class Projectile : MonoBehaviour
+public abstract class Projectile : NetworkBehaviour
 {
     [SerializeField] protected float lifetime = 3f;
 
@@ -21,11 +22,17 @@ public abstract class Projectile : MonoBehaviour
 
     protected virtual void Start()
     {
-        Destroy(gameObject, lifetime);
+        if (IsServer)
+        {
+            Destroy(gameObject, lifetime);
+        }
+        
     }
 
     protected virtual void OnTriggerEnter2D(Collider2D collision)
     {
+        if (!IsServer) return;
+
         if (collision.TryGetComponent(out Enemy enemy))
         {
             OnHitEnemy(enemy);

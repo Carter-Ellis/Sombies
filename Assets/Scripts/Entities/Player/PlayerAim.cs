@@ -1,13 +1,15 @@
+using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using static UnityEditor.Experimental.GraphView.GraphView;
 
-public class PlayerAim : MonoBehaviour
+public class PlayerAim : NetworkBehaviour
 {
     private Player player;
     private Camera _mainCam;
     private ReviveController _revive;
     [SerializeField] private Transform pivot;
+
+    private NetworkVariable<float> syncRotation = new NetworkVariable<float>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
 
     private void Awake()
     {
@@ -18,12 +20,20 @@ public class PlayerAim : MonoBehaviour
 
     private void Update()
     {
-        // Only rotate if the game isn't paused or the player isn't dead
-        if (Time.timeScale > 0)
+        if (IsOwner)
         {
-            RotateFirePoint();
+            if (Time.timeScale > 0)
+            {
+                RotateFirePoint();
+            }
+        }
+        else
+        {
+            // If we aren't the owner, just apply the synced rotation
+            pivot.rotation = Quaternion.Euler(0, 0, syncRotation.Value);
         }
     }
+
     private void RotateFirePoint()
     {
         // Use the stored _mainCam reference
@@ -34,24 +44,27 @@ public class PlayerAim : MonoBehaviour
         float angle = Mathf.Atan2(lookDir.y, lookDir.x) * Mathf.Rad2Deg;
 
         pivot.rotation = Quaternion.Euler(0, 0, angle);
+
+        syncRotation.Value = angle;
     }
 
     public void OnClick(InputAction.CallbackContext context)
     {
-        if (_revive != null && _revive.IsDowned) return;
+        if (!IsOwner) return;
+
+        if (_revive != null && _revive.IsDownedSync.Value) return;
 
         if (!context.started) return;
-
+        print("Hello");
         if (player.activeSpell == null) return;
-
+        print("Hello2");
         if (player.Mana < player.activeSpell.ManaCost)
         {
             Debug.Log($"Need {player.activeSpell.ManaCost} Mana! Current: {player.Mana}");
             return;
         }
 
-        player.Mana -= player.activeSpell.ManaCost;
-        player.activeSpell.Cast(player);
-        
+        player.RequestCastSpellServerRpc(player.SelectedSpellIndex);
+
     }
 }

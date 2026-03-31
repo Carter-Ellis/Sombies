@@ -1,32 +1,34 @@
 using UnityEngine;
-using UnityEngine.InputSystem;
-using System.Collections.Generic;
+using Unity.Netcode;
 
-public abstract class PurchaseSystem : MonoBehaviour
+public abstract class PurchaseSystem : NetworkBehaviour
 {
 
     [SerializeField] protected int price;
     [SerializeField] protected Spell spell;
     [SerializeField] protected bool disableOnPurchase = true;
-    protected bool hasBeenPurchased = false;
-    
+
+    protected NetworkVariable<bool> hasBeenPurchased = new NetworkVariable<bool>(
+        false,
+        NetworkVariableReadPermission.Everyone,
+        NetworkVariableWritePermission.Server
+    );
+
 
     public virtual void AttemptPurchase(Player buyingPlayer)
     {
-        // If another player already bought this, do nothing
-        if (hasBeenPurchased) return;
 
         // TrySpendCoins will return true if the player has enough money
-        if (buyingPlayer.TrySpendCoins(price))
+        if (!hasBeenPurchased.Value && buyingPlayer.TrySpendCoins(price))
         {
-            hasBeenPurchased = true;
+            hasBeenPurchased.Value = true;
             Debug.Log($"Purchase successful for {price} coins!");
 
             GrantPurchase(buyingPlayer);
 
             if (disableOnPurchase)
             {
-                gameObject.SetActive(false);
+                GetComponent<NetworkObject>().Despawn();
             }
             
         }

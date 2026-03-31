@@ -12,7 +12,7 @@ public class Sombie : Enemy
             if (agent.isOnNavMesh)
             {
                 agent.isStopped = true;
-                agent.velocity = Vector3.zero;
+                agent.speed = 0.1f;
             }
         }
     }
@@ -30,6 +30,7 @@ public class Sombie : Enemy
         {
             if (agent.isOnNavMesh)
             {
+                WalkSpeed = speed;
                 agent.isStopped = false;
             }
         }

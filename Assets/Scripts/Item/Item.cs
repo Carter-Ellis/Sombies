@@ -1,9 +1,13 @@
 using System;
 using System.Collections;
+using Unity.Netcode;
 using UnityEngine;
 
-public abstract class Item : MonoBehaviour
+public abstract class Item : NetworkBehaviour
 {
+    [Header("Network")]
+    public int itemID;
+
     [SerializeField] protected string _itemName;
     [SerializeField] protected string _itemDescription;
     [SerializeField] protected float duration = 0f;

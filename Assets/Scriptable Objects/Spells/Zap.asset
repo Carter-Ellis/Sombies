@@ -16,5 +16,6 @@ MonoBehaviour:
   _description: Stun your enemies with a zap of electricity
   _manaCost: 15
   damage: 15
+  spellID: 2
   projectilePrefab: {fileID: 2797691783092432233, guid: 1f7cb6a72f5adec4081daf2d1213cee3, type: 3}
   launchForce: 25

@@ -1,12 +1,17 @@
+using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public class Entity : MonoBehaviour
+public class Entity : NetworkBehaviour
 {
+    [Header("Network Sync")]
+    // This variable handles the heavy lifting of syncing across the network.
+    [SerializeField] private NetworkVariable<int> _netHealth = new NetworkVariable<int>(100,
+        NetworkVariableReadPermission.Everyone,
+        NetworkVariableWritePermission.Server);
+
     [Header("Base Entity Health")]
     [SerializeField] protected int _maxHealth = 100;
-    [SerializeField] protected int _health;
-
     public virtual int MaxHealth
     {
         get => _maxHealth;
@@ -15,13 +20,18 @@ public class Entity : MonoBehaviour
 
     public virtual int Health
     {
-        get => _health;
+        get => _netHealth.Value;
         set
         {
-            _health = Mathf.Clamp(value, 0, MaxHealth);
-            if (_health <= 0)
+            if (IsServer)
             {
-                Die();
+                _netHealth.Value = Mathf.Clamp(value, 0, MaxHealth);
+  
+
+                if (_netHealth.Value <= 0)
+                {
+                    Die();
+                }
             }
         }
     }
@@ -39,6 +49,30 @@ public class Entity : MonoBehaviour
         Buffs = GetComponent<BuffManager>();
     }
 
+    public override void OnNetworkSpawn()
+    {
+        // Subscribe to the change event so we can run logic (like UI/VFX) on all clients
+        _netHealth.OnValueChanged += OnHealthChanged;
+
+        if (IsServer)
+        {
+            _netHealth.Value = _maxHealth;
+        }
+    }
+
+    public override void OnNetworkDespawn()
+    {
+        // Cleanup to prevent memory leaks
+        _netHealth.OnValueChanged -= OnHealthChanged;
+    }
+
+    // This method fires on EVERY client whenever the server changes the health
+    protected virtual void OnHealthChanged(int previousValue, int newValue)
+    {
+        Debug.Log($"{gameObject.name} health update: {newValue}");
+        // You can trigger hurt animations or UI updates here
+    }
+
     public virtual void TakeDamage(int amount)
     {
         Health -= amount;
@@ -51,12 +85,17 @@ public class Entity : MonoBehaviour
         Debug.Log($"{gameObject.name} healed! Current health: {Health}");
     }
 
-    // Can be overriden
     public virtual void Die()
     {
-        gameObject.SetActive(false);
-
-        // This is temp 
-        SceneManager.LoadScene("MainMenu");
+        if (IsServer)
+        {
+            // In Netcode, use Despawn to remove the object for everyone
+            GetComponent<NetworkObject>().Despawn();
+        }
+        else
+        {
+            // Local fallback logic if needed
+            gameObject.SetActive(false);
+        }
     }
 }

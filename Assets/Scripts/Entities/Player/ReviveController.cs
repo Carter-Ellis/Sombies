@@ -1,14 +1,23 @@
 using System.Collections;
+using Unity.Netcode;
 using UnityEngine;
+using UnityEngine.AI;
 
-public class ReviveController : MonoBehaviour
+public class ReviveController : NetworkBehaviour
 {
+    [Header("Network Variables")]
+    public NetworkVariable<bool> IsDownedSync = new NetworkVariable<bool>(false, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+
+    [Header("Physics")]
+    [SerializeField] private string defaultLayerName = "Player";
+    [SerializeField] private string downedLayerName = "DownedPlayer";
+
     [SerializeField] private float reviveDuration = 4f;
     [SerializeField] private int healthAfterRevive = 20;
     [SerializeField] private float crawlSpeed = 1.5f;
     [SerializeField] private float maxReviveDistance = 2.0f;
 
-    public bool IsDowned { get; private set; }
+    public bool IsDowned => IsDownedSync.Value;
     public float CrawlSpeed => crawlSpeed;
 
     private Coroutine reviveCoroutine;
@@ -26,10 +35,14 @@ public class ReviveController : MonoBehaviour
 
     public void GoDown()
     {
-        if (IsDowned) return;
+        if (!IsServer) return;
 
-        IsDowned = true;
-        _player.isHidden = true;
+        if (IsDownedSync.Value) return;
+
+        IsDownedSync.Value = true;
+        _player.isHidden.Value = true;
+
+        gameObject.layer = LayerMask.NameToLayer(downedLayerName);
 
         if (_rb != null)
         {
@@ -37,27 +50,36 @@ public class ReviveController : MonoBehaviour
         }
     }
 
-    public void StartBeingRevived(Player reviver)
+    [Rpc(SendTo.Server)]
+    public void StartBeingRevivedServerRpc(ulong reviverNetworkObjectId)
     {
-        if (!IsDowned || reviveCoroutine != null) return;
+        // The server finds the reviver object from the ID
+        if (!NetworkManager.Singleton.SpawnManager.SpawnedObjects.TryGetValue(reviverNetworkObjectId, out var networkObject))
+            return;
+
+        Player reviver = networkObject.GetComponent<Player>();
+
+        if (!IsDowned || reviveCoroutine != null || reviver == null) return;
 
         currentReviver = reviver;
         reviveStartPosition = reviver.transform.position;
-
         reviveCoroutine = StartCoroutine(ReviveProcess());
     }
 
-    public void StopBeingRevived()
+    [Rpc(SendTo.Server)]
+    public void StopBeingRevivedServerRpc()
     {
         if (reviveCoroutine != null)
         {
             StopCoroutine(reviveCoroutine);
             reviveCoroutine = null;
+            currentReviver = null;
         }
     }
 
     private IEnumerator ReviveProcess()
     {
+
         float timer = 0f;
 
         // Loop until the duration is met
@@ -85,9 +107,11 @@ public class ReviveController : MonoBehaviour
         }
 
         // If the loop finishes without breaking, the revive is successful!
-        IsDowned = false;
-        _player.isHidden = false;
+        IsDownedSync.Value = false;
+        _player.isHidden.Value = false;
         _player.Health = healthAfterRevive;
+
+        gameObject.layer = LayerMask.NameToLayer(defaultLayerName);
 
         // Clean up
         currentReviver.CancelMyReviveAction(); // Resets the reviver's target

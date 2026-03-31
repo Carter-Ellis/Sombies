@@ -1,3 +1,4 @@
+using Unity.Netcode;
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "New Projectile Spell", menuName = "Spells/ProjectileSpell")]
@@ -15,6 +16,11 @@ public class ProjectileSpell : Spell
         if (ball.TryGetComponent(out Projectile proj))
         {
             proj.Initialize(player, damage);
+        }
+
+        if (ball.TryGetComponent(out NetworkObject netObj))
+        {
+            netObj.Spawn();
         }
 
         Rigidbody2D rb = ball.GetComponent<Rigidbody2D>();

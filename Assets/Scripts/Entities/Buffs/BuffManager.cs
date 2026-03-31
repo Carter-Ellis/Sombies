@@ -97,7 +97,7 @@ public class BuffManager : MonoBehaviour
             case BUFFTYPE.Stealth:
                 if (_entity is Player player)
                 {
-                    player.isHidden = _activeBuffs[type].Count > 0;
+                    player.isHidden.Value = _activeBuffs[type].Count > 0;
                 }
                 break;
             

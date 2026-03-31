@@ -1,8 +1,9 @@
 using System.Collections;
+using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class PlayerMovement : MonoBehaviour
+public class PlayerMovement : NetworkBehaviour
 {
     [Header("Base Settings")]
     public float baseWalkSpeed = 5f;
@@ -22,7 +23,7 @@ public class PlayerMovement : MonoBehaviour
     {
         get
         {
-            if (_revive != null && _revive.IsDowned)
+            if (_revive != null && _revive.IsDownedSync.Value)
             {
                 return _revive.CrawlSpeed;
             }
@@ -50,6 +51,8 @@ public class PlayerMovement : MonoBehaviour
 
     public void OnMove(InputAction.CallbackContext context)
     {
+        if (!IsOwner) return;
+
         if (context.performed)
         {
             moveInput = context.ReadValue<Vector2>();
@@ -62,6 +65,8 @@ public class PlayerMovement : MonoBehaviour
 
     public void OnSprint(InputAction.CallbackContext context)
     {
+        if (!IsOwner) return;
+
         if (context.started)
         {
             _isSprinting = true;

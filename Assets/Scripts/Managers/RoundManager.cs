@@ -1,14 +1,15 @@
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Netcode;
 
-public class RoundManager : MonoBehaviour
+public class RoundManager : NetworkBehaviour
 {
     // Simple states to keep the logic clean
     public enum RoundState { Waiting, Spawning, Fighting }
 
     [Header("Current Status")]
-    public int currentRound = 0;
+    public NetworkVariable<int> SyncRound = new NetworkVariable<int>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
     public RoundState currentState = RoundState.Waiting;
     private int enemiesRemainingToKill;
 
@@ -24,24 +25,30 @@ public class RoundManager : MonoBehaviour
     private List<Enemy> activeEnemies = new List<Enemy>();
     private EnemySpawnPoint[] spawnPoints;
 
-    void Start()
+    public override void OnNetworkSpawn()
     {
-        spawnPoints = FindObjectsByType<EnemySpawnPoint>(FindObjectsInactive.Exclude);
-
-        if (spawnPoints.Length == 0)
+        // Only the server starts the round logic
+        if (IsServer)
         {
-            Debug.LogError("No EnemySpawnPoints found in the scene!");
-            return;
-        }
+            spawnPoints = FindObjectsByType<EnemySpawnPoint>(FindObjectsInactive.Exclude);
 
-        StartNextRound();
+            if (spawnPoints.Length == 0)
+            {
+                Debug.LogError("No EnemySpawnPoints found!");
+                return;
+            }
+
+            StartNextRound();
+        }
     }
 
     public void StartNextRound()
     {
-        currentRound++;
+        if (!IsServer) return;
+
+        SyncRound.Value++;
         currentTimeBetweenSpawns = Mathf.Max(timeBetweenSpawnsMinimum, currentTimeBetweenSpawns - 0.5f);
-        Debug.Log($"Starting Round {currentRound}");
+        Debug.Log($"Starting Round {SyncRound.Value}");
         StartCoroutine(SpawnRoundRoutine());
     }
 
@@ -79,10 +86,19 @@ public class RoundManager : MonoBehaviour
 
     private void SpawnEnemy()
     {
+        if (!IsServer) return;
+
         Enemy prefab = enemyPrefabs[Random.Range(0, enemyPrefabs.Length)];
         Transform spawnPos = spawnPoints[Random.Range(0, spawnPoints.Length)].transform;
 
         Enemy newEnemy = Instantiate(prefab, spawnPos.position, Quaternion.identity);
+
+        NetworkObject netObj = newEnemy.GetComponent<NetworkObject>();
+        if (netObj != null)
+        {
+            netObj.Spawn(); // This tells all clients to create this enemy
+        }
+
         newEnemy.SetManager(this);
         activeEnemies.Add(newEnemy);
     }
@@ -91,11 +107,12 @@ public class RoundManager : MonoBehaviour
     {
         // Round 1: 5 enemies. Every round adds 3 more.
         // Round 10 would be 5 + (9 * 3) = 32 enemies.
-        return firstRoundEnemyCount + (currentRound - 1) * 3;
+        return firstRoundEnemyCount + (SyncRound.Value - 1) * 3;
     }
 
     public void RemoveEnemy(Enemy deadEnemy)
     {
+        if (!IsServer) return;
 
         if (activeEnemies.Contains(deadEnemy))
         {

@@ -1,4 +1,5 @@
 using System.Collections;
+using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -81,6 +82,8 @@ public abstract class Enemy : Entity
 
     protected virtual void Update()
     {
+        if (!IsServer) return;
+
         targetUpdateTimer -= Time.deltaTime;
         if (targetUpdateTimer <= 0f)
         {
@@ -88,7 +91,6 @@ public abstract class Enemy : Entity
             targetUpdateTimer = targetUpdateInterval;
         }
 
-        // ONLY process AI movement if we aren't currently flying backward from a knife hit
         if (!isKnockedBack)
         {
             if (currentTarget != null)
@@ -100,18 +102,19 @@ public abstract class Enemy : Entity
                     agent.nextPosition = transform.position;
                 }
             }
-            else if (agent.hasPath)
+            else
             {
-                if (agent.isOnNavMesh)
+                // If we have no target, we MUST clear the velocity and the agent path
+                rb.linearVelocity = Vector2.zero;
+
+                if (agent.isOnNavMesh && agent.hasPath)
                 {
                     agent.ResetPath();
-                    rb.linearVelocity = Vector2.zero;
                 }
             }
         }
         else
         {
-            // Keep the NavMeshAgent glued to the enemy while the Rigidbody gets knocked back
             if (agent.isOnNavMesh)
             {
                 agent.nextPosition = transform.position;
@@ -126,6 +129,7 @@ public abstract class Enemy : Entity
 
     private Transform GetClosestPlayer()
     {
+        // Ensure we are finding all active player scripts in the network
         Player[] allPlayers = Object.FindObjectsByType<Player>(FindObjectsInactive.Exclude);
 
         Transform bestTarget = null;
@@ -134,7 +138,12 @@ public abstract class Enemy : Entity
 
         foreach (Player player in allPlayers)
         {
-            if (player.isHidden) continue;
+            // 1. Skip if player is hidden/dead
+            if (player == null || player.isHidden.Value) continue;
+
+            // 2. Extra safety: Check if the player actually has a NetworkObject and is spawned
+            var netObj = player.GetComponent<NetworkObject>();
+            if (netObj == null || !netObj.IsSpawned) continue;
 
             Vector3 directionToPlayer = player.transform.position - currentPos;
             float dSqrToPlayer = directionToPlayer.sqrMagnitude;
@@ -162,6 +171,8 @@ public abstract class Enemy : Entity
 
     public override void Die()
     {
+        if (!IsServer) return;
+
         TryDropItem();
 
         if (roundManager != null)
@@ -174,7 +185,7 @@ public abstract class Enemy : Entity
     protected void TryDamagePlayer(Collider2D collider)
     {
         Player player = collider.GetComponent<Player>();
-        if (player != null && player.isHidden) return;
+        if (player != null && player.isHidden.Value) return;
 
         // Check if enough time has passed since the last attack
         if (Time.time >= lastAttackTime + attackCooldown)
@@ -200,20 +211,31 @@ public abstract class Enemy : Entity
 
     protected void TryDropItem()
     {
-        // 1. Check if the drop chance succeeds
-        if (UnityEngine.Random.value <= _dropChance)
+        // 1. Only the Server handles spawning
+        if (!IsServer) return;
+
+        if (Random.value <= _dropChance)
         {
-            // 2. Ensure we actually have items in the array to drop
             if (_possibleDrops != null && _possibleDrops.Length > 0)
             {
-                // 3. Pick a random item from the pool
-                int randomIndex = UnityEngine.Random.Range(0, _possibleDrops.Length);
+                int randomIndex = Random.Range(0, _possibleDrops.Length);
                 Item itemPrefab = _possibleDrops[randomIndex];
 
-                // 4. Instantiate the item at the enemy's death position
                 if (itemPrefab != null)
                 {
-                    Instantiate(itemPrefab, transform.position, Quaternion.identity);
+                    // 2. Standard Instantiate first
+                    Item spawnedItem = Instantiate(itemPrefab, transform.position, Quaternion.identity);
+
+                    // 3. Get the NetworkObject and Spawn it across the network
+                    NetworkObject netObj = spawnedItem.GetComponent<NetworkObject>();
+                    if (netObj != null)
+                    {
+                        netObj.Spawn();
+                    }
+                    else
+                    {
+                        Debug.LogError($"Item {itemPrefab.name} is missing a NetworkObject component!");
+                    }
                 }
             }
         }

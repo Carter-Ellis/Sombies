@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5513060752212264940}
   - component: {fileID: 1631919778923364864}
+  - component: {fileID: -8035137588096089362}
   - component: {fileID: 6550845291702011459}
   - component: {fileID: 404648281334506118}
   - component: {fileID: 4017798893514427148}
@@ -94,6 +95,31 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
+--- !u!114 &-8035137588096089362
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7111331313505595456}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
+  GlobalObjectIdHash: 3994246539
+  InScenePlacedSourceGlobalObjectIdHash: 0
+  DeferredDespawnTick: 0
+  Ownership: 1
+  AlwaysReplicateAsRoot: 0
+  SynchronizeTransform: 1
+  ActiveSceneSynchronization: 0
+  SceneMigrationSynchronization: 1
+  SpawnWithObservers: 1
+  DontDestroyWithOwner: 0
+  AutoObjectParentSync: 1
+  SyncOwnerTransformWhenParented: 1
+  AllowOwnerToParent: 0
 --- !u!114 &6550845291702011459
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -106,6 +132,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 454deb0889f2094439e6c0a8c8c80b78, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SpellPurchase
+  ShowTopMostFoldoutHeaderGroup: 1
   price: 20
   spell: {fileID: 11400000, guid: bc29f01417f159b40a70b6d6ef33893f, type: 2}
   disableOnPurchase: 1
