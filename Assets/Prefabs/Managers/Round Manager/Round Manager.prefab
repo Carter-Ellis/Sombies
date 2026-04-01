@@ -9,6 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8234753286367428848}
+  - component: {fileID: 3468180394796691793}
   - component: {fileID: 4409015688360436899}
   m_Layer: 0
   m_Name: Round Manager
@@ -32,6 +33,31 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &3468180394796691793
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6328290744576356839}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
+  GlobalObjectIdHash: 4203041075
+  InScenePlacedSourceGlobalObjectIdHash: 0
+  DeferredDespawnTick: 0
+  Ownership: 1
+  AlwaysReplicateAsRoot: 0
+  SynchronizeTransform: 1
+  ActiveSceneSynchronization: 0
+  SceneMigrationSynchronization: 0
+  SpawnWithObservers: 1
+  DontDestroyWithOwner: 0
+  AutoObjectParentSync: 1
+  SyncOwnerTransformWhenParented: 1
+  AllowOwnerToParent: 0
 --- !u!114 &4409015688360436899
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -44,14 +70,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 68f3737858c334f47921905c26279def, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RoundManager
-  currentRound: 0
+  ShowTopMostFoldoutHeaderGroup: 1
+  SyncRound:
+    UpdateTraits:
+      MinSecondsBetweenUpdates: 0
+      MaxSecondsBetweenUpdates: 0
+    m_InternalValue: 0
   currentState: 0
   enemyPrefabs:
   - {fileID: 8778292145451889993, guid: 80a1f8f9c014fb842bacdad5513039e6, type: 3}
   - {fileID: 4800129920439414402, guid: e081f0ccac3c3f4458143574a542918b, type: 3}
   - {fileID: 4002571793902810397, guid: 70a2bf122e1725a438549331faeae7dc, type: 3}
   timeBetweenSpawnsMinimum: 0.5
-  currentTimeBetweenSpawns: 10.5
+  currentTimeBetweenSpawns: 2
   delayBeforeNextRound: 5
   firstRoundEnemyCount: 5
-  maxActiveEnemies: 20
+  maxActiveEnemies: 30

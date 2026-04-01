@@ -37,9 +37,13 @@ public abstract class Projectile : NetworkBehaviour
         {
             OnHitEnemy(enemy);
             Destroy(gameObject);
-            return;
         }
-        
+        else if (collision.CompareTag("Wall"))
+        {
+            Destroy(gameObject);
+        }
+
+
     }
 
     protected virtual void OnHitEnemy(Enemy enemy)

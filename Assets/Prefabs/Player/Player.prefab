@@ -334,14 +334,17 @@ MonoBehaviour:
   maxSpellSlots: 2
   _mana: 0
   _maxMana: 100
-  coins: 20
-  meleeDamage: 10
+  coins: 0
+  meleeDamage: 25
   meleeRange: 1.5
   meleeRadius: 0.5
   meleeKnockbackForce: 15
   meleeKnockbackDuration: 0.2
   meleeCooldown: 0.8
   meleeVisual: {fileID: 4091189712847468096}
+  manaTxt: {fileID: 0}
+  coinsTxt: {fileID: 0}
+  healthTxt: {fileID: 0}
 --- !u!114 &8007500877819934515
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
 using Unity.Netcode;
+using TMPro;
 
 
 public class Player : Entity
@@ -59,6 +60,7 @@ public class Player : Entity
             if (IsServer)
             {
                 SyncMana.Value = _mana;
+                manaTxt.text = $"Mana: {_mana}/{_maxMana}";
             }
         }
     }
@@ -72,10 +74,11 @@ public class Player : Entity
         set
         {
             coins = value;
-
+            
             if (IsServer)
             {
                 SyncCoins.Value = coins;
+                coinsTxt.text = $"Coins: {coins}";
             }
         }
     }
@@ -97,9 +100,17 @@ public class Player : Entity
     private Player nearbyDownedPlayer = null;
     private Player revivingTarget = null;
 
+    [Header("Temporary UI Elements")]
+    [SerializeField] private TextMeshProUGUI manaTxt;
+    [SerializeField] private TextMeshProUGUI coinsTxt;
+    [SerializeField] private TextMeshProUGUI healthTxt;
+
     protected override void Awake()
     {
         base.Awake();
+        healthTxt = GameObject.FindWithTag("HealthTxt").GetComponent<TextMeshProUGUI>();
+        manaTxt = GameObject.FindWithTag("ManaTxt").GetComponent<TextMeshProUGUI>();
+        coinsTxt = GameObject.FindWithTag("CoinsTxt").GetComponent<TextMeshProUGUI>();
         _movement = GetComponent<PlayerMovement>();
 
         _revive = GetComponent<ReviveController>();
@@ -117,11 +128,20 @@ public class Player : Entity
 
     void Start()
     {
+        
         Mana = _maxMana;
     }
     public override void OnNetworkSpawn()
     {
-        base.OnNetworkSpawn();
+        // 1. Move UI discovery here to be safe
+        if (IsOwner)
+        {
+            healthTxt = GameObject.FindWithTag("HealthTxt")?.GetComponent<TextMeshProUGUI>();
+            manaTxt = GameObject.FindWithTag("ManaTxt")?.GetComponent<TextMeshProUGUI>();
+            coinsTxt = GameObject.FindWithTag("CoinsTxt")?.GetComponent<TextMeshProUGUI>();
+        }
+
+        base.OnNetworkSpawn(); // This triggers the OnHealthChanged call in Entity
 
         if (!IsServer)
         {
@@ -132,18 +152,30 @@ public class Player : Entity
             _mana = SyncMana.Value;
         }
 
-        SyncActiveSpellID.OnValueChanged += (oldID, newID) => {
-            if (newID != -1)
-            {
-                activeSpell = SpellDatabase.Instance.GetSpellByID(newID);
-                Debug.Log($"Client synced spell: {activeSpell.Name}");
-            }
-        };
-
-        // Initial check for late-joiners
-        if (SyncActiveSpellID.Value != -1)
+        // 2. FORCIBLY refresh the UI once we are sure we have the reference
+        if (IsOwner)
         {
-            activeSpell = SpellDatabase.Instance.GetSpellByID(SyncActiveSpellID.Value);
+            UpdateHealthUI(_netHealth.Value);
+            coinsTxt.text = $"Coins: {SyncCoins.Value}";
+            manaTxt.text = $"Mana: {SyncMana.Value}/{_maxMana}";
+        }
+    }
+
+    protected override void OnHealthChanged(int previousValue, int newValue)
+    {
+        base.OnHealthChanged(previousValue, newValue);
+
+        if (IsOwner)
+        {
+            UpdateHealthUI(newValue);
+        }
+    }
+
+    private void UpdateHealthUI(int currentHealth)
+    {
+        if (healthTxt != null)
+        {
+            healthTxt.text = $"Health: {currentHealth}/{MaxHealth}";
         }
     }
 
