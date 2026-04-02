@@ -3,7 +3,7 @@ using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public class Entity : NetworkBehaviour
+public abstract class Entity : NetworkBehaviour
 {
     [Header("Network Sync")]
     // This variable handles the heavy lifting of syncing across the network.
@@ -11,31 +11,38 @@ public class Entity : NetworkBehaviour
         NetworkVariableReadPermission.Everyone,
         NetworkVariableWritePermission.Server);
 
-    [Header("Base Entity Health")]
-    [SerializeField] protected int _maxHealth = 100;
-    
+    [SerializeField]
+    protected NetworkVariable<int> _netMaxHealth = new NetworkVariable<int>(100,
+        NetworkVariableReadPermission.Everyone,
+        NetworkVariableWritePermission.Server);
 
     public virtual int MaxHealth
     {
-        get => _maxHealth;
-        set => _maxHealth = value;
+        get => _netMaxHealth.Value;
+        set
+        {
+            if (!IsServer) return;
+            _netMaxHealth.Value = value;
+
+            Health = value;
+        }
     }
 
     public virtual int Health
     {
         get => _netHealth.Value;
-        set
+        protected set
         {
-            if (IsServer)
-            {
-                _netHealth.Value = Mathf.Clamp(value, 0, MaxHealth);
+            if (!IsServer) return;
+
+            _netHealth.Value = Mathf.Clamp(value, 0, MaxHealth);
                 
 
-                if (_netHealth.Value <= 0)
-                {
-                    Die();
-                }
+            if (_netHealth.Value <= 0)
+            {
+                Die();
             }
+            
         }
     }
 
@@ -61,10 +68,9 @@ public class Entity : NetworkBehaviour
         {
             _netHealth.Value = MaxHealth;
         }
-        else
-        {
-            OnHealthChanged(0, _netHealth.Value);
-        }
+
+        OnHealthChanged(_netHealth.Value, _netHealth.Value);
+        
     }
 
     public override void OnNetworkDespawn()
@@ -76,33 +82,29 @@ public class Entity : NetworkBehaviour
     // This method fires on EVERY client whenever the server changes the health
     protected virtual void OnHealthChanged(int previousValue, int newValue)
     {
-        Debug.Log($"{gameObject.name} health update: {newValue}");
-        // You can trigger hurt animations or UI updates here
+
     }
 
     public virtual void TakeDamage(int amount)
     {
         Health -= amount;
-        Debug.Log($"{gameObject.name} took damage! Current health: {Health}");
     }
 
     public virtual void Heal(int amount)
     {
         Health += amount;
-        Debug.Log($"{gameObject.name} healed! Current health: {Health}");
+    }
+
+    public virtual void SetHealth(int amount)
+    {
+        Health = amount;
     }
 
     public virtual void Die()
     {
-        if (IsServer)
-        {
-            // In Netcode, use Despawn to remove the object for everyone
-            GetComponent<NetworkObject>().Despawn();
-        }
-        else
-        {
-            // Local fallback logic if needed
-            gameObject.SetActive(false);
-        }
+        if (!IsServer) return;
+            
+        GetComponent<NetworkObject>().Despawn();
+        
     }
 }

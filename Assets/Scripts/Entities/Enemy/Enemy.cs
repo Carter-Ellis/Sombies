@@ -130,42 +130,42 @@ public abstract class Enemy : Entity
     private Transform GetClosestPlayer()
     {
         // Ensure we are finding all active player scripts in the network
-        Player[] allPlayers = Object.FindObjectsByType<Player>(FindObjectsInactive.Exclude);
+        PlayerStats[] allPlayers = Object.FindObjectsByType<PlayerStats>(FindObjectsInactive.Exclude);
 
         Transform bestTarget = null;
         float closestDistanceSqr = Mathf.Infinity;
         Vector3 currentPos = transform.position;
 
-        foreach (Player player in allPlayers)
+        foreach (PlayerStats playerStats in allPlayers)
         {
             // 1. Skip if player is hidden/dead
-            if (player == null || player.isHidden.Value) continue;
+            if (playerStats == null || playerStats.isHidden.Value) continue;
 
             // 2. Extra safety: Check if the player actually has a NetworkObject and is spawned
-            var netObj = player.GetComponent<NetworkObject>();
+            var netObj = playerStats.GetComponent<NetworkObject>();
             if (netObj == null || !netObj.IsSpawned) continue;
 
-            Vector3 directionToPlayer = player.transform.position - currentPos;
+            Vector3 directionToPlayer = playerStats.transform.position - currentPos;
             float dSqrToPlayer = directionToPlayer.sqrMagnitude;
 
             if (dSqrToPlayer < closestDistanceSqr)
             {
                 closestDistanceSqr = dSqrToPlayer;
-                bestTarget = player.transform;
+                bestTarget = playerStats.transform;
             }
         }
 
         return bestTarget;
     }
 
-    public void TakeDamage(int amount, Player player)
+    public void TakeDamage(int amount, PlayerStats playerStats)
     {
         Health -= amount;
 
         if (Health <= 0)
         {
-            player.AddCoins(killPrice);
-            player.AddMana(manaReward);
+            playerStats.AddCoins(killPrice);
+            playerStats.AddMana(manaReward);
         }
     }
 
@@ -184,24 +184,26 @@ public abstract class Enemy : Entity
 
     protected void TryDamagePlayer(Collider2D collider)
     {
-        Player player = collider.GetComponent<Player>();
-        if (player != null && player.isHidden.Value) return;
+        PlayerStats playerStats = collider.GetComponent<PlayerStats>();
+        if (playerStats != null && playerStats.isHidden.Value) return;
 
         // Check if enough time has passed since the last attack
         if (Time.time >= lastAttackTime + attackCooldown)
         {
             
 
-            if (player != null)
+            if (playerStats != null)
             {
-                PlayerMovement playerMovement = player.GetComponent<PlayerMovement>();
+                PlayerMovement playerMovement = playerStats.GetComponent<PlayerMovement>();
 
                 // Calculate direction and apply knockback
-                Vector2 knockbackDirection = (player.transform.position - transform.position).normalized;
-                playerMovement.ApplyKnockback(knockbackDirection * KnockbackForce, KnockbackDuration);
+                Vector2 knockbackDirection = (playerStats.transform.position - transform.position).normalized;
+                Vector2 force = knockbackDirection * KnockbackForce;
+
+                playerMovement.ApplyKnockbackClientRpc(force, KnockbackDuration);
 
                 // Deal damage
-                player.TakeDamage(DamageAmount);
+                playerStats.TakeDamage(DamageAmount);
 
                 // Record the time of this attack so the cooldown starts
                 lastAttackTime = Time.time;

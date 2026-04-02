@@ -49,7 +49,6 @@ public class NetworkManagerUI : MonoBehaviour
         if (joinCodeText != null)
         {
             joinCodeText.text = $"Join Code: {code}";
-            Debug.Log($"Displaying Code: {code}");
         }
     }
 

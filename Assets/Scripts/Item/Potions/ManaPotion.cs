@@ -4,8 +4,12 @@ public class ManaPotion : Item
 {
     [SerializeField] private int manaRestoreAmount = 25;
 
-    public override void Use(Player player)
+    public override void Use(Entity entity)
     {
-        player.Mana += manaRestoreAmount;
+        if (entity is PlayerStats stats)
+        {
+            stats.Mana += manaRestoreAmount;
+            IsUsed = true;
+        }
     }
 }

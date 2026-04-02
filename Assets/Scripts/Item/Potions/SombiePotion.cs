@@ -3,14 +3,13 @@ using UnityEngine;
 
 public class SombiePotion : Item
 {
-    public override void Use(Player player)
+    public override void Use(Entity entity)
     {
         Debug.Log("Player used Sombie Potion.");
-        if (player.Buffs != null)
+        if (entity.Buffs != null)
         {
-            StealthBuff hideBuff = new StealthBuff(player);
-            Debug.Log("Applying Sombie Potion buff to player for 10 seconds.");
-            player.Buffs.AddTemporaryBuff(hideBuff, duration);
+            StealthBuff hideBuff = new StealthBuff(entity);
+            entity.Buffs.AddTemporaryBuff(hideBuff, duration);
 
             IsUsed = true;
         }

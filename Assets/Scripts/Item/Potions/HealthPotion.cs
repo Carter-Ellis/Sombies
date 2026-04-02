@@ -4,9 +4,10 @@ public class HealthPotion : Item
 {
     [SerializeField] private int healAmount = 20;
 
-    public override void Use(Player player)
+    public override void Use(Entity entity)
     {
-        player.Health += healAmount;
+        entity.Heal(healAmount);
+        IsUsed = true;
     }
 
 }

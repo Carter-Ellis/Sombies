@@ -16,6 +16,7 @@ MonoBehaviour:
   _description: Throw a snowball at unsuspecting enemies brrrr...
   _manaCost: 1
   damage: 5
+  sprite: {fileID: -2413806693520163455, guid: d0d74d53d768e1741918c95e7bd8ff1c, type: 3}
   spellID: 1
   projectilePrefab: {fileID: 2797691783092432233, guid: c878fdd7696ada644aca21d4a52def4f, type: 3}
   launchForce: 5

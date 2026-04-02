@@ -43,7 +43,7 @@ public class PlayerMovement : NetworkBehaviour
 
     void FixedUpdate()
     {
-
+        if (!IsOwner) return;
         if (isKnockedBack) return;
         rb.linearVelocity = moveInput * CurrentSpeed;
 
@@ -96,6 +96,12 @@ public class PlayerMovement : NetworkBehaviour
     {
         walkSpeed = baseWalkSpeed;
         sprintSpeed = baseSprintSpeed;
+    }
+
+    [Rpc(SendTo.Owner)]
+    public void ApplyKnockbackClientRpc(Vector2 force, float duration)
+    {
+        ApplyKnockback(force, duration);
     }
 
 }

@@ -21,7 +21,7 @@ public class ReviveController : NetworkBehaviour
     public float CrawlSpeed => crawlSpeed;
 
     private Coroutine reviveCoroutine;
-    private Player _player;
+    private PlayerStats _playerStats;
     private Rigidbody2D _rb;
 
     private Player currentReviver;
@@ -29,7 +29,7 @@ public class ReviveController : NetworkBehaviour
 
     private void Awake()
     {
-        _player = GetComponent<Player>();
+        _playerStats = GetComponent<PlayerStats>();
         _rb = GetComponent<Rigidbody2D>();
     }
 
@@ -40,7 +40,7 @@ public class ReviveController : NetworkBehaviour
         if (IsDownedSync.Value) return;
 
         IsDownedSync.Value = true;
-        _player.isHidden.Value = true;
+        _playerStats.isHidden.Value = true;
 
         gameObject.layer = LayerMask.NameToLayer(downedLayerName);
 
@@ -108,8 +108,8 @@ public class ReviveController : NetworkBehaviour
 
         // If the loop finishes without breaking, the revive is successful!
         IsDownedSync.Value = false;
-        _player.isHidden.Value = false;
-        _player.Health = healthAfterRevive;
+        _playerStats.isHidden.Value = false;
+        _playerStats.SetHealth(healthAfterRevive);
 
         gameObject.layer = LayerMask.NameToLayer(defaultLayerName);
 

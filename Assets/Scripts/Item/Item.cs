@@ -20,11 +20,11 @@ public abstract class Item : NetworkBehaviour
         protected set => _isUsed = value;
     }
 
-    public abstract void Use(Player player);
+    public abstract void Use(Entity entity);
 
-    protected void ApplyTimeEffect(Player player, Action startEffect, Action endEffect)
+    protected void ApplyTimeEffect(Entity entity, Action startEffect, Action endEffect)
     {
-        player.StartCoroutine(EffectRoutine(startEffect, endEffect));
+        entity.StartCoroutine(EffectRoutine(startEffect, endEffect));
     }
     private IEnumerator EffectRoutine(Action start, Action end)
     {

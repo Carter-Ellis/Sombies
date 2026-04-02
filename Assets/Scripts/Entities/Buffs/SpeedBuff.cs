@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class SpeedBuff : Buff
 {
-    public SpeedBuff(Player p, float amt) : base(p, BUFFTYPE.Speed, amt) { }
+    public SpeedBuff(Entity e, float amt) : base(e, BUFFTYPE.Speed, amt) { }
     public override void Apply()
     {
     }

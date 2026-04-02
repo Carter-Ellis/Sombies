@@ -14,7 +14,7 @@ public class MysteryBox : PurchaseSystem
         disableOnPurchase = false;
     }
 
-    protected override void GrantPurchase(Player player)
+    protected override void GrantPurchase(Entity buyer)
     {
         StartCoroutine(Sequence());
     }

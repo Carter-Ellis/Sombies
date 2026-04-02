@@ -11,6 +11,7 @@ using UnityEngine;
 public class GameManager : NetworkBehaviour
 {
     [SerializeField] private NetworkManagerUI networkManagerUI;
+    [SerializeField] private bool useRelay = true;
 
     async void Start()
     {
@@ -42,6 +43,13 @@ public class GameManager : NetworkBehaviour
     private async void StartHost()
     {
         networkManagerUI.DisableButtons();
+
+        if (!useRelay)
+        {
+            StartLocalHost();
+            return;
+        }
+
         try
         {
             // 1. Create Allocation for 4 players
@@ -71,12 +79,18 @@ public class GameManager : NetworkBehaviour
     {
         networkManagerUI.DisableButtons();
 
+        if (!useRelay)
+        {
+            StartLocalClient();
+            return;
+        }
+
         // Grab the code typed into the InputField
         string joinCode = networkManagerUI.GetJoinCodeFromInput();
 
         if (string.IsNullOrEmpty(joinCode))
         {
-            Debug.LogError("Join Code is empty!");
+            //If no code was entered, just re-enable buttons and exit
             networkManagerUI.EnableButtons();
             return;
         }
@@ -108,4 +122,25 @@ public class GameManager : NetworkBehaviour
             NetworkManager.Singleton.Shutdown();
         }
     }
+    private void StartLocalHost()
+    {
+        // 1. Get the transport
+        var transport = NetworkManager.Singleton.GetComponent<UnityTransport>();
+
+        // 2. Set it to Localhost (127.0.0.1) and port 7777 (standard)
+        transport.SetConnectionData("127.0.0.1", 7777);
+
+        // 3. Just start
+        NetworkManager.Singleton.StartHost();
+        Debug.Log("Local Host Started (No Relay)");
+    }
+
+    private void StartLocalClient()
+    {
+        var transport = NetworkManager.Singleton.GetComponent<UnityTransport>();
+        transport.SetConnectionData("127.0.0.1", 7777);
+        NetworkManager.Singleton.StartClient();
+        Debug.Log("Local Client Started (Skipped Relay)");
+    }
+
 }

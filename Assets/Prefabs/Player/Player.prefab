@@ -178,6 +178,7 @@ GameObject:
   - component: {fileID: 7415597102487306732}
   - component: {fileID: 8483029773774216251}
   - component: {fileID: 8356795351833012328}
+  - component: {fileID: -5536222883858744348}
   m_Layer: 8
   m_Name: Player
   m_TagString: Untagged
@@ -303,7 +304,11 @@ MonoBehaviour:
       MinSecondsBetweenUpdates: 0
       MaxSecondsBetweenUpdates: 0
     m_InternalValue: 100
-  _maxHealth: 100
+  _netMaxHealth:
+    UpdateTraits:
+      MinSecondsBetweenUpdates: 0
+      MaxSecondsBetweenUpdates: 0
+    m_InternalValue: 100
   SyncCoins:
     UpdateTraits:
       MinSecondsBetweenUpdates: 0
@@ -762,3 +767,15 @@ MonoBehaviour:
   UseRigidBodyForMotion: 0
   AutoUpdateKinematicState: 1
   AutoSetKinematicOnDespawn: 1
+--- !u!114 &-5536222883858744348
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4411116556212734287}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b09528a3fa7e2c043a823a8089caf3a0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerStats

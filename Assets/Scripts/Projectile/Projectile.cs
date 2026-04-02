@@ -12,11 +12,11 @@ public abstract class Projectile : NetworkBehaviour
     [SerializeField] protected float buffDuration;
 
     protected int damage;
-    protected Player owner;
+    protected PlayerStats ownerStats;
 
-    public void Initialize(Player player, int damage)
+    public void Initialize(PlayerStats playerStats, int damage)
     {
-        owner = player;
+        ownerStats = playerStats;
         this.damage = damage;
     }
 
@@ -48,8 +48,8 @@ public abstract class Projectile : NetworkBehaviour
 
     protected virtual void OnHitEnemy(Enemy enemy)
     {
-        owner.AddCoins(enemy.hitPrice);
-        enemy.TakeDamage(damage, owner);
+        ownerStats.AddCoins(enemy.hitPrice);
+        enemy.TakeDamage(damage, ownerStats);
 
         if (appliesBuff && enemy.TryGetComponent(out BuffManager bm))
         {

@@ -95,9 +95,9 @@ public class BuffManager : MonoBehaviour
                 // _player.Damage = _player.BaseDamage + maxBoost;
                 break;
             case BUFFTYPE.Stealth:
-                if (_entity is Player player)
+                if (_entity is PlayerStats playerStats)
                 {
-                    player.isHidden.Value = _activeBuffs[type].Count > 0;
+                    playerStats.isHidden.Value = _activeBuffs[type].Count > 0;
                 }
                 break;
             

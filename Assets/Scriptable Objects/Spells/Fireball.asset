@@ -16,5 +16,7 @@ MonoBehaviour:
   _description: Shoot a Fireball
   _manaCost: 4
   damage: 20
+  sprite: {fileID: -2413806693520163455, guid: d0d74d53d768e1741918c95e7bd8ff1c, type: 3}
+  spellID: 0
   projectilePrefab: {fileID: 2797691783092432233, guid: e4216e69b68961946a402704b85282e9, type: 3}
   launchForce: 15

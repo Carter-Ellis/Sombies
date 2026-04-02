@@ -5,6 +5,7 @@ using UnityEngine.InputSystem;
 public class PlayerAim : NetworkBehaviour
 {
     private Player player;
+    private PlayerStats _playerStats;
     private Camera _mainCam;
     private ReviveController _revive;
     [SerializeField] private Transform pivot;
@@ -14,6 +15,7 @@ public class PlayerAim : NetworkBehaviour
     private void Awake()
     {
         player = GetComponent<Player>();
+        _playerStats = GetComponent<PlayerStats>();
         _revive = GetComponent<ReviveController>();
         _mainCam = Camera.main;
     }
@@ -55,12 +57,12 @@ public class PlayerAim : NetworkBehaviour
         if (_revive != null && _revive.IsDownedSync.Value) return;
 
         if (!context.started) return;
-        print("Hello");
+
         if (player.activeSpell == null) return;
-        print("Hello2");
-        if (player.Mana < player.activeSpell.ManaCost)
+
+        if (_playerStats.Mana < player.activeSpell.ManaCost)
         {
-            Debug.Log($"Need {player.activeSpell.ManaCost} Mana! Current: {player.Mana}");
+            Debug.Log($"Need {player.activeSpell.ManaCost} Mana! Current: {_playerStats.Mana}");
             return;
         }
 

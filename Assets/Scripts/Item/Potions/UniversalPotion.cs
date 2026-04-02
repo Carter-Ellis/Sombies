@@ -6,13 +6,13 @@ public class UniversalPotion : Item
     [SerializeField] private BUFFTYPE buffToApply;
     [SerializeField] private float buffAmount = 5f;
 
-    public override void Use(Player player)
+    public override void Use(Entity entity)
     {
-        BuffManager buffs = player.GetComponent<BuffManager>();
+        BuffManager buffs = entity.GetComponent<BuffManager>();
 
         if (buffs != null)
         {
-            StatBuff newBuff = new StatBuff(player, buffToApply, buffAmount);
+            StatBuff newBuff = new StatBuff(entity, buffToApply, buffAmount);
 
             buffs.AddTemporaryBuff(newBuff, duration);
             IsUsed = true;
