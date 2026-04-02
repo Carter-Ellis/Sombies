@@ -8,6 +8,13 @@ public abstract class Item : NetworkBehaviour
     [Header("Network")]
     public int itemID;
 
+    [Header("UI Visuals")]
+    [SerializeField] private Sprite _itemIcon;
+    [SerializeField] private Color _itemColor = Color.white;
+
+    public Sprite ItemIcon => _itemIcon;
+    public Color ItemColor => _itemColor;
+
     [SerializeField] protected string _itemName;
     [SerializeField] protected string _itemDescription;
     [SerializeField] protected float duration = 0f;

@@ -166,19 +166,19 @@ GameObject:
   - component: {fileID: 8584342022392115057}
   - component: {fileID: 7884636646253627986}
   - component: {fileID: 996504619050980156}
+  - component: {fileID: -5536222883858744348}
   - component: {fileID: 2922282686609498777}
   - component: {fileID: 8007500877819934515}
   - component: {fileID: 2956555394039448100}
   - component: {fileID: 679429566734730214}
   - component: {fileID: 1621959512621734935}
+  - component: {fileID: 576847374589109670}
   - component: {fileID: 4671400500304408989}
   - component: {fileID: 2828103765466306134}
-  - component: {fileID: 5881064376979135100}
-  - component: {fileID: 576847374589109670}
   - component: {fileID: 7415597102487306732}
+  - component: {fileID: 5881064376979135100}
   - component: {fileID: 8483029773774216251}
   - component: {fileID: 8356795351833012328}
-  - component: {fileID: -5536222883858744348}
   m_Layer: 8
   m_Name: Player
   m_TagString: Untagged
@@ -286,6 +286,49 @@ MonoBehaviour:
   AutoObjectParentSync: 1
   SyncOwnerTransformWhenParented: 1
   AllowOwnerToParent: 0
+--- !u!114 &-5536222883858744348
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4411116556212734287}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b09528a3fa7e2c043a823a8089caf3a0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerStats
+  ShowTopMostFoldoutHeaderGroup: 1
+  _netHealth:
+    UpdateTraits:
+      MinSecondsBetweenUpdates: 0
+      MaxSecondsBetweenUpdates: 0
+    m_InternalValue: 100
+  _netMaxHealth:
+    UpdateTraits:
+      MinSecondsBetweenUpdates: 0
+      MaxSecondsBetweenUpdates: 0
+    m_InternalValue: 100
+  _netCoins:
+    UpdateTraits:
+      MinSecondsBetweenUpdates: 0
+      MaxSecondsBetweenUpdates: 0
+    m_InternalValue: 0
+  _netMana:
+    UpdateTraits:
+      MinSecondsBetweenUpdates: 0
+      MaxSecondsBetweenUpdates: 0
+    m_InternalValue: 100
+  _netMaxMana:
+    UpdateTraits:
+      MinSecondsBetweenUpdates: 0
+      MaxSecondsBetweenUpdates: 0
+    m_InternalValue: 100
+  isHidden:
+    UpdateTraits:
+      MinSecondsBetweenUpdates: 0
+      MaxSecondsBetweenUpdates: 0
+    m_InternalValue: 0
 --- !u!114 &2922282686609498777
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -299,36 +342,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Player
   ShowTopMostFoldoutHeaderGroup: 1
-  _netHealth:
-    UpdateTraits:
-      MinSecondsBetweenUpdates: 0
-      MaxSecondsBetweenUpdates: 0
-    m_InternalValue: 100
-  _netMaxHealth:
-    UpdateTraits:
-      MinSecondsBetweenUpdates: 0
-      MaxSecondsBetweenUpdates: 0
-    m_InternalValue: 100
-  SyncCoins:
-    UpdateTraits:
-      MinSecondsBetweenUpdates: 0
-      MaxSecondsBetweenUpdates: 0
-    m_InternalValue: 0
-  SyncMana:
-    UpdateTraits:
-      MinSecondsBetweenUpdates: 0
-      MaxSecondsBetweenUpdates: 0
-    m_InternalValue: 100
   SyncActiveSpellID:
     UpdateTraits:
       MinSecondsBetweenUpdates: 0
       MaxSecondsBetweenUpdates: 0
     m_InternalValue: -1
-  isHidden:
-    UpdateTraits:
-      MinSecondsBetweenUpdates: 0
-      MaxSecondsBetweenUpdates: 0
-    m_InternalValue: 0
   inventory: []
   maxInventorySlots: 3
   selectedItemIndex: 0
@@ -337,9 +355,6 @@ MonoBehaviour:
   spells: []
   selectedSpellIndex: 0
   maxSpellSlots: 2
-  _mana: 0
-  _maxMana: 100
-  coins: 0
   meleeDamage: 25
   meleeRange: 1.5
   meleeRadius: 0.5
@@ -347,9 +362,6 @@ MonoBehaviour:
   meleeKnockbackDuration: 0.2
   meleeCooldown: 0.8
   meleeVisual: {fileID: 4091189712847468096}
-  manaTxt: {fileID: 0}
-  coinsTxt: {fileID: 0}
-  healthTxt: {fileID: 0}
 --- !u!114 &8007500877819934515
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -567,6 +579,30 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 02b765ff1b681ae42955d5f92d2f3f62, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BuffManager
+--- !u!114 &576847374589109670
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4411116556212734287}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a08cbdd95ce8b7b4d95670ee7a8daad5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ReviveController
+  ShowTopMostFoldoutHeaderGroup: 1
+  IsDownedSync:
+    UpdateTraits:
+      MinSecondsBetweenUpdates: 0
+      MaxSecondsBetweenUpdates: 0
+    m_InternalValue: 0
+  defaultLayerName: Player
+  downedLayerName: DownedPlayer
+  reviveDuration: 4
+  healthAfterRevive: 20
+  crawlSpeed: 0.5
+  maxReviveDistance: 1.5
 --- !u!50 &4671400500304408989
 Rigidbody2D:
   serializedVersion: 5
@@ -631,43 +667,6 @@ CapsuleCollider2D:
   m_Offset: {x: 0, y: 0}
   m_Size: {x: 1, y: 1}
   m_Direction: 0
---- !u!114 &5881064376979135100
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4411116556212734287}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 78a0d51097ebe7b4b87cd40ccbd0b022, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::CameraSetup
-  ShowTopMostFoldoutHeaderGroup: 1
---- !u!114 &576847374589109670
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4411116556212734287}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a08cbdd95ce8b7b4d95670ee7a8daad5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::ReviveController
-  ShowTopMostFoldoutHeaderGroup: 1
-  IsDownedSync:
-    UpdateTraits:
-      MinSecondsBetweenUpdates: 0
-      MaxSecondsBetweenUpdates: 0
-    m_InternalValue: 0
-  defaultLayerName: Player
-  downedLayerName: DownedPlayer
-  reviveDuration: 4
-  healthAfterRevive: 20
-  crawlSpeed: 0.5
-  maxReviveDistance: 1.5
 --- !u!58 &7415597102487306732
 CircleCollider2D:
   m_ObjectHideFlags: 0
@@ -704,6 +703,19 @@ CircleCollider2D:
   m_CompositeOrder: 0
   m_Offset: {x: 0, y: 0}
   m_Radius: 1.5
+--- !u!114 &5881064376979135100
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4411116556212734287}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 78a0d51097ebe7b4b87cd40ccbd0b022, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CameraSetup
+  ShowTopMostFoldoutHeaderGroup: 1
 --- !u!114 &8483029773774216251
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -767,15 +779,3 @@ MonoBehaviour:
   UseRigidBodyForMotion: 0
   AutoUpdateKinematicState: 1
   AutoSetKinematicOnDespawn: 1
---- !u!114 &-5536222883858744348
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4411116556212734287}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b09528a3fa7e2c043a823a8089caf3a0, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::PlayerStats

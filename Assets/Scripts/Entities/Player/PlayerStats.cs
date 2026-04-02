@@ -11,11 +11,6 @@ public class PlayerStats : Entity
     public NetworkVariable<int> _netMaxMana = new NetworkVariable<int>(100, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
     public NetworkVariable<bool> isHidden = new NetworkVariable<bool>(false, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 
-    [Header("UI References")]
-    [SerializeField] private TextMeshProUGUI manaTxt;
-    [SerializeField] private TextMeshProUGUI coinsTxt;
-    [SerializeField] private TextMeshProUGUI healthTxt;
-
     public int Coins
     {
         get => _netCoins.Value;

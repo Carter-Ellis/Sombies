@@ -19,7 +19,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &4873745023738267641
 Transform:
   m_ObjectHideFlags: 0
@@ -179,6 +179,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ManaPotion
   ShowTopMostFoldoutHeaderGroup: 1
   itemID: 5
+  _itemIcon: {fileID: 7482667652216324306, guid: fa4519d153ad56c40af18e5c9521190f, type: 3}
+  _itemColor: {r: 0.039215688, g: 0.3137255, b: 0.5647059, a: 1}
   _itemName: Mana Potion III
   _itemDescription: Restores 75 Mana
   duration: 0

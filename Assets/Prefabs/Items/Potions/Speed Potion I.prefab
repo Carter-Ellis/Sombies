@@ -19,7 +19,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &1290260689839645951
 Transform:
   m_ObjectHideFlags: 0
@@ -179,6 +179,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::UniversalPotion
   ShowTopMostFoldoutHeaderGroup: 1
   itemID: 9
+  _itemIcon: {fileID: 7482667652216324306, guid: fa4519d153ad56c40af18e5c9521190f, type: 3}
+  _itemColor: {r: 1, g: 0.9882353, b: 0.69411767, a: 1}
   _itemName: Speed Potion I
   _itemDescription: Makes you speedy
   duration: 4

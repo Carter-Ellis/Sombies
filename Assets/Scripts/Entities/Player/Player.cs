@@ -65,8 +65,12 @@ public class Player : NetworkBehaviour
 
     public override void OnNetworkSpawn()
     {
-
-
+        if (IsOwner)
+        {
+            UIManager.Instance.InitializeInventoryUI(maxInventorySlots);
+            UIManager.Instance.RefreshInventory(inventory, selectedItemIndex);
+            UpdateInventoryUI();
+        }
     }
 
     public void OnDeathTriggered()
@@ -90,8 +94,7 @@ public class Player : NetworkBehaviour
         if (openSlot != -1)
         {
             inventory[openSlot] = item;
-            item.gameObject.SetActive(false);
-            
+            UpdateInventoryUI();
         }
         else
         {
@@ -112,6 +115,28 @@ public class Player : NetworkBehaviour
 
         // 3. Tell the clients to add it to THEIR lists
         GrantSpellClientRpc(spell.spellID, slotToUse);
+
+        EquipSpellLocal(slotToUse);
+    }
+
+    private void EquipSpellLocal(int index)
+    {
+        if (index >= 0 && index < spells.Count && spells[index] != null)
+        {
+            selectedSpellIndex = index;
+            activeSpell = spells[selectedSpellIndex];
+
+            if (IsOwner)
+            {
+                UpdateHUDWithActiveSpell();
+            }
+
+            // Ensure the NetworkVariable is updated so others see the change
+            if (IsServer)
+            {
+                SyncActiveSpellID.Value = activeSpell.spellID;
+            }
+        }
     }
 
     private int FindOpenInventorySlot()
@@ -261,6 +286,7 @@ public class Player : NetworkBehaviour
         if (newIndex >= 0 && newIndex < maxInventorySlots)
         {
             selectedItemIndex = newIndex;
+            UpdateInventoryUI();
         }
     }
 
@@ -305,11 +331,12 @@ public class Player : NetworkBehaviour
 
     private void UpdateHUDWithActiveSpell()
     {
-        if (activeSpell != null && UIManager.Instance != null)
+        return;
+        /*if (activeSpell != null && UIManager.Instance != null)
         {
             // Tell the HUD to show THIS spell's sprite
             UIManager.Instance.UpdateSpellUI(activeSpell.sprite, activeSpell.spellID);
-        }
+        }*/
     }
 
     public void OnMelee(InputAction.CallbackContext context)
@@ -476,8 +503,20 @@ public class Player : NetworkBehaviour
     [Rpc(SendTo.Everyone)] // Or SendTo.Owner
     private void RemoveItemClientRpc(int index)
     {
-        if (IsServer) return; // Server already did this
-        inventory[index] = null;
+        if (!IsServer)
+        {
+            inventory[index] = null;
+        }
+        UpdateInventoryUI();
+    }
+
+    private void UpdateInventoryUI()
+    {
+        // Only the person playing this character needs to see their own inventory UI
+        if (IsOwner && UIManager.Instance != null)
+        {
+            UIManager.Instance.RefreshInventory(inventory, selectedItemIndex);
+        }
     }
 
 }

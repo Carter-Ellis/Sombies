@@ -141,7 +141,11 @@ MonoBehaviour:
       MinSecondsBetweenUpdates: 0
       MaxSecondsBetweenUpdates: 0
     m_InternalValue: 100
-  _maxHealth: 100
+  _netMaxHealth:
+    UpdateTraits:
+      MinSecondsBetweenUpdates: 0
+      MaxSecondsBetweenUpdates: 0
+    m_InternalValue: 100
   _damageAmount: 10
   _knockbackForce: 8
   _knockbackDuration: 0.08
@@ -152,7 +156,7 @@ MonoBehaviour:
   targetUpdateInterval: 0.2
   hitPrice: 1
   killPrice: 10
-  _dropChance: 1
+  _dropChance: 0.25
   _possibleDrops:
   - {fileID: 3993095922639958794, guid: 32f4d1328dd3e7c499b2a959e7d66883, type: 3}
   - {fileID: 3993095922639958794, guid: 4e9a9e0242bf0f1438b051683a8b788d, type: 3}

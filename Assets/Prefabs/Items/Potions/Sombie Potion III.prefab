@@ -179,6 +179,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SombiePotion
   ShowTopMostFoldoutHeaderGroup: 1
   itemID: 8
+  _itemIcon: {fileID: 7482667652216324306, guid: fa4519d153ad56c40af18e5c9521190f, type: 3}
+  _itemColor: {r: 0.0627451, g: 0.28235295, b: 0.05882353, a: 1}
   _itemName: Sombie Potion III
   _itemDescription: Makes you hidden from sombies.
   duration: 10.5

@@ -45,8 +45,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
-  GlobalObjectIdHash: 4203041075
-  InScenePlacedSourceGlobalObjectIdHash: 0
+  GlobalObjectIdHash: 746221847
+  InScenePlacedSourceGlobalObjectIdHash: 4181931373
   DeferredDespawnTick: 0
   Ownership: 1
   AlwaysReplicateAsRoot: 0
@@ -71,12 +71,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RoundManager
   ShowTopMostFoldoutHeaderGroup: 1
-  SyncRound:
+  _netRound:
     UpdateTraits:
       MinSecondsBetweenUpdates: 0
       MaxSecondsBetweenUpdates: 0
     m_InternalValue: 0
-  currentState: 0
+  currentState: 2
   enemyPrefabs:
   - {fileID: 8778292145451889993, guid: 80a1f8f9c014fb842bacdad5513039e6, type: 3}
   - {fileID: 4800129920439414402, guid: e081f0ccac3c3f4458143574a542918b, type: 3}

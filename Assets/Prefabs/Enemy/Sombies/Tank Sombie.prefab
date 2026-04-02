@@ -136,8 +136,16 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Sombie
   ShowTopMostFoldoutHeaderGroup: 1
-  _maxHealth: 100
-  _health: 500
+  _netHealth:
+    UpdateTraits:
+      MinSecondsBetweenUpdates: 0
+      MaxSecondsBetweenUpdates: 0
+    m_InternalValue: 100
+  _netMaxHealth:
+    UpdateTraits:
+      MinSecondsBetweenUpdates: 0
+      MaxSecondsBetweenUpdates: 0
+    m_InternalValue: 100
   _damageAmount: 5
   _knockbackForce: 8
   _knockbackDuration: 0.08
@@ -148,7 +156,7 @@ MonoBehaviour:
   targetUpdateInterval: 0.2
   hitPrice: 0
   killPrice: 15
-  _dropChance: 0.15
+  _dropChance: 0.3
   _possibleDrops:
   - {fileID: 25931170526279509, guid: 9963e242cb6890749abb4587465306fd, type: 3}
   - {fileID: 25931170526279509, guid: b19f9f64e2c219a42b73845224989ec9, type: 3}

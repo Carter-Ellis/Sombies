@@ -9,8 +9,8 @@ public class RoundManager : NetworkBehaviour
     public enum RoundState { Waiting, Spawning, Fighting }
 
     [Header("Current Status")]
-    public NetworkVariable<int> SyncRound = new NetworkVariable<int>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
-    public RoundState currentState = RoundState.Waiting;
+    public NetworkVariable<int> _netRound = new NetworkVariable<int>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+    public RoundState currentState = RoundState.Fighting;
     private int enemiesRemainingToKill;
 
     [Header("Spawn Settings")]
@@ -27,6 +27,8 @@ public class RoundManager : NetworkBehaviour
 
     public override void OnNetworkSpawn()
     {
+        _netRound.OnValueChanged += OnRoundChanged;
+
         // Only the server starts the round logic
         if (IsServer)
         {
@@ -42,13 +44,29 @@ public class RoundManager : NetworkBehaviour
         }
     }
 
+    public override void OnNetworkDespawn()
+    {
+        _netRound.OnValueChanged -= OnRoundChanged;
+    }
+
+    private void OnRoundChanged(int oldVal, int newVal)
+    {
+        // This runs on EVERYONE whenever the server changes netRound.Value
+        if (UIManager.Instance != null)
+        {
+            UIManager.Instance.UpdateRound(newVal);
+        }
+    }
+
     public void StartNextRound()
     {
         if (!IsServer) return;
 
-        SyncRound.Value++;
+        if (currentState == RoundState.Waiting || currentState == RoundState.Spawning) return;
+
+        _netRound.Value++;
         currentTimeBetweenSpawns = Mathf.Max(timeBetweenSpawnsMinimum, currentTimeBetweenSpawns - 0.5f);
-        Debug.Log($"Starting Round {SyncRound.Value}");
+
         StartCoroutine(SpawnRoundRoutine());
     }
 
@@ -107,7 +125,7 @@ public class RoundManager : NetworkBehaviour
     {
         // Round 1: 5 enemies. Every round adds 3 more.
         // Round 10 would be 5 + (9 * 3) = 32 enemies.
-        return firstRoundEnemyCount + (SyncRound.Value - 1) * 3;
+        return firstRoundEnemyCount + (_netRound.Value - 1) * 3;
     }
 
     public void RemoveEnemy(Enemy deadEnemy)
@@ -117,15 +135,16 @@ public class RoundManager : NetworkBehaviour
         if (activeEnemies.Contains(deadEnemy))
         {
             activeEnemies.Remove(deadEnemy);
-        }
 
-        enemiesRemainingToKill--;
-            
 
-        // Now we check if the round is over only when an enemy actually dies
-        if (enemiesRemainingToKill <= 0)
-        {
-            StartNextRound();
+            enemiesRemainingToKill--;
+
+
+            // Now we check if the round is over only when an enemy actually dies
+            if (enemiesRemainingToKill <= 0)
+            {
+                StartNextRound();
+            }
         }
     }
 

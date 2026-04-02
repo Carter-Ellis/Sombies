@@ -19,7 +19,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &3443555592063337163
 Transform:
   m_ObjectHideFlags: 0
@@ -179,6 +179,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SombiePotion
   ShowTopMostFoldoutHeaderGroup: 1
   itemID: 6
+  _itemIcon: {fileID: 7482667652216324306, guid: fa4519d153ad56c40af18e5c9521190f, type: 3}
+  _itemColor: {r: 0.25490198, g: 0.5019608, b: 0.24705882, a: 1}
   _itemName: Sombie Potion I
   _itemDescription: Makes you hidden from sombies.
   duration: 3.5

@@ -5064,7 +5064,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::GameManager
   ShowTopMostFoldoutHeaderGroup: 1
   networkManagerUI: {fileID: 206793874}
-  useRelay: 0
+  useRelay: 1
 --- !u!4 &2081898532
 Transform:
   m_ObjectHideFlags: 0
@@ -5365,10 +5365,6 @@ PrefabInstance:
     - target: {fileID: 3468180394796691793, guid: f3b6f908e7ed0b5488a3dbd28496e2c0, type: 3}
       propertyPath: GlobalObjectIdHash
       value: 746221847
-      objectReference: {fileID: 0}
-    - target: {fileID: 3468180394796691793, guid: f3b6f908e7ed0b5488a3dbd28496e2c0, type: 3}
-      propertyPath: InScenePlacedSourceGlobalObjectIdHash
-      value: 4181931373
       objectReference: {fileID: 0}
     - target: {fileID: 6328290744576356839, guid: f3b6f908e7ed0b5488a3dbd28496e2c0, type: 3}
       propertyPath: m_Name
