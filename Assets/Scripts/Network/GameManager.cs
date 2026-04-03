@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Unity.Netcode;
 using Unity.Netcode.Transports.UTP;
 using Unity.Networking.Transport.Relay;
@@ -12,6 +13,13 @@ public class GameManager : NetworkBehaviour
 {
     [SerializeField] private NetworkManagerUI networkManagerUI;
     [SerializeField] private bool useRelay = true;
+    [SerializeField] private string sceneToLoad = "SampleScene";
+    [SerializeField] private GameObject playerPrefab;
+
+    private void Awake()
+    {
+        DontDestroyOnLoad(gameObject);
+    }
 
     async void Start()
     {
@@ -37,6 +45,28 @@ public class GameManager : NetworkBehaviour
             networkManagerUI.onStartHost += StartHost;
             networkManagerUI.onStartClient += StartClient;
             networkManagerUI.onDisconnectClient += DisconnectClient;
+            networkManagerUI.onStartGame += StartGame;
+        }
+
+        if (IsServer)
+        {
+            NetworkManager.Singleton.SceneManager.OnLoadEventCompleted += OnSceneLoaded;
+        }
+    }
+
+    public override void OnNetworkSpawn()
+    {
+        if (IsServer)
+        {
+            NetworkManager.Singleton.SceneManager.OnLoadEventCompleted += OnSceneLoaded;
+        }
+    }
+
+    public override void OnNetworkDespawn()
+    {
+        if (IsServer && NetworkManager.Singleton != null)
+        {
+            NetworkManager.Singleton.SceneManager.OnLoadEventCompleted -= OnSceneLoaded;
         }
     }
 
@@ -141,6 +171,32 @@ public class GameManager : NetworkBehaviour
         transport.SetConnectionData("127.0.0.1", 7777);
         NetworkManager.Singleton.StartClient();
         Debug.Log("Local Client Started (Skipped Relay)");
+    }
+
+    public void StartGame()
+    {
+        if (IsServer) 
+        {
+            NetworkManager.Singleton.SceneManager.LoadScene(sceneToLoad, UnityEngine.SceneManagement.LoadSceneMode.Single);
+        }
+    }
+
+    private void OnSceneLoaded(string sceneName, UnityEngine.SceneManagement.LoadSceneMode loadMode, List<ulong> clientsCompleted, List<ulong> clientsTimedOut)
+    {
+        if (!IsServer) return;
+
+        if (sceneName == sceneToLoad)
+        {
+            foreach (ulong clientId in clientsCompleted)
+            {
+
+                GameObject playerInstance = Instantiate(playerPrefab);
+
+                playerInstance.GetComponent<NetworkObject>().SpawnAsPlayerObject(clientId, true);
+
+                Debug.Log($"Spawned new player prefab for client: {clientId}");
+            }
+        }
     }
 
 }

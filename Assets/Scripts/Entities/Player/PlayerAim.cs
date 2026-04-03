@@ -66,7 +66,7 @@ public class PlayerAim : NetworkBehaviour
             return;
         }
 
-        player.RequestCastSpellServerRpc(player.SelectedSpellIndex);
+        player.RequestCastSpellServerRpc(player.ActiveSpellIndex);
 
     }
 }

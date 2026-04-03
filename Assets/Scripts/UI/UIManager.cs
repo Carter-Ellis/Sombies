@@ -20,7 +20,6 @@ public sealed class UIManager : MonoBehaviour
     [SerializeField] private GameObject slotPrefab;
     [SerializeField] private Transform slotParent;
 
-    // Edit these in the Inspector for your prefab: Z, X, C, etc.
     [SerializeField] private List<string> inventoryKeyLabels = new List<string> { "Z", "X", "C" };
 
     private List<InventorySlot> uiSlots = new List<InventorySlot>();

@@ -10,7 +10,7 @@ using TMPro;
 public class Player : NetworkBehaviour
 {
 
-    public NetworkVariable<int> SyncActiveSpellID = new NetworkVariable<int>(-1, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+    public NetworkVariable<int> _netActiveSpellID = new NetworkVariable<int>(-1, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 
     [Header("Inventory")]
     [SerializeField] private List<Item> inventory = new List<Item>();
@@ -21,10 +21,14 @@ public class Player : NetworkBehaviour
     public Spell activeSpell;
     public Transform firepoint;
     [SerializeField] private List<Spell> spells = new List<Spell>();
-    [SerializeField] private int selectedSpellIndex = 0;
+    [SerializeField] private int activeSpellIndex = 0;
     [SerializeField] private int maxSpellSlots = 2;
 
-    public int SelectedSpellIndex => selectedSpellIndex;
+    public int ActiveSpellIndex
+    {
+        get => activeSpellIndex;
+        set => activeSpellIndex = Mathf.Clamp(value, 0, maxSpellSlots - 1);
+    } 
 
 
     [Header("Interaction")]
@@ -104,39 +108,53 @@ public class Player : NetworkBehaviour
 
     public void AddSpell(Spell spell)
     {
+        if (!IsServer) return;
+
         int openSlot = FindOpenSpellSlot();
-        int slotToUse = openSlot != -1 ? openSlot : selectedSpellIndex;
+        int slotIndex = openSlot != -1 ? openSlot : ActiveSpellIndex;
 
-        // 1. Add it to the Server's list
-        spells[slotToUse] = spell;
+        // Replace/Add spell at slotIndex in the server's list
+        spells[slotIndex] = spell;
 
-        // 2. Make it the active spell locally for the server
-        activeSpell = spells[selectedSpellIndex];
+        // Make it the active spell on the server
+        activeSpell = spells[slotIndex];
+        ActiveSpellIndex = slotIndex;
 
-        // 3. Tell the clients to add it to THEIR lists
-        GrantSpellClientRpc(spell.spellID, slotToUse);
+        // Set the _netActiveSpellID for the specific owner
+        _netActiveSpellID.Value = activeSpell.spellID;
 
-        EquipSpellLocal(slotToUse);
+        // Tell the clients to add it to THEIR lists
+        GrantSpellClientRpc(spell.spellID, slotIndex);
+
     }
 
-    private void EquipSpellLocal(int index)
+    [Rpc(SendTo.Owner, InvokePermission = RpcInvokePermission.Server)]
+    public void GrantSpellClientRpc(int spellID, int slotIndex)
     {
-        if (index >= 0 && index < spells.Count && spells[index] != null)
+        if (!IsOwner) return;
+
+        Spell unlockedSpell = SpellDatabase.Instance.GetSpellByID(spellID);
+
+        if (unlockedSpell != null)
         {
-            selectedSpellIndex = index;
-            activeSpell = spells[selectedSpellIndex];
+            // Add the spell to the client's list in the slotIndex and Update the HUD
+            spells[slotIndex] = unlockedSpell;
+            activeSpell = spells[slotIndex];
+            ActiveSpellIndex = slotIndex;
+            UpdateHUDWithActiveSpell();
+        }
+    }
 
-            if (IsOwner)
+    private int FindOpenSpellSlot()
+    {
+        for (int i = 0; i < spells.Count; i++)
+        {
+            if (spells[i] == null)
             {
-                UpdateHUDWithActiveSpell();
-            }
-
-            // Ensure the NetworkVariable is updated so others see the change
-            if (IsServer)
-            {
-                SyncActiveSpellID.Value = activeSpell.spellID;
+                return i;
             }
         }
+        return -1;
     }
 
     private int FindOpenInventorySlot()
@@ -151,17 +169,7 @@ public class Player : NetworkBehaviour
         return -1;
     }
 
-    private int FindOpenSpellSlot()
-    {
-        for (int i = 0; i < spells.Count; i++)
-        {
-            if (spells[i] == null)
-            {
-                return i;
-            }
-        }
-        return -1;
-    }
+
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
@@ -263,9 +271,10 @@ public class Player : NetworkBehaviour
 
     public void TryUseSelectedItem()
     {
+        if (!IsOwner) return;
+
         if (_revive.IsDownedSync.Value) return;
 
-        // Ask the server to use the item
         RequestUseItemServerRpc(selectedItemIndex);
     }
 
@@ -317,8 +326,8 @@ public class Player : NetworkBehaviour
             {
                 return;
             }
-            selectedSpellIndex = newIndex;
-            activeSpell = spells[selectedSpellIndex];
+            ActiveSpellIndex = newIndex;
+            activeSpell = spells[ActiveSpellIndex];
 
             if (IsOwner)
             {
@@ -419,27 +428,11 @@ public class Player : NetworkBehaviour
         spellToCast.Cast(_playerStats);
     }
 
-    [Rpc(SendTo.Everyone, InvokePermission = RpcInvokePermission.Server)]
-    public void GrantSpellClientRpc(int spellID, int slotIndex)
-    {
-        if (IsServer) return; // The server already added it above!
-
-        // The client looks up the spell in the database
-        Spell unlockedSpell = SpellDatabase.Instance.GetSpellByID(spellID);
-
-        if (unlockedSpell != null)
-        {
-            // The client adds it to their local list so SwitchSpell will work
-            spells[slotIndex] = unlockedSpell;
-            Debug.Log($"Client added {unlockedSpell.Name} to slot {slotIndex}");
-        }
-    }
-
     [Rpc(SendTo.Server)]
     public void UpdateSelectedSpellServerRpc(int spellID)
     {
         // The server updates the NetworkVariable, which then syncs to everyone
-        SyncActiveSpellID.Value = spellID;
+        _netActiveSpellID.Value = spellID;
     }
 
 
@@ -488,19 +481,14 @@ public class Player : NetworkBehaviour
     {
         if (inventory[index] == null) return;
 
-        Debug.Log($"Server executing use for: {inventory[index].ItemName}");
-
-        // 1. Execute the item logic (this will update NetworkVariables like Mana)
         inventory[index].Use(_playerStats);
 
-        // 2. Remove it from the Server's list
         inventory[index] = null;
 
-        // 3. Tell the Client to remove it from their list too
         RemoveItemClientRpc(index);
     }
 
-    [Rpc(SendTo.Everyone)] // Or SendTo.Owner
+    [Rpc(SendTo.Owner)]
     private void RemoveItemClientRpc(int index)
     {
         if (!IsServer)

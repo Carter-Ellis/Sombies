@@ -8,7 +8,7 @@ public class SpellPurchase : PurchaseSystem
         if (player == null) return;
 
         player.AddSpell(spell);
-        player.SyncActiveSpellID.Value = spell.spellID;
+        player._netActiveSpellID.Value = spell.spellID;
     }
 
 }

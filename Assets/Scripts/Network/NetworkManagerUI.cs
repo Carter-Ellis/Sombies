@@ -9,23 +9,46 @@ public class NetworkManagerUI : MonoBehaviour
     [SerializeField] private Button hostBtn;
     [SerializeField] private Button clientBtn;
     [SerializeField] private Button disconnectBtn;
+    [SerializeField] private Button startGameBtn;
+
+    [Header("Lobby UI References")]
+    [SerializeField] private GameObject lobbyPanel;
 
     [Header("Relay UI References")]
     [SerializeField] private TMP_InputField joinInputField; // Drag your InputField here
     [SerializeField] private TextMeshProUGUI joinCodeText;   // Drag a TextMeshPro text here
 
-    public event Action onStartHost, onStartClient, onDisconnectClient;
+    public event Action onStartHost, onStartClient, onDisconnectClient, onStartGame;
+
+    private void Awake()
+    {
+        ShowStartButton(false);
+        ShowLobbyUI(false);
+    }
 
     private void Start()
     {
-        hostBtn.onClick.AddListener(() => onStartHost?.Invoke());
-        clientBtn.onClick.AddListener(() => onStartClient?.Invoke());
-        disconnectBtn.onClick.AddListener(() => onDisconnectClient?.Invoke());
+        hostBtn.onClick.AddListener(() => {
+            onStartHost?.Invoke();
+            ShowLobbyUI(true);
+            ShowStartButton(true);
+        });
 
-        EnableButtons();
+        clientBtn.onClick.AddListener(() => {
+            onStartClient?.Invoke();
+            ShowLobbyUI(true);
+            ShowStartButton(false);
+        });
 
-        // Clear the code text on start
-        if (joinCodeText != null) joinCodeText.text = "";
+        disconnectBtn.onClick.AddListener(() => {
+            onDisconnectClient?.Invoke();
+            ShowLobbyUI(false);
+            ShowStartButton(false);
+        });
+
+        startGameBtn.onClick.AddListener(() => {
+            onStartGame?.Invoke();
+        });
     }
 
     public void DisableButtons()
@@ -60,4 +83,22 @@ public class NetworkManagerUI : MonoBehaviour
         }
         return "";
     }
+
+    public void ShowStartButton(bool isVisible)
+    {
+        if (startGameBtn != null)
+        {
+            startGameBtn.gameObject.SetActive(isVisible);
+        }
+    }
+
+    public void ShowLobbyUI(bool isVisible)
+    {
+        if (lobbyPanel != null)
+        {
+            lobbyPanel.SetActive(isVisible);
+        }
+
+    }
+
 }
