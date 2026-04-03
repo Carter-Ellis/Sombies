@@ -13,6 +13,7 @@ public class NetworkManagerUI : MonoBehaviour
 
     [Header("Lobby UI References")]
     [SerializeField] private GameObject lobbyPanel;
+    [SerializeField] private TMP_InputField nameInputField;
 
     [Header("Relay UI References")]
     [SerializeField] private TMP_InputField joinInputField; // Drag your InputField here
@@ -99,6 +100,15 @@ public class NetworkManagerUI : MonoBehaviour
             lobbyPanel.SetActive(isVisible);
         }
 
+    }
+
+    public string GetPlayerName()
+    {
+        if (string.IsNullOrEmpty(nameInputField.text))
+        {
+            return "Player_" + UnityEngine.Random.Range(10, 99);
+        }
+        return nameInputField.text;
     }
 
 }

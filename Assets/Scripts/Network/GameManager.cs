@@ -15,11 +15,19 @@ public class GameManager : NetworkBehaviour
     [SerializeField] private bool useRelay = true;
     [SerializeField] private string sceneToLoad = "SampleScene";
     [SerializeField] private GameObject playerPrefab;
-
+    private Dictionary<ulong, string> clientNames = new Dictionary<ulong, string>();
     private void Awake()
     {
         DontDestroyOnLoad(gameObject);
+
+        if (NetworkManager.Singleton != null)
+        {
+            NetworkManager.Singleton.NetworkConfig.ConnectionApproval = true;
+            NetworkManager.Singleton.ConnectionApprovalCallback = ApprovalCheck;
+        }
+
     }
+
 
     async void Start()
     {
@@ -70,9 +78,27 @@ public class GameManager : NetworkBehaviour
         }
     }
 
+    private void ApprovalCheck(NetworkManager.ConnectionApprovalRequest request, NetworkManager.ConnectionApprovalResponse response)
+    {
+        // 1. Read the name from the suitcase (Payload)
+        string payloadName = System.Text.Encoding.UTF8.GetString(request.Payload);
+
+        Debug.Log($"Server received approval request for Client: {request.ClientNetworkId} with name: {payloadName}");
+        // 2. Save it so we can give it to the Player Prefab later
+        clientNames[request.ClientNetworkId] = payloadName;
+
+        // 3. Let them in!
+        response.Approved = true;
+        response.CreatePlayerObject = false; // We spawn manually in OnSceneLoaded
+        response.Pending = false;
+    }
+
     private async void StartHost()
     {
         networkManagerUI.DisableButtons();
+
+        string myName = networkManagerUI.GetPlayerName();
+        clientNames[NetworkManager.ServerClientId] = myName;
 
         if (!useRelay)
         {
@@ -109,6 +135,9 @@ public class GameManager : NetworkBehaviour
     {
         networkManagerUI.DisableButtons();
 
+        string myName = networkManagerUI.GetPlayerName();
+        NetworkManager.Singleton.NetworkConfig.ConnectionData = System.Text.Encoding.UTF8.GetBytes(myName);
+
         if (!useRelay)
         {
             StartLocalClient();
@@ -141,6 +170,7 @@ public class GameManager : NetworkBehaviour
         {
             Debug.LogError($"Relay Join Error: {e.Message}");
         }
+
     }
 
     private void DisconnectClient()
@@ -183,18 +213,25 @@ public class GameManager : NetworkBehaviour
 
     private void OnSceneLoaded(string sceneName, UnityEngine.SceneManagement.LoadSceneMode loadMode, List<ulong> clientsCompleted, List<ulong> clientsTimedOut)
     {
-        if (!IsServer) return;
+        if (!IsServer || sceneName != sceneToLoad) return;
 
-        if (sceneName == sceneToLoad)
+        foreach (ulong clientId in clientsCompleted)
         {
-            foreach (ulong clientId in clientsCompleted)
+            GameObject playerInstance = Instantiate(playerPrefab);
+            playerInstance.GetComponent<NetworkObject>().SpawnAsPlayerObject(clientId, true);
+
+            var playerScript = playerInstance.GetComponent<Player>();
+            if (playerScript != null)
             {
-
-                GameObject playerInstance = Instantiate(playerPrefab);
-
-                playerInstance.GetComponent<NetworkObject>().SpawnAsPlayerObject(clientId, true);
-
-                Debug.Log($"Spawned new player prefab for client: {clientId}");
+                // If the name exists in our dictionary, use it. Otherwise, use a fallback.
+                if (clientNames.TryGetValue(clientId, out string savedName))
+                {
+                    playerScript.playerName.Value = savedName;
+                }
+                else
+                {
+                    playerScript.playerName.Value = $"Player {clientId}";
+                }
             }
         }
     }

@@ -1,19 +1,25 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
+using Unity.Collections;
+using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
-using Unity.Netcode;
-using TMPro;
 
 
 public class Player : NetworkBehaviour
 {
-
+    [Header("Name")]
+    public NetworkVariable<FixedString32Bytes> playerName = new NetworkVariable<FixedString32Bytes>();
+    [SerializeField] private TextMeshProUGUI nameTagText;
+    
+    
     public NetworkVariable<int> _netActiveSpellID = new NetworkVariable<int>(-1, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 
     [Header("Inventory")]
     [SerializeField] private List<Item> inventory = new List<Item>();
+    [SerializeField] private NetworkList<int> _netInventory;
     [SerializeField] private int maxInventorySlots = 3;
     [SerializeField] private int selectedItemIndex = 0;
 
@@ -35,9 +41,9 @@ public class Player : NetworkBehaviour
     private PurchaseSystem nearbyPurchaseSystem = null;
 
     [Header("Melee Attack (Knife)")]
-    [SerializeField] private int meleeDamage = 150; // Insta-kill early rounds!
-    [SerializeField] private float meleeRange = 1.5f; // How far forward the knife reaches
-    [SerializeField] private float meleeRadius = 0.5f; // How wide the hit detection is
+    [SerializeField] private int meleeDamage = 150;
+    [SerializeField] private float meleeRange = 1.5f;
+    [SerializeField] private float meleeRadius = 0.5f;
     [SerializeField] private float meleeKnockbackForce = 15f;
     [SerializeField] private float meleeKnockbackDuration = 0.2f;
     [SerializeField] private float meleeCooldown = 0.8f;
@@ -54,6 +60,7 @@ public class Player : NetworkBehaviour
 
         _revive = GetComponent<ReviveController>();
         _playerStats = GetComponent<PlayerStats>();
+        _netInventory = new NetworkList<int>();
 
         for (int i = 0; i < maxInventorySlots; i++)
         {
@@ -64,16 +71,98 @@ public class Player : NetworkBehaviour
         {
             spells.Add(null);
         }
+
     }
 
 
     public override void OnNetworkSpawn()
     {
+        // Prevents double subscription
+        playerName.OnValueChanged -= OnNameChanged;
+        playerName.OnValueChanged += OnNameChanged;
+
+        nameTagText.text = playerName.Value.ToString();
+
+        if (IsServer)
+        {
+            _netInventory.Clear();
+            for (int i = 0; i < maxInventorySlots; i++)
+            {
+                _netInventory.Add(-1);
+            }
+        }
+
+        _netInventory.OnListChanged += OnInventoryChanged;
+
         if (IsOwner)
         {
             UIManager.Instance.InitializeInventoryUI(maxInventorySlots);
             UIManager.Instance.RefreshInventory(inventory, selectedItemIndex);
             UpdateInventoryUI();
+        }
+    }
+
+    public override void OnNetworkDespawn()
+    {
+        // Clean up when the player leaves the game
+        playerName.OnValueChanged -= OnNameChanged;
+        _netInventory.OnListChanged -= OnInventoryChanged;
+    }
+
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        if (!IsOwner) return;
+
+        Item hitItem = collision.GetComponent<Item>();
+
+        if (hitItem != null)
+        {
+            var itemNetObj = hitItem.GetComponent<NetworkObject>();
+            RequestPickupServerRpc(itemNetObj.NetworkObjectId);
+        }
+
+        PurchaseSystem shop = collision.GetComponent<PurchaseSystem>();
+        if (shop != null)
+        {
+            nearbyPurchaseSystem = shop;
+            Debug.Log("Press E to purchase!");
+        }
+
+        Player other = collision.GetComponent<Player>();
+        if (other != null && other != this)
+        {
+            ReviveController otherRevive = other.GetComponent<ReviveController>();
+            if (otherRevive != null && otherRevive.IsDownedSync.Value)
+            {
+                nearbyDownedPlayer = other;
+            }
+        }
+
+    }
+
+    private void OnTriggerExit2D(Collider2D collision)
+    {
+        // Clear the reference if the player walks away
+        PurchaseSystem shop = collision.GetComponent<PurchaseSystem>();
+        if (shop != null && shop == nearbyPurchaseSystem)
+        {
+            nearbyPurchaseSystem = null;
+        }
+
+        Player other = collision.GetComponent<Player>();
+        if (other != null && other == nearbyDownedPlayer)
+        {
+            CancelMyReviveAction();
+            nearbyDownedPlayer = null;
+        }
+
+    }
+
+    private void OnNameChanged(FixedString32Bytes oldVal, FixedString32Bytes newVal)
+    {
+        if (nameTagText != null)
+        {
+            nameTagText.text = newVal.ToString();
         }
     }
 
@@ -89,20 +178,6 @@ public class Player : NetworkBehaviour
         {
             Debug.LogWarning("No ReviveController found on player! Despawning instead.");
             GetComponent<NetworkObject>().Despawn();
-        }
-    }
-
-    public void AddItem(Item item)
-    {
-        int openSlot = FindOpenInventorySlot();
-        if (openSlot != -1)
-        {
-            inventory[openSlot] = item;
-            UpdateInventoryUI();
-        }
-        else
-        {
-            Debug.Log("Inventory is full!");
         }
     }
 
@@ -157,67 +232,99 @@ public class Player : NetworkBehaviour
         return -1;
     }
 
-    private int FindOpenInventorySlot()
+    [Rpc(SendTo.Server)]
+    private void RequestPickupServerRpc(ulong itemNetId)
     {
-        for (int i = 0; i < inventory.Count; i++)
+        if (NetworkManager.Singleton.SpawnManager.SpawnedObjects.TryGetValue(itemNetId, out var netObj))
         {
-            if (inventory[i] == null)
+            // Safety check for hackers
+            float distance = Vector3.Distance(transform.position, netObj.transform.position);
+
+            if (distance > 3.0f)
             {
-                return i;
+                return;
+            }
+
+            Item worldItem = netObj.GetComponent<Item>();
+            if (worldItem != null)
+            {
+                // Find an open slot in the server's inventory list
+                for (int i = 0; i < maxInventorySlots; i++)
+                {
+                    // Found empty slot
+                    if (_netInventory[i] == -1)
+                    {
+                        // Setting this triggers the OnInventoryChanged function 
+                        _netInventory[i] = worldItem.itemID;
+                        netObj.Despawn();
+                        break;
+                    }
+                }
             }
         }
-        return -1;
     }
 
+    private void OnInventoryChanged(NetworkListEvent<int> changeEvent)
+    {
+        int index = changeEvent.Index;
+        int newItemID = changeEvent.Value;
 
+        if (newItemID == -1)
+        {
+            inventory[index] = null;
+        }
+        else
+        {
+            inventory[index] = ItemDatabase.Instance.GetItemByID(newItemID);
+        }
 
-    private void OnTriggerEnter2D(Collider2D collision)
+        UpdateInventoryUI();
+
+    }
+
+    public void TryUseSelectedItem()
     {
         if (!IsOwner) return;
 
-        Item hitItem = collision.GetComponent<Item>();
+        if (_revive.IsDownedSync.Value) return;
 
-        if (hitItem != null)
-        {
-            var itemNetObj = hitItem.GetComponent<NetworkObject>();
-            RequestPickupServerRpc(itemNetObj.NetworkObjectId);
-        }
-
-        PurchaseSystem shop = collision.GetComponent<PurchaseSystem>();
-        if (shop != null)
-        {
-            nearbyPurchaseSystem = shop;
-            Debug.Log("Press E to purchase!");
-        }
-
-        Player other = collision.GetComponent<Player>();
-        if (other != null && other != this)
-        {
-            ReviveController otherRevive = other.GetComponent<ReviveController>();
-            if (otherRevive != null && otherRevive.IsDownedSync.Value)
-            {
-                nearbyDownedPlayer = other;
-            }
-        }
-
+        RequestUseItemServerRpc(selectedItemIndex);
     }
 
-    private void OnTriggerExit2D(Collider2D collision)
+    [Rpc(SendTo.Server)]
+    private void RequestUseItemServerRpc(int index)
     {
-        // Clear the reference if the player walks away
-        PurchaseSystem shop = collision.GetComponent<PurchaseSystem>();
-        if (shop != null && shop == nearbyPurchaseSystem)
+        if (_netInventory[index] == -1) return;
+
+        Item itemToUse = ItemDatabase.Instance.GetItemByID(_netInventory[index]);
+
+        if (itemToUse != null)
         {
-            nearbyPurchaseSystem = null;
+            itemToUse.Use(_playerStats);
         }
 
-        Player other = collision.GetComponent<Player>();
-        if (other != null && other == nearbyDownedPlayer)
-        {
-            CancelMyReviveAction();
-            nearbyDownedPlayer = null;
-        }
+        _netInventory[index] = -1;
+    }
 
+    public void SwitchItem(InputAction.CallbackContext context)
+    {
+        if (_revive.IsDownedSync.Value) return;
+
+        if (context.performed)
+        {
+            int index = Mathf.RoundToInt(context.ReadValue<float>());
+
+            ChangeSelectedItem(index);
+        }
+    }
+
+    private void ChangeSelectedItem(int newIndex)
+    {
+        if (newIndex >= 0 && newIndex < maxInventorySlots)
+        {
+            selectedItemIndex = newIndex;
+            UpdateInventoryUI();
+        }
     }
 
     public void OnInteract(InputAction.CallbackContext context)
@@ -269,41 +376,6 @@ public class Player : NetworkBehaviour
         }
     }
 
-    public void TryUseSelectedItem()
-    {
-        if (!IsOwner) return;
-
-        if (_revive.IsDownedSync.Value) return;
-
-        RequestUseItemServerRpc(selectedItemIndex);
-    }
-
-    public void SwitchItem(InputAction.CallbackContext context)
-    {
-        if (_revive.IsDownedSync.Value) return;
-
-        if (context.performed)
-        {
-            int index = Mathf.RoundToInt(context.ReadValue<float>());
-
-            ChangeSelectedItem(index);
-        }
-    }
-
-    private void ChangeSelectedItem(int newIndex)
-    {
-        if (newIndex >= 0 && newIndex < maxInventorySlots)
-        {
-            selectedItemIndex = newIndex;
-            UpdateInventoryUI();
-        }
-    }
-
-    public void ReloadScene()
-    {
-        int buildIndex = SceneManager.GetActiveScene().buildIndex;
-        SceneManager.LoadScene(buildIndex);
-    }
 
 
     public void SwitchSpell(InputAction.CallbackContext context)
@@ -433,69 +505,6 @@ public class Player : NetworkBehaviour
     {
         // The server updates the NetworkVariable, which then syncs to everyone
         _netActiveSpellID.Value = spellID;
-    }
-
-
-    [Rpc(SendTo.Server)]
-    private void RequestPickupServerRpc(ulong itemNetId, RpcParams rpcParams = default)
-    {
-        if (NetworkManager.Singleton.SpawnManager.SpawnedObjects.TryGetValue(itemNetId, out var netObj))
-        {
-            Item worldItem = netObj.GetComponent<Item>();
-            if (worldItem != null)
-            {
-                int id = worldItem.itemID;
-                Item prefab = ItemDatabase.Instance.GetItemByID(id);
-
-                if (prefab != null)
-                {
-                    AddItem(prefab);
-
-                    var targetParams = RpcTarget.Single(rpcParams.Receive.SenderClientId, RpcTargetUse.Temp);
-                    SyncPickupClientRpc(id, targetParams);
-
-                    netObj.Despawn();
-                }
-            }
-        }
-    }
-
-    [Rpc(SendTo.SpecifiedInParams)]
-    private void SyncPickupClientRpc(int itemID, RpcParams rpcParams = default)
-    {
-        if (IsServer) return;
-
-        // Look up the item prefab in your new database
-        Item itemPrefab = ItemDatabase.Instance.GetItemByID(itemID);
-
-        if (itemPrefab != null)
-        {
-            // Add the stable prefab reference to the local inventory
-            AddItem(itemPrefab);
-            Debug.Log($"Client: Successfully added {itemPrefab.ItemName} to inventory via ID {itemID}");
-        }
-    }
-
-    [Rpc(SendTo.Server)]
-    private void RequestUseItemServerRpc(int index)
-    {
-        if (inventory[index] == null) return;
-
-        inventory[index].Use(_playerStats);
-
-        inventory[index] = null;
-
-        RemoveItemClientRpc(index);
-    }
-
-    [Rpc(SendTo.Owner)]
-    private void RemoveItemClientRpc(int index)
-    {
-        if (!IsServer)
-        {
-            inventory[index] = null;
-        }
-        UpdateInventoryUI();
     }
 
     private void UpdateInventoryUI()

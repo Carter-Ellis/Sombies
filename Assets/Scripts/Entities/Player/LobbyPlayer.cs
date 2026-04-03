@@ -7,14 +7,7 @@ public class LobbyPlayer : NetworkBehaviour
     public NetworkVariable<FixedString32Bytes> PlayerName = new NetworkVariable<FixedString32Bytes>(
         "Player",
         NetworkVariableReadPermission.Everyone,
-        NetworkVariableWritePermission.Owner
+        NetworkVariableWritePermission.Server
     );
 
-    public override void OnNetworkSpawn()
-    {
-        if (IsOwner)
-        {
-            PlayerName.Value = $"Player {OwnerClientId}";
-        }
-    }
 }
