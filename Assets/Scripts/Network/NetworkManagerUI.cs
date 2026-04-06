@@ -104,10 +104,6 @@ public class NetworkManagerUI : MonoBehaviour
 
     public string GetPlayerName()
     {
-        if (string.IsNullOrEmpty(nameInputField.text))
-        {
-            return "Player_" + UnityEngine.Random.Range(10, 99);
-        }
         return nameInputField.text;
     }
 

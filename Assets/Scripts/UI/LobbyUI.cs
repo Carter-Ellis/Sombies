@@ -12,42 +12,41 @@ public class LobbyUI : MonoBehaviour
 
     private void OnEnable()
     {
-        if (NetworkManager.Singleton != null)
-        {
-            NetworkManager.Singleton.OnClientConnectedCallback += RefreshList;
-            NetworkManager.Singleton.OnClientDisconnectCallback += RefreshList;
-        }
+        LobbyPlayer.OnAnyPlayerSpawned += RefreshUI;
+        LobbyPlayer.OnAnyPlayerDespawned += RefreshUI;
 
-        Invoke(nameof(UpdatePlayerList), 0.5f);
+        RefreshUI();
     }
 
     private void OnDisable()
     {
-        if (NetworkManager.Singleton != null)
-        {
-            NetworkManager.Singleton.OnClientConnectedCallback -= RefreshList;
-            NetworkManager.Singleton.OnClientDisconnectCallback -= RefreshList;
-        }
+        LobbyPlayer.OnAnyPlayerSpawned -= RefreshUI;
+        LobbyPlayer.OnAnyPlayerDespawned -= RefreshUI;
     }
 
-    private void RefreshList(ulong id)
+    private void RefreshUI()
     {
-        Invoke(nameof(UpdatePlayerList), 0.5f);
+        // Give Netcode a tiny moment to finish internal registration
+        CancelInvoke(nameof(UpdatePlayerList));
+        Invoke(nameof(UpdatePlayerList), 0.1f);
     }
 
     public void UpdatePlayerList()
     {
+        // Cleanup existing UI entries
         foreach (var entry in _entryInstances)
         {
             if (entry != null) Destroy(entry);
         }
         _entryInstances.Clear();
 
+        // Find all LobbyPlayers in the scene
         LobbyPlayer[] players = Object.FindObjectsByType<LobbyPlayer>(FindObjectsInactive.Include);
 
         foreach (LobbyPlayer player in players)
         {
-            if (!player.gameObject.scene.IsValid()) continue;
+            // Ensure the player is actually spawned and in the active scene
+            if (!player.IsSpawned || !player.gameObject.scene.IsValid()) continue;
 
             GameObject newEntry = Instantiate(playerEntryPrefab, container);
             var text = newEntry.GetComponentInChildren<TextMeshProUGUI>();

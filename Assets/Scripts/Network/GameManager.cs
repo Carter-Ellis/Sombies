@@ -16,6 +16,7 @@ public class GameManager : NetworkBehaviour
     [SerializeField] private string sceneToLoad = "SampleScene";
     [SerializeField] private GameObject playerPrefab;
     private Dictionary<ulong, string> clientNames = new Dictionary<ulong, string>();
+
     private void Awake()
     {
         DontDestroyOnLoad(gameObject);
@@ -23,11 +24,9 @@ public class GameManager : NetworkBehaviour
         if (NetworkManager.Singleton != null)
         {
             NetworkManager.Singleton.NetworkConfig.ConnectionApproval = true;
-            NetworkManager.Singleton.ConnectionApprovalCallback = ApprovalCheck;
         }
 
     }
-
 
     async void Start()
     {
@@ -80,16 +79,28 @@ public class GameManager : NetworkBehaviour
 
     private void ApprovalCheck(NetworkManager.ConnectionApprovalRequest request, NetworkManager.ConnectionApprovalResponse response)
     {
-        // 1. Read the name from the suitcase (Payload)
+        // Check if host
+        if (request.ClientNetworkId == NetworkManager.ServerClientId)
+        {
+            response.Approved = true;
+            response.CreatePlayerObject = true;
+            response.Pending = false;
+            return;
+        }
+
         string payloadName = System.Text.Encoding.UTF8.GetString(request.Payload);
 
         Debug.Log($"Server received approval request for Client: {request.ClientNetworkId} with name: {payloadName}");
-        // 2. Save it so we can give it to the Player Prefab later
+
+        if (string.IsNullOrEmpty(payloadName))
+        {
+            payloadName = "Player " + (clientNames.Count + 1);
+        }
+
         clientNames[request.ClientNetworkId] = payloadName;
 
-        // 3. Let them in!
         response.Approved = true;
-        response.CreatePlayerObject = false; // We spawn manually in OnSceneLoaded
+        response.CreatePlayerObject = true;
         response.Pending = false;
     }
 
@@ -98,7 +109,16 @@ public class GameManager : NetworkBehaviour
         networkManagerUI.DisableButtons();
 
         string myName = networkManagerUI.GetPlayerName();
+
+        // If host did not put name, assign default "Player 1"
+        if (string.IsNullOrEmpty(myName))
+        {
+            myName = "Player 1";
+        }
+
         clientNames[NetworkManager.ServerClientId] = myName;
+
+        NetworkManager.Singleton.ConnectionApprovalCallback = ApprovalCheck;
 
         if (!useRelay)
         {
@@ -136,7 +156,10 @@ public class GameManager : NetworkBehaviour
         networkManagerUI.DisableButtons();
 
         string myName = networkManagerUI.GetPlayerName();
+
         NetworkManager.Singleton.NetworkConfig.ConnectionData = System.Text.Encoding.UTF8.GetBytes(myName);
+
+        NetworkManager.Singleton.ConnectionApprovalCallback = ApprovalCheck;
 
         if (!useRelay)
         {
@@ -217,23 +240,34 @@ public class GameManager : NetworkBehaviour
 
         foreach (ulong clientId in clientsCompleted)
         {
-            GameObject playerInstance = Instantiate(playerPrefab);
-            playerInstance.GetComponent<NetworkObject>().SpawnAsPlayerObject(clientId, true);
-
-            var playerScript = playerInstance.GetComponent<Player>();
-            if (playerScript != null)
+            // 1. Find the "Lobby" version of this player
+            if (NetworkManager.Singleton.ConnectedClients.TryGetValue(clientId, out var networkClient))
             {
-                // If the name exists in our dictionary, use it. Otherwise, use a fallback.
-                if (clientNames.TryGetValue(clientId, out string savedName))
+                var oldPlayerObject = networkClient.PlayerObject;
+                if (oldPlayerObject != null)
                 {
-                    playerScript.playerName.Value = savedName;
-                }
-                else
-                {
-                    playerScript.playerName.Value = $"Player {clientId}";
+                    // Despawn the Lobby object (it will disappear for everyone)
+                    oldPlayerObject.Despawn(true);
                 }
             }
+
+            // 2. Instantiate the "Actual Gameplay" version (your existing code)
+            GameObject playerInstance = Instantiate(playerPrefab);
+            var playerScript = playerInstance.GetComponent<Player>();
+
+            if (playerScript != null && clientNames.TryGetValue(clientId, out string savedName))
+            {
+                playerScript.playerName.Value = savedName;
+            }
+
+            // 3. Re-assign this as the official PlayerObject for this client
+            playerInstance.GetComponent<NetworkObject>().SpawnAsPlayerObject(clientId, true);
         }
+    }
+
+    public bool GetSavedName(ulong clientId, out string name)
+    {
+        return clientNames.TryGetValue(clientId, out name);
     }
 
 }
