@@ -1,10 +1,14 @@
 using System.Collections;
 using Unity.Netcode;
+using Unity.Netcode.Components;
 using UnityEngine;
 using UnityEngine.AI;
 
 public abstract class Enemy : Entity
 {
+    private NetworkTransform _netTransform;
+    private NetworkRigidbody2D _netRB;
+
     private RoundManager roundManager;
 
     [Header("Attack")]
@@ -57,15 +61,20 @@ public abstract class Enemy : Entity
     [Header("States")]
     protected bool isKnockedBack = false;
 
+    protected override void Awake()
+    {
+        base.Awake();
+        _netTransform = GetComponent<NetworkTransform>();
+        _netRB = GetComponent<NetworkRigidbody2D>();
+    }
+
     protected virtual void Start()
     {
         agent = GetComponent<NavMeshAgent>();
         rb = GetComponent<Rigidbody2D>();
 
-
         agent.updateRotation = false;
         agent.updateUpAxis = false;
-
         agent.updatePosition = false;
 
         agent.speed = speed;
@@ -104,7 +113,6 @@ public abstract class Enemy : Entity
             }
             else
             {
-                // If we have no target, we MUST clear the velocity and the agent path
                 rb.linearVelocity = Vector2.zero;
 
                 if (agent.isOnNavMesh && agent.hasPath)
@@ -129,7 +137,6 @@ public abstract class Enemy : Entity
 
     private Transform GetClosestPlayer()
     {
-        // Ensure we are finding all active player scripts in the network
         PlayerStats[] allPlayers = Object.FindObjectsByType<PlayerStats>(FindObjectsInactive.Exclude);
 
         Transform bestTarget = null;
@@ -138,10 +145,8 @@ public abstract class Enemy : Entity
 
         foreach (PlayerStats playerStats in allPlayers)
         {
-            // 1. Skip if player is hidden/dead
             if (playerStats == null || playerStats.isHidden.Value) continue;
 
-            // 2. Extra safety: Check if the player actually has a NetworkObject and is spawned
             var netObj = playerStats.GetComponent<NetworkObject>();
             if (netObj == null || !netObj.IsSpawned) continue;
 
@@ -187,25 +192,19 @@ public abstract class Enemy : Entity
         PlayerStats playerStats = collider.GetComponent<PlayerStats>();
         if (playerStats != null && playerStats.isHidden.Value) return;
 
-        // Check if enough time has passed since the last attack
         if (Time.time >= lastAttackTime + attackCooldown)
         {
-            
-
             if (playerStats != null)
             {
                 PlayerMovement playerMovement = playerStats.GetComponent<PlayerMovement>();
 
-                // Calculate direction and apply knockback
                 Vector2 knockbackDirection = (playerStats.transform.position - transform.position).normalized;
                 Vector2 force = knockbackDirection * KnockbackForce;
 
                 playerMovement.ApplyKnockbackClientRpc(force, KnockbackDuration);
 
-                // Deal damage
                 playerStats.TakeDamage(DamageAmount);
 
-                // Record the time of this attack so the cooldown starts
                 lastAttackTime = Time.time;
             }
         }
@@ -213,7 +212,6 @@ public abstract class Enemy : Entity
 
     protected void TryDropItem()
     {
-        // 1. Only the Server handles spawning
         if (!IsServer) return;
 
         if (Random.value <= _dropChance)
@@ -225,10 +223,8 @@ public abstract class Enemy : Entity
 
                 if (itemPrefab != null)
                 {
-                    // 2. Standard Instantiate first
                     Item spawnedItem = Instantiate(itemPrefab, transform.position, Quaternion.identity);
 
-                    // 3. Get the NetworkObject and Spawn it across the network
                     NetworkObject netObj = spawnedItem.GetComponent<NetworkObject>();
                     if (netObj != null)
                     {
@@ -252,14 +248,11 @@ public abstract class Enemy : Entity
     {
         isKnockedBack = true;
 
-        // Apply the sudden force
         rb.linearVelocity = force;
 
         yield return new WaitForSeconds(duration);
 
-        // End knockback, stop sliding
         rb.linearVelocity = Vector2.zero;
         isKnockedBack = false;
     }
-
 }
