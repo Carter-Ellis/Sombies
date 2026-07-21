@@ -15,6 +15,7 @@ public sealed class UIManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI manaTxt;
     [SerializeField] private TextMeshProUGUI coinsTxt;
     [SerializeField] private TextMeshProUGUI roundTxt;
+    [SerializeField] private TextMeshProUGUI enemyCountTxt;
 
     [Header("Inventory UI Settings")]
     [SerializeField] private GameObject slotPrefab;
@@ -57,6 +58,11 @@ public sealed class UIManager : MonoBehaviour
     public void UpdateRound(int roundNumber)
     {
         if (roundTxt != null) roundTxt.text = $"Round: {roundNumber}";
+    }
+
+    public void UpdateEnemyCount(int enemyCount)
+    {
+        if (enemyCountTxt != null) enemyCountTxt.text = $"Sombies: {enemyCount}";
     }
 
     public void InitializeInventoryUI(int slotCount)

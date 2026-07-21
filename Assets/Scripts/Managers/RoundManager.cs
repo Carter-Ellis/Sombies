@@ -11,7 +11,7 @@ public class RoundManager : NetworkBehaviour
     [Header("Current Status")]
     public NetworkVariable<int> _netRound = new NetworkVariable<int>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
     public RoundState currentState = RoundState.Fighting;
-    private int enemiesRemainingToKill;
+    public NetworkVariable<int> _netEnemiesRemaining = new NetworkVariable<int>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 
     [Header("Spawn Settings")]
     [SerializeField] private Enemy[] enemyPrefabs;
@@ -28,6 +28,8 @@ public class RoundManager : NetworkBehaviour
     public override void OnNetworkSpawn()
     {
         _netRound.OnValueChanged += OnRoundChanged;
+
+        _netEnemiesRemaining.OnValueChanged += OnEnemiesChanged;
 
         // Only the server starts the round logic
         if (IsServer)
@@ -47,6 +49,7 @@ public class RoundManager : NetworkBehaviour
     public override void OnNetworkDespawn()
     {
         _netRound.OnValueChanged -= OnRoundChanged;
+        _netEnemiesRemaining.OnValueChanged -= OnEnemiesChanged;
     }
 
     private void OnRoundChanged(int oldVal, int newVal)
@@ -55,6 +58,14 @@ public class RoundManager : NetworkBehaviour
         if (UIManager.Instance != null)
         {
             UIManager.Instance.UpdateRound(newVal);
+        }
+    }
+
+    private void OnEnemiesChanged(int oldVal, int newVal)
+    {
+        if (UIManager.Instance != null)
+        {
+            UIManager.Instance.UpdateEnemyCount(newVal);
         }
     }
 
@@ -79,7 +90,7 @@ public class RoundManager : NetworkBehaviour
 
         
         int totalEnemiesToSpawn = CalculateEnemyCount();
-        enemiesRemainingToKill = totalEnemiesToSpawn;
+        _netEnemiesRemaining.Value = totalEnemiesToSpawn;
 
         currentState = RoundState.Spawning;
 
@@ -137,11 +148,10 @@ public class RoundManager : NetworkBehaviour
             activeEnemies.Remove(deadEnemy);
 
 
-            enemiesRemainingToKill--;
-
+            _netEnemiesRemaining.Value--;
 
             // Now we check if the round is over only when an enemy actually dies
-            if (enemiesRemainingToKill <= 0)
+            if (_netEnemiesRemaining.Value <= 0)
             {
                 StartNextRound();
             }
