@@ -755,7 +755,7 @@ MonoBehaviour:
       - m_Target: {fileID: 2922282686609498777}
         m_TargetAssemblyTypeName: Player, Assembly-CSharp
         m_MethodName: TryUseSelectedItem
-        m_Mode: 1
+        m_Mode: 0
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine

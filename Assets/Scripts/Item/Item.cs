@@ -50,6 +50,7 @@ public abstract class Item : NetworkBehaviour
         {
             NetworkObject.Despawn();
         }
+        
     }
 
     public abstract void Use(Entity entity);

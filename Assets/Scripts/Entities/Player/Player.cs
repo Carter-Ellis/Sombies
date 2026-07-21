@@ -260,8 +260,10 @@ public class Player : NetworkBehaviour
         UpdateInventoryUI();
     }
 
-    public void TryUseSelectedItem()
+    public void TryUseSelectedItem(InputAction.CallbackContext context)
     {
+        if (!context.performed) return;
+
         if (!IsOwner) return;
 
         if (_revive.IsDownedSync.Value) return;
