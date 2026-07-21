@@ -1,4 +1,5 @@
 using System.Collections;
+using TMPro;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -12,6 +13,9 @@ public class MysteryBox : PurchaseSystem
     private void Awake()
     {
         disableOnPurchase = false;
+        priceTxt = GetComponentInChildren<TextMeshPro>();
+        priceTxt.gameObject.SetActive(false);
+        UpdatePriceText();
     }
 
     protected override void GrantPurchase(Entity buyer)

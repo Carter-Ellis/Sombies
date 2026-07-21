@@ -1,7 +1,8 @@
-using UnityEngine;
+using TMPro;
 
 public class SpellPurchase : PurchaseSystem
 {
+
     protected override void GrantPurchase(Entity buyer)
     {
         Player player = buyer.GetComponent<Player>();

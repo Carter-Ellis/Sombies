@@ -106,7 +106,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
-  GlobalObjectIdHash: 3406887642
+  GlobalObjectIdHash: 2325688831
   InScenePlacedSourceGlobalObjectIdHash: 0
   DeferredDespawnTick: 0
   Ownership: 1
@@ -133,6 +133,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::HealthPotion
   ShowTopMostFoldoutHeaderGroup: 1
   itemID: 0
+  lifetime: 10
+  autoDespawn: 1
   _itemIcon: {fileID: 7482667652216324306, guid: fa4519d153ad56c40af18e5c9521190f, type: 3}
   _itemColor: {r: 0.9607843, g: 0.36862746, b: 0.36862746, a: 1}
   _itemName: Health Potion I

@@ -1,5 +1,6 @@
-using UnityEngine;
+using TMPro;
 using Unity.Netcode;
+using UnityEngine;
 
 public abstract class PurchaseSystem : NetworkBehaviour
 {
@@ -14,6 +15,14 @@ public abstract class PurchaseSystem : NetworkBehaviour
         NetworkVariableWritePermission.Server
     );
 
+    protected TextMeshPro priceTxt;
+
+    private void Awake()
+    {
+        priceTxt = GetComponentInChildren<TextMeshPro>();
+        priceTxt.gameObject.SetActive(false);
+        UpdatePriceText();
+    }
 
     public virtual void AttemptPurchase(Entity buyer)
     {
@@ -44,6 +53,43 @@ public abstract class PurchaseSystem : NetworkBehaviour
     public void MakeFree()
     {
         price = 0;
+    }
+
+    protected void UpdatePriceText()
+    {
+        if (priceTxt == null)
+        {
+            Debug.LogError("Price Text component is not assigned!");
+        }
+        
+        if (spell == null)
+        {
+            // This is the mysterybox
+            priceTxt.text = "E to buy mystery box [Cost: " + price.ToString() + "]";
+        }
+        else
+        {
+            // This is a spell purchase
+            priceTxt.text = "E to buy " + spell.Name + " [Cost: " + price.ToString() + "]";
+        }
+            
+        
+    }
+
+    public void DisplayPrice()
+    {
+        if (priceTxt != null)
+        {
+            priceTxt.gameObject.SetActive(true);
+        }
+    }
+
+    public void HidePrice()
+    {
+        if (priceTxt != null)
+        {
+            priceTxt.gameObject.SetActive(false);
+        }
     }
 
     protected abstract void GrantPurchase(Entity buyer);

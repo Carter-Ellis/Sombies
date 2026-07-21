@@ -117,7 +117,7 @@ public class Player : NetworkBehaviour
         if (shop != null)
         {
             nearbyPurchaseSystem = shop;
-            Debug.Log("Press E to purchase!");
+            shop.DisplayPrice();
         }
 
         Player other = collision.GetComponent<Player>();
@@ -136,6 +136,7 @@ public class Player : NetworkBehaviour
         PurchaseSystem shop = collision.GetComponent<PurchaseSystem>();
         if (shop != null && shop == nearbyPurchaseSystem)
         {
+            shop.HidePrice();
             nearbyPurchaseSystem = null;
         }
 

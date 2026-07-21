@@ -8,6 +8,10 @@ public abstract class Item : NetworkBehaviour
     [Header("Network")]
     public int itemID;
 
+    [Header("Lifetime Settings")]
+    [SerializeField] private float lifetime = 10f; // How long before the item despawns
+    [SerializeField] private bool autoDespawn = true;
+
     [Header("UI Visuals")]
     [SerializeField] private Sprite _itemIcon;
     [SerializeField] private Color _itemColor = Color.white;
@@ -27,12 +31,34 @@ public abstract class Item : NetworkBehaviour
         protected set => _isUsed = value;
     }
 
+    public override void OnNetworkSpawn()
+    {
+        base.OnNetworkSpawn();
+
+        if (IsServer && autoDespawn)
+        {
+            StartCoroutine(DespawnTimerRoutine());
+        }
+    }
+
+    private IEnumerator DespawnTimerRoutine()
+    {
+        yield return new WaitForSeconds(lifetime);
+
+        // Verify the object is still spawned before despawning
+        if (NetworkObject != null && NetworkObject.IsSpawned)
+        {
+            NetworkObject.Despawn();
+        }
+    }
+
     public abstract void Use(Entity entity);
 
     protected void ApplyTimeEffect(Entity entity, Action startEffect, Action endEffect)
     {
         entity.StartCoroutine(EffectRoutine(startEffect, endEffect));
     }
+
     private IEnumerator EffectRoutine(Action start, Action end)
     {
         start?.Invoke();
