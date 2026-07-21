@@ -2,11 +2,17 @@ using System.Collections;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.UI;
 
 public class ReviveController : NetworkBehaviour
 {
     [Header("Network Variables")]
     public NetworkVariable<bool> IsDownedSync = new NetworkVariable<bool>(false, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+
+    [Header("Visual Customization")]
+    private SpriteRenderer playerSr;
+    [SerializeField] private Color downedColor = new Color(0.3f, 0.3f, 0.3f, 1f);
+    private Color originalColor = Color.white;
 
     [Header("Physics")]
     [SerializeField] private string defaultLayerName = "Player";
@@ -16,6 +22,9 @@ public class ReviveController : NetworkBehaviour
     [SerializeField] private int healthAfterRevive = 20;
     [SerializeField] private float crawlSpeed = 1.5f;
     [SerializeField] private float maxReviveDistance = 2.0f;
+
+    [Header("UI Visuals")]
+    [SerializeField] private Slider reviveProgressSlider;
 
     public bool IsDowned => IsDownedSync.Value;
     public float CrawlSpeed => crawlSpeed;
@@ -31,6 +40,39 @@ public class ReviveController : NetworkBehaviour
     {
         _playerStats = GetComponent<PlayerStats>();
         _rb = GetComponent<Rigidbody2D>();
+        playerSr = GetComponent<SpriteRenderer>();
+
+        // Hide the revive progress slider on awake
+        if (reviveProgressSlider != null)
+        {
+            reviveProgressSlider.gameObject.SetActive(false);
+        }
+
+    }
+
+    public override void OnNetworkSpawn()
+    {
+        IsDownedSync.OnValueChanged += OnDownedStateChanged;
+
+        UpdatePlayerColor(IsDownedSync.Value);
+    }
+
+    public override void OnNetworkDespawn()
+    {
+        IsDownedSync.OnValueChanged -= OnDownedStateChanged;
+    }
+
+    private void OnDownedStateChanged(bool previousValue, bool newValue)
+    {
+        UpdatePlayerColor(newValue);
+    }
+
+    private void UpdatePlayerColor(bool isDowned)
+    {
+        if (playerSr != null)
+        {
+            playerSr.color = isDowned ? downedColor : originalColor;
+        }
     }
 
     public void GoDown()
@@ -63,6 +105,9 @@ public class ReviveController : NetworkBehaviour
 
         currentReviver = reviver;
         reviveStartPosition = reviver.transform.position;
+
+        SetSliderStateClientRpc(true, 0f);
+
         reviveCoroutine = StartCoroutine(ReviveProcess());
     }
 
@@ -74,6 +119,9 @@ public class ReviveController : NetworkBehaviour
             StopCoroutine(reviveCoroutine);
             reviveCoroutine = null;
             currentReviver = null;
+
+            SetSliderStateClientRpc(false, 0f);
+
         }
     }
 
@@ -93,16 +141,25 @@ public class ReviveController : NetworkBehaviour
                 if (sqrDistance > (maxReviveDistance * maxReviveDistance))
                 {
                     Debug.Log("Reviver moved too far! Revive canceled.");
+
+                    SetSliderStateClientRpc(false, 0f);
+
                     currentReviver.CancelMyReviveAction(); // Tell the reviver to cancel
                     yield break; // Exit the coroutine immediately
                 }
             }
             else
             {
+                SetSliderStateClientRpc(false, 0f);
+
                 yield break; // Failsafe in case the reviver is destroyed/null
             }
 
             timer += Time.deltaTime; // Advance the timer
+
+            float progress = Mathf.Clamp01(timer / reviveDuration);
+            UpdateSliderProgressClientRpc(progress);
+
             yield return null; // Wait for the next frame
         }
 
@@ -113,9 +170,31 @@ public class ReviveController : NetworkBehaviour
 
         gameObject.layer = LayerMask.NameToLayer(defaultLayerName);
 
+        SetSliderStateClientRpc(false, 0f);
+
         // Clean up
         currentReviver.CancelMyReviveAction(); // Resets the reviver's target
         currentReviver = null;
         reviveCoroutine = null;
     }
+
+    [Rpc(SendTo.Everyone)]
+    private void SetSliderStateClientRpc(bool isActive, float initialProgress)
+    {
+        if (reviveProgressSlider != null)
+        {
+            reviveProgressSlider.value = initialProgress;
+            reviveProgressSlider.gameObject.SetActive(isActive);
+        }
+    }
+
+    [Rpc(SendTo.Everyone)]
+    private void UpdateSliderProgressClientRpc(float progress)
+    {
+        if (reviveProgressSlider != null)
+        {
+            reviveProgressSlider.value = progress;
+        }
+    }
+
 }

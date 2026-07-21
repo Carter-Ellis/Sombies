@@ -37,6 +37,9 @@ public class Player : NetworkBehaviour
     [Header("Interaction")]
     private PurchaseSystem nearbyPurchaseSystem = null;
 
+    [Header("Revive")]
+    [SerializeField] private TextMeshPro reviveTxt;
+
     [Header("Melee Attack (Knife)")]
     [SerializeField] private int meleeDamage = 150;
     [SerializeField] private float meleeRange = 1.5f;
@@ -57,6 +60,10 @@ public class Player : NetworkBehaviour
         _revive = GetComponent<ReviveController>();
         _playerStats = GetComponent<PlayerStats>();
         _netInventory = new NetworkList<int>();
+
+        reviveTxt = GetComponentInChildren<TextMeshPro>();
+
+        HideReviveText();
 
         for (int i = 0; i < maxInventorySlots; i++)
         {
@@ -127,6 +134,7 @@ public class Player : NetworkBehaviour
             if (otherRevive != null && otherRevive.IsDownedSync.Value)
             {
                 nearbyDownedPlayer = other;
+                nearbyDownedPlayer.DisplayReviveText();
             }
         }
     }
@@ -144,6 +152,7 @@ public class Player : NetworkBehaviour
         if (other != null && other == nearbyDownedPlayer)
         {
             CancelMyReviveAction();
+            nearbyDownedPlayer.HideReviveText();
             nearbyDownedPlayer = null;
         }
     }
@@ -315,6 +324,7 @@ public class Player : NetworkBehaviour
             if (nearbyDownedPlayer != null)
             {
                 revivingTarget = nearbyDownedPlayer;
+                revivingTarget.HideReviveText();
                 nearbyDownedPlayer.GetComponent<ReviveController>().StartBeingRevivedServerRpc(NetworkObjectId);
             }
             else if (nearbyPurchaseSystem != null)
@@ -348,6 +358,7 @@ public class Player : NetworkBehaviour
     {
         if (revivingTarget != null)
         {
+
             revivingTarget.GetComponent<ReviveController>().StopBeingRevivedServerRpc();
             revivingTarget = null;
         }
@@ -480,4 +491,21 @@ public class Player : NetworkBehaviour
             UIManager.Instance.RefreshInventory(inventory, selectedItemIndex);
         }
     }
+
+    public void DisplayReviveText()
+    {
+        if (reviveTxt != null)
+        {
+            reviveTxt.gameObject.SetActive(true);
+        }
+    }
+
+    public void HideReviveText()
+    {
+        if (reviveTxt != null)
+        {
+            reviveTxt.gameObject.SetActive(false);
+        }
+    }
+
 }
