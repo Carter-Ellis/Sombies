@@ -7,7 +7,7 @@ public class InventorySlot : MonoBehaviour
     [Header("UI Elements")]
     [SerializeField] private Image iconImage;
     [SerializeField] private Image frameImage;
-    [SerializeField] private TextMeshProUGUI keyLabelText; // Drag your Z/X/C text here
+    [SerializeField] private TextMeshProUGUI keyLabelText;
 
     public void UpdateSlot(Item item, bool isSelected, string keyLabel)
     {
@@ -27,6 +27,6 @@ public class InventorySlot : MonoBehaviour
         }
 
         if (frameImage != null)
-            frameImage.color = isSelected ? Color.yellow : Color.white;
+            frameImage.color = isSelected ? Color.gray4 : Color.white;
     }
 }

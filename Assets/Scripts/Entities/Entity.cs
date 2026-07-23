@@ -6,8 +6,8 @@ using UnityEngine.SceneManagement;
 public abstract class Entity : NetworkBehaviour
 {
     [Header("Network Sync")]
-    // This variable handles the heavy lifting of syncing across the network.
-    [SerializeField] protected NetworkVariable<int> _netHealth = new NetworkVariable<int>(100,
+    [SerializeField]
+    protected NetworkVariable<int> _netHealth = new NetworkVariable<int>(100,
         NetworkVariableReadPermission.Everyone,
         NetworkVariableWritePermission.Server);
 
@@ -36,19 +36,22 @@ public abstract class Entity : NetworkBehaviour
             if (!IsServer) return;
 
             _netHealth.Value = Mathf.Clamp(value, 0, MaxHealth);
-                
+
 
             if (_netHealth.Value <= 0)
             {
                 Die();
             }
-            
+
         }
     }
 
     [Header("Movement")]
-    public virtual float BaseWalkSpeed { get; }
-    public virtual float BaseSprintSpeed { get; }
+    [SerializeField] protected float _baseWalkSpeed = 5f;
+    [SerializeField] protected float _baseSprintSpeed = 7f;
+
+    public virtual float BaseWalkSpeed => _baseWalkSpeed;
+    public virtual float BaseSprintSpeed => _baseSprintSpeed;
     public virtual float WalkSpeed { get; set; }
     public virtual float SprintSpeed { get; set; }
 
@@ -57,7 +60,8 @@ public abstract class Entity : NetworkBehaviour
     protected virtual void Awake()
     {
         Buffs = GetComponent<BuffManager>();
-
+        WalkSpeed = BaseWalkSpeed;
+        SprintSpeed = BaseSprintSpeed;
     }
 
     public override void OnNetworkSpawn()
@@ -70,16 +74,14 @@ public abstract class Entity : NetworkBehaviour
         }
 
         OnHealthChanged(_netHealth.Value, _netHealth.Value);
-        
+
     }
 
     public override void OnNetworkDespawn()
     {
-        // Cleanup to prevent memory leaks
         _netHealth.OnValueChanged -= OnHealthChanged;
     }
 
-    // This method fires on EVERY client whenever the server changes the health
     protected virtual void OnHealthChanged(int previousValue, int newValue)
     {
 
@@ -87,6 +89,7 @@ public abstract class Entity : NetworkBehaviour
 
     public virtual void TakeDamage(int amount)
     {
+        Audio.playSFX(FMODEvents.instance.playerHurt, transform.position);
         Health -= amount;
     }
 
@@ -103,8 +106,8 @@ public abstract class Entity : NetworkBehaviour
     public virtual void Die()
     {
         if (!IsServer) return;
-            
+
         GetComponent<NetworkObject>().Despawn();
-        
+
     }
 }

@@ -5,19 +5,12 @@ using UnityEngine.InputSystem;
 
 public class PlayerMovement : NetworkBehaviour
 {
-    [Header("Base Settings")]
-    public float baseWalkSpeed = 5f;
-    public float baseSprintSpeed = 7f;
-
-    public float walkSpeed;
-    public float sprintSpeed;
-
-    Rigidbody2D rb;
+    private Entity _entity;
+    private Rigidbody2D rb;
     private Vector2 moveInput;
     private bool isKnockedBack;
     private bool _isSprinting;
     private ReviveController _revive;
-
 
     public float CurrentSpeed
     {
@@ -27,26 +20,22 @@ public class PlayerMovement : NetworkBehaviour
             {
                 return _revive.CrawlSpeed;
             }
-            return _isSprinting ? sprintSpeed : walkSpeed;
+            return _isSprinting ? _entity.SprintSpeed : _entity.WalkSpeed;
         }
     }
 
     private void Awake()
     {
+        _entity = GetComponent<Entity>();
         _revive = GetComponent<ReviveController>();
         rb = GetComponent<Rigidbody2D>();
-
-        walkSpeed = baseWalkSpeed;
-        sprintSpeed = baseSprintSpeed;
     }
-
 
     void FixedUpdate()
     {
         if (!IsOwner) return;
         if (isKnockedBack) return;
         rb.linearVelocity = moveInput * CurrentSpeed;
-
     }
 
     public void OnMove(InputAction.CallbackContext context)
@@ -94,8 +83,8 @@ public class PlayerMovement : NetworkBehaviour
 
     public void SetSpeedToDefault()
     {
-        walkSpeed = baseWalkSpeed;
-        sprintSpeed = baseSprintSpeed;
+        _entity.WalkSpeed = _entity.BaseWalkSpeed;
+        _entity.SprintSpeed = _entity.BaseSprintSpeed;
     }
 
     [Rpc(SendTo.Owner)]
@@ -103,5 +92,4 @@ public class PlayerMovement : NetworkBehaviour
     {
         ApplyKnockback(force, duration);
     }
-
 }

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<objects serializationModel="Studio.02.03.00">
+	<object class="AudioFile" id="{dd60fa62-3dc2-4759-bf84-bee00f1e78a1}">
+		<property name="assetPath">
+			<value>Melee/knife 2.wav</value>
+		</property>
+		<property name="frequencyInKHz">
+			<value>48</value>
+		</property>
+		<property name="channelCount">
+			<value>2</value>
+		</property>
+		<property name="length">
+			<value>0.90000000000000002</value>
+		</property>
+		<relationship name="masterAssetFolder">
+			<destination>{b248d80b-4b0c-4635-9b81-ed9db0ddc28b}</destination>
+		</relationship>
+	</object>
+</objects>

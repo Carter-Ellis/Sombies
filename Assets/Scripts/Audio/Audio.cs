@@ -1,7 +1,6 @@
 using UnityEngine;
 using FMODUnity;
 using FMOD.Studio;
-using UnityEngine.SceneManagement;
 
 public class Audio : MonoBehaviour
 {
@@ -145,6 +144,14 @@ public class Audio : MonoBehaviour
     public static void playSFX(EventReference eventRef, Vector3 pos = default)
     {
         play(TYPE.SFX, eventRef, pos);
+    }
+
+    public static EventInstance playSFXInstance(EventReference eventRef, Vector3 pos = default)
+    {
+        EventInstance eventInst = RuntimeManager.CreateInstance(eventRef);
+        eventInst.set3DAttributes(RuntimeUtils.To3DAttributes(pos));
+        eventInst.start();
+        return eventInst;
     }
 
     private static void stop(TYPE type)

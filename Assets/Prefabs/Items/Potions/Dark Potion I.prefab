@@ -182,7 +182,7 @@ MonoBehaviour:
   lifetime: 10
   autoDespawn: 1
   _itemIcon: {fileID: 7482667652216324306, guid: fa4519d153ad56c40af18e5c9521190f, type: 3}
-  _itemColor: {r: 0.039215688, g: 0.3137255, b: 0.5647059, a: 1}
+  _itemColor: {r: 0.21176471, g: 0.12156863, b: 0.25490198, a: 1}
   _itemName: Dark Potion I
   _itemDescription: Depletes 25 Mana
   duration: 0

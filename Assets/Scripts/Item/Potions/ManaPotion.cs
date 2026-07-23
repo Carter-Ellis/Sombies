@@ -4,7 +4,7 @@ public class ManaPotion : Item
 {
     [SerializeField] private int manaRestoreAmount = 25;
 
-    public override void Use(Entity entity)
+    protected override void OnUse(Entity entity)
     {
         if (entity is PlayerStats stats)
         {

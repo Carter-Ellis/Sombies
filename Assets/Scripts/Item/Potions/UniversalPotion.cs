@@ -6,7 +6,7 @@ public class UniversalPotion : Item
     [SerializeField] private BUFFTYPE buffToApply;
     [SerializeField] private float buffAmount = 5f;
 
-    public override void Use(Entity entity)
+    protected override void OnUse(Entity entity)
     {
         BuffManager buffs = entity.GetComponent<BuffManager>();
 

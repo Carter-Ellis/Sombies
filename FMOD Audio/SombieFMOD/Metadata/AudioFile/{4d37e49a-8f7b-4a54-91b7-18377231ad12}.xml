@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<objects serializationModel="Studio.02.03.00">
+	<object class="AudioFile" id="{4d37e49a-8f7b-4a54-91b7-18377231ad12}">
+		<property name="assetPath">
+			<value>Player/ouchy.wav</value>
+		</property>
+		<property name="frequencyInKHz">
+			<value>48</value>
+		</property>
+		<property name="channelCount">
+			<value>2</value>
+		</property>
+		<property name="length">
+			<value>1.2</value>
+		</property>
+		<relationship name="masterAssetFolder">
+			<destination>{b248d80b-4b0c-4635-9b81-ed9db0ddc28b}</destination>
+		</relationship>
+	</object>
+</objects>

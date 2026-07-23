@@ -5,6 +5,10 @@ using UnityEngine.UIElements;
 
 public class PlayerStats : Entity
 {
+    [Header("Testing / Initial Settings")]
+    [SerializeField] private int initialMana = 100;
+    [SerializeField] private int initialHealth = 100;
+
     [Header("Network Stats")]
     public NetworkVariable<int> _netCoins = new NetworkVariable<int>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
     public NetworkVariable<int> _netMana = new NetworkVariable<int>(100, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
@@ -46,6 +50,12 @@ public class PlayerStats : Entity
     public override void OnNetworkSpawn()
     {
         base.OnNetworkSpawn();
+
+        if (IsServer)
+        {
+            _netHealth.Value = initialHealth;
+            _netMana.Value = initialMana;
+        }
 
         if (IsOwner)
         {

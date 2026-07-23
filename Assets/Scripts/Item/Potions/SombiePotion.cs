@@ -3,9 +3,10 @@ using UnityEngine;
 
 public class SombiePotion : Item
 {
-    public override void Use(Entity entity)
+    protected override void OnUse(Entity entity)
     {
         Debug.Log("Player used Sombie Potion.");
+
         if (entity.Buffs != null)
         {
             StealthBuff hideBuff = new StealthBuff(entity);

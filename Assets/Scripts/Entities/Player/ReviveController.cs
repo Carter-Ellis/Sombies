@@ -1,7 +1,6 @@
 using System.Collections;
 using Unity.Netcode;
 using UnityEngine;
-using UnityEngine.AI;
 using UnityEngine.UI;
 
 public class ReviveController : NetworkBehaviour
@@ -81,6 +80,8 @@ public class ReviveController : NetworkBehaviour
 
         if (IsDownedSync.Value) return;
 
+        Audio.playSFX(FMODEvents.instance.downed, transform.position);
+
         IsDownedSync.Value = true;
         _playerStats.isHidden.Value = true;
 
@@ -105,6 +106,10 @@ public class ReviveController : NetworkBehaviour
 
         currentReviver = reviver;
         reviveStartPosition = reviver.transform.position;
+
+
+        Audio.playSFX(FMODEvents.instance.reviveSequence, transform.position);
+
 
         SetSliderStateClientRpc(true, 0f);
 

@@ -79,8 +79,10 @@ public class BuffManager : MonoBehaviour
                 }
                 else
                 {
+
                     float newWalk = _entity.BaseWalkSpeed + totalBoost;
                     float newSprint = _entity.BaseSprintSpeed + totalBoost;
+
 
                     _entity.WalkSpeed = Mathf.Max(0.1f, newWalk);
 

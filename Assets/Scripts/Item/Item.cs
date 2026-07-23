@@ -53,7 +53,12 @@ public abstract class Item : NetworkBehaviour
         
     }
 
-    public abstract void Use(Entity entity);
+    public void Use(Entity entity)
+    {
+        OnUse(entity);
+    }
+
+    protected abstract void OnUse(Entity entity);
 
     protected void ApplyTimeEffect(Entity entity, Action startEffect, Action endEffect)
     {
