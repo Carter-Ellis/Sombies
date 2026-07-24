@@ -30,7 +30,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 2.7993, y: 0.34, z: 0}
-  m_LocalScale: {x: 0.4185223, y: 0.8578377, z: 0.7028}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -84,8 +84,8 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_MaskInteraction: 0
-  m_Sprite: {fileID: 7482667652216324306, guid: 311925a002f4447b3a28927169b83ea6, type: 3}
-  m_Color: {r: 0.49361062, g: 0.46337664, b: 0.8396226, a: 1}
+  m_Sprite: {fileID: 8667365659305455228, guid: 02944a025176d6a4aa291d6b59581a4e, type: 3}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -136,8 +136,8 @@ MonoBehaviour:
   lifetime: 10
   autoDespawn: 1
   _dropWeight: 30
-  _itemIcon: {fileID: 0}
-  _itemColor: {r: 0.49411765, g: 0.4627451, b: 0.8392157, a: 1}
+  _itemIcon: {fileID: 8667365659305455228, guid: 02944a025176d6a4aa291d6b59581a4e, type: 3}
+  _itemColor: {r: 1, g: 1, b: 1, a: 1}
   _itemName: 
   _itemDescription: Health +20 Mana +25
   duration: 0
@@ -181,7 +181,7 @@ BoxCollider2D:
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 1, y: 1}
+    oldSize: {x: 1, y: 1.125}
     newSize: {x: 1, y: 1}
     adaptiveTilingThreshold: 0.5
     drawMode: 0

@@ -13,17 +13,27 @@ public abstract class Enemy : Entity
 
     [Header("Attack")]
     [SerializeField] private int _damageAmount = 10;
+
+    [SerializeField] protected int damageIncreasePerRound = 2;
+    [SerializeField] protected int maxDamage = 40;
+
+    protected int currentDamage;
+
     [SerializeField] private int _knockbackForce = 5;
     [SerializeField] private float _knockbackDuration = .2f;
     [SerializeField] private int manaReward = 20;
     [SerializeField] protected float attackCooldown = 1f;
     protected float lastAttackTime;
-    public int DamageAmount => _damageAmount;
+    public int DamageAmount => currentDamage;
     public int KnockbackForce => _knockbackForce;
     public float KnockbackDuration => _knockbackDuration;
 
     [Header("Movement")]
     [SerializeField] protected float speed = 2f;
+
+    [SerializeField] protected float speedIncreasePerRound = 0.25f;
+    [SerializeField] protected float maxSpeed = 7f;
+
     protected float currentSpeed = 2f;
 
     public override float BaseWalkSpeed => speed;
@@ -77,10 +87,19 @@ public abstract class Enemy : Entity
         agent.updateUpAxis = false;
         agent.updatePosition = false;
 
-        agent.speed = speed;
+        //Speed Scaling
+        int currentRound = roundManager != null ? roundManager._netRound.Value : 1;
+        float scaledSpeed = speed + (speedIncreasePerRound * (currentRound - 1));
+        currentSpeed = Mathf.Min(scaledSpeed, maxSpeed);
+
+
+        agent.speed = currentSpeed;
         agent.stoppingDistance = stoppingDistance;
 
-        currentSpeed = speed;
+        // Damage Scaling
+        int scaledDamage = _damageAmount + (damageIncreasePerRound * (currentRound - 1));
+        currentDamage = Mathf.Min(scaledDamage, maxDamage);
+
 
         NavMeshHit hit;
         if (NavMesh.SamplePosition(transform.position, out hit, 2f, NavMesh.AllAreas))

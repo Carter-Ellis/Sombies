@@ -8,6 +8,7 @@ public class InventorySlot : MonoBehaviour
     [SerializeField] private Image iconImage;
     [SerializeField] private Image frameImage;
     [SerializeField] private TextMeshProUGUI keyLabelText;
+    [SerializeField] private Color slotColor;
 
     public void UpdateSlot(Item item, bool isSelected, string keyLabel)
     {
@@ -27,6 +28,6 @@ public class InventorySlot : MonoBehaviour
         }
 
         if (frameImage != null)
-            frameImage.color = isSelected ? Color.gray4 : Color.white;
+            frameImage.color = isSelected ? Color.gray4 : slotColor;
     }
 }
