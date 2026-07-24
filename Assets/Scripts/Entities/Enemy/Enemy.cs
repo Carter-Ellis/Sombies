@@ -218,12 +218,34 @@ public abstract class Enemy : Entity
         {
             if (_possibleDrops != null && _possibleDrops.Length > 0)
             {
-                int randomIndex = Random.Range(0, _possibleDrops.Length);
-                Item itemPrefab = _possibleDrops[randomIndex];
-
-                if (itemPrefab != null)
+                float totalWeight = 0f;
+                foreach (Item itemPrefab in _possibleDrops)
                 {
-                    Item spawnedItem = Instantiate(itemPrefab, transform.position, Quaternion.identity);
+                    if (itemPrefab != null)
+                    {
+                        totalWeight += itemPrefab.DropWeight;
+                    }
+                }
+
+                float randomValue = Random.Range(0f, totalWeight);
+                float cumulativeWeight = 0f;
+                Item selectedItemPrefab = null;
+
+                foreach (Item itemPrefab in _possibleDrops)
+                {
+                    if (itemPrefab == null) continue;
+
+                    cumulativeWeight += itemPrefab.DropWeight;
+                    if (randomValue <= cumulativeWeight)
+                    {
+                        selectedItemPrefab = itemPrefab;
+                        break;
+                    }
+                }
+
+                if (selectedItemPrefab != null)
+                {
+                    Item spawnedItem = Instantiate(selectedItemPrefab, transform.position, Quaternion.identity);
 
                     NetworkObject netObj = spawnedItem.GetComponent<NetworkObject>();
                     if (netObj != null)
@@ -232,7 +254,7 @@ public abstract class Enemy : Entity
                     }
                     else
                     {
-                        Debug.LogError($"Item {itemPrefab.name} is missing a NetworkObject component!");
+                        Debug.LogError($"Item {selectedItemPrefab.name} is missing a NetworkObject component!");
                     }
                 }
             }

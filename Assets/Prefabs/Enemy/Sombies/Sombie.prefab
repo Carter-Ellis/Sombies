@@ -147,6 +147,18 @@ MonoBehaviour:
       MinSecondsBetweenUpdates: 0
       MaxSecondsBetweenUpdates: 0
     m_InternalValue: 100
+  _netWalkSpeed:
+    UpdateTraits:
+      MinSecondsBetweenUpdates: 0
+      MaxSecondsBetweenUpdates: 0
+    m_InternalValue: 5
+  _netSprintSpeed:
+    UpdateTraits:
+      MinSecondsBetweenUpdates: 0
+      MaxSecondsBetweenUpdates: 0
+    m_InternalValue: 7
+  _baseWalkSpeed: 5
+  _baseSprintSpeed: 7
   _damageAmount: 10
   _knockbackForce: 8
   _knockbackDuration: 0.08
@@ -168,6 +180,7 @@ MonoBehaviour:
   - {fileID: 7403620136370341819, guid: 1abc4be293fb9ed4aa05bcb3e6a6b7f9, type: 3}
   - {fileID: 7403620136370341819, guid: 619a5c7b6e2905a4e93b5acbd6086335, type: 3}
   - {fileID: 7403620136370341819, guid: a50943c6de019304da28e91e4b5d91a3, type: 3}
+  - {fileID: -2331858836548812082, guid: 5e9304969de382c47991331466631019, type: 3}
 --- !u!114 &7268400246437503077
 MonoBehaviour:
   m_ObjectHideFlags: 0

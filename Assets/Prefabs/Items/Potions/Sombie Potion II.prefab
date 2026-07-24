@@ -179,6 +179,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SombiePotion
   ShowTopMostFoldoutHeaderGroup: 1
   itemID: 7
+  lifetime: 10
+  autoDespawn: 1
+  _dropWeight: 50
   _itemIcon: {fileID: 7482667652216324306, guid: fa4519d153ad56c40af18e5c9521190f, type: 3}
   _itemColor: {r: 0.15294118, g: 0.3882353, b: 0.14509805, a: 1}
   _itemName: Sombie Potion II

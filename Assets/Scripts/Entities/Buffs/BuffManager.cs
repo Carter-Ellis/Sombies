@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public enum BUFFTYPE { Speed, Strength, Defense, Stealth, Stun }
+public enum BUFFTYPE { Speed, Strength, Defense, Stealth, Stun, Revive }
 
 public abstract class Buff
 {
@@ -102,7 +102,17 @@ public class BuffManager : MonoBehaviour
                     playerStats.isHidden.Value = _activeBuffs[type].Count > 0;
                 }
                 break;
-            
+            case BUFFTYPE.Revive:
+                if (_entity is PlayerStats playerStatsRevive)
+                {
+                    print("BUFF Revive applied");
+                    ReviveController reviveController = _entity.GetComponent<ReviveController>();
+                    float newDuration = reviveController.BaseReviveDuration - totalBoost;
+                    print("newDuration: " + newDuration);
+                    reviveController.ReviveDuration = newDuration; 
+                }
+                break;
+
         }
     }
 
@@ -114,6 +124,7 @@ public class BuffManager : MonoBehaviour
     private IEnumerator TemporaryBuffRoutine(Buff buff, float duration)
     {
         AddBuff(buff);
+        print("duration: " + duration);
         yield return new WaitForSeconds(duration);
         RemoveBuff(buff);
     }

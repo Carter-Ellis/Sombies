@@ -17,7 +17,25 @@ public class ReviveController : NetworkBehaviour
     [SerializeField] private string defaultLayerName = "Player";
     [SerializeField] private string downedLayerName = "DownedPlayer";
 
-    [SerializeField] private float reviveDuration = 4f;
+    [SerializeField]
+    protected NetworkVariable<float> _netReviveDuration = new NetworkVariable<float>(4f,
+        NetworkVariableReadPermission.Everyone,
+        NetworkVariableWritePermission.Server);
+
+    [SerializeField] protected float _baseReviveDuration = 4f;
+
+    public virtual float BaseReviveDuration => _baseReviveDuration;
+
+    public virtual float ReviveDuration
+    {
+        get => _netReviveDuration.Value;
+        set
+        {
+            if (!IsServer) return;
+            _netReviveDuration.Value = value;
+        }
+    }
+
     [SerializeField] private int healthAfterRevive = 20;
     [SerializeField] private float crawlSpeed = 1.5f;
     [SerializeField] private float maxReviveDistance = 2.0f;
@@ -52,6 +70,11 @@ public class ReviveController : NetworkBehaviour
     public override void OnNetworkSpawn()
     {
         IsDownedSync.OnValueChanged += OnDownedStateChanged;
+
+        if (IsServer)
+        {
+            _netReviveDuration.Value = _baseReviveDuration;
+        }
 
         UpdatePlayerColor(IsDownedSync.Value);
     }
@@ -134,9 +157,13 @@ public class ReviveController : NetworkBehaviour
     {
 
         float timer = 0f;
+        float targetDuration = ReviveDuration;
+        if (currentReviver != null && currentReviver.TryGetComponent<ReviveController>(out var reviverRc))
+        {
+            targetDuration = reviverRc.ReviveDuration;
+        }
 
-        // Loop until the duration is met
-        while (timer < reviveDuration)
+        while (timer < targetDuration)
         {
             if (currentReviver != null)
             {
@@ -162,7 +189,7 @@ public class ReviveController : NetworkBehaviour
 
             timer += Time.deltaTime; // Advance the timer
 
-            float progress = Mathf.Clamp01(timer / reviveDuration);
+            float progress = Mathf.Clamp01(timer / targetDuration);
             UpdateSliderProgressClientRpc(progress);
 
             yield return null; // Wait for the next frame

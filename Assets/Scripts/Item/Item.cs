@@ -9,8 +9,12 @@ public abstract class Item : NetworkBehaviour
     public int itemID;
 
     [Header("Lifetime Settings")]
-    [SerializeField] private float lifetime = 10f; // How long before the item despawns
+    [SerializeField] private float lifetime = 10f;
     [SerializeField] private bool autoDespawn = true;
+
+    [Header("Loot Drops")]
+    [SerializeField] private float _dropWeight = 1f;
+    public float DropWeight => _dropWeight;
 
     [Header("UI Visuals")]
     [SerializeField] private Sprite _itemIcon;

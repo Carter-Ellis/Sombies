@@ -147,6 +147,18 @@ MonoBehaviour:
       MinSecondsBetweenUpdates: 0
       MaxSecondsBetweenUpdates: 0
     m_InternalValue: 100
+  _netWalkSpeed:
+    UpdateTraits:
+      MinSecondsBetweenUpdates: 0
+      MaxSecondsBetweenUpdates: 0
+    m_InternalValue: 5
+  _netSprintSpeed:
+    UpdateTraits:
+      MinSecondsBetweenUpdates: 0
+      MaxSecondsBetweenUpdates: 0
+    m_InternalValue: 7
+  _baseWalkSpeed: 5
+  _baseSprintSpeed: 7
   _damageAmount: 5
   _knockbackForce: 8
   _knockbackDuration: 0.08
@@ -157,7 +169,7 @@ MonoBehaviour:
   targetUpdateInterval: 0.2
   hitPrice: 0
   killPrice: 15
-  _dropChance: 0.3
+  _dropChance: 0.2
   _possibleDrops:
   - {fileID: 25931170526279509, guid: 9963e242cb6890749abb4587465306fd, type: 3}
   - {fileID: 25931170526279509, guid: b19f9f64e2c219a42b73845224989ec9, type: 3}
@@ -165,6 +177,10 @@ MonoBehaviour:
   - {fileID: 6866149092854546728, guid: f4bf23d1f1ae02a43bcfd94e32601c50, type: 3}
   - {fileID: 6866149092854546728, guid: 559a91a2f6e4eb045859dae15501ae0b, type: 3}
   - {fileID: 6866149092854546728, guid: 1e9f207327e1f7a48a4cc7e407a54a69, type: 3}
+  - {fileID: 2238357194454848698, guid: eafdb9c31bcf3e04ba24b4db4c32e88c, type: 3}
+  - {fileID: 2238357194454848698, guid: a5f068e2fed7e534a919741f70ccd55c, type: 3}
+  - {fileID: 2238357194454848698, guid: 5789ab103d450ef4f85bb55ac13efe4a, type: 3}
+  - {fileID: -2331858836548812082, guid: 5e9304969de382c47991331466631019, type: 3}
 --- !u!114 &7590307235161388329
 MonoBehaviour:
   m_ObjectHideFlags: 0

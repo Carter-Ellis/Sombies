@@ -588,8 +588,20 @@ MonoBehaviour:
       MinSecondsBetweenUpdates: 0
       MaxSecondsBetweenUpdates: 0
     m_InternalValue: 100
-  initialMana: 100
-  initialHealth: 100
+  _netWalkSpeed:
+    UpdateTraits:
+      MinSecondsBetweenUpdates: 0
+      MaxSecondsBetweenUpdates: 0
+    m_InternalValue: 5
+  _netSprintSpeed:
+    UpdateTraits:
+      MinSecondsBetweenUpdates: 0
+      MaxSecondsBetweenUpdates: 0
+    m_InternalValue: 7
+  _baseWalkSpeed: 5
+  _baseSprintSpeed: 7
+  initialMana: 20
+  initialHealth: 20
   _netCoins:
     UpdateTraits:
       MinSecondsBetweenUpdates: 0
@@ -700,10 +712,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerMovement
   ShowTopMostFoldoutHeaderGroup: 1
-  baseWalkSpeed: 5
-  baseSprintSpeed: 7
-  walkSpeed: 5
-  sprintSpeed: 8
 --- !u!114 &2956555394039448100
 MonoBehaviour:
   m_ObjectHideFlags: 0

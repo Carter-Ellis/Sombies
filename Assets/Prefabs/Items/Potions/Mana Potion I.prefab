@@ -179,6 +179,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ManaPotion
   ShowTopMostFoldoutHeaderGroup: 1
   itemID: 3
+  lifetime: 10
+  autoDespawn: 1
+  _dropWeight: 100
   _itemIcon: {fileID: 7482667652216324306, guid: fa4519d153ad56c40af18e5c9521190f, type: 3}
   _itemColor: {r: 0.5137255, g: 0.76862746, b: 1, a: 1}
   _itemName: Mana Potion I

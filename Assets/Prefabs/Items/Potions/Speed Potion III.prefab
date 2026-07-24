@@ -152,7 +152,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
-  GlobalObjectIdHash: 96515052
+  GlobalObjectIdHash: 2388478785
   InScenePlacedSourceGlobalObjectIdHash: 2388478785
   DeferredDespawnTick: 0
   Ownership: 1
@@ -181,6 +181,7 @@ MonoBehaviour:
   itemID: 11
   lifetime: 10
   autoDespawn: 1
+  _dropWeight: 25
   _itemIcon: {fileID: 7482667652216324306, guid: fa4519d153ad56c40af18e5c9521190f, type: 3}
   _itemColor: {r: 1, g: 0.9647059, b: 0.078431375, a: 1}
   _itemName: Speed Potion III

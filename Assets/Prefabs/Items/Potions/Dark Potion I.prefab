@@ -178,9 +178,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ManaPotion
   ShowTopMostFoldoutHeaderGroup: 1
-  itemID: 12
+  itemID: 16
   lifetime: 10
   autoDespawn: 1
+  _dropWeight: 1
   _itemIcon: {fileID: 7482667652216324306, guid: fa4519d153ad56c40af18e5c9521190f, type: 3}
   _itemColor: {r: 0.21176471, g: 0.12156863, b: 0.25490198, a: 1}
   _itemName: Dark Potion I

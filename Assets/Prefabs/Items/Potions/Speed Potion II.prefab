@@ -179,6 +179,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::UniversalPotion
   ShowTopMostFoldoutHeaderGroup: 1
   itemID: 10
+  lifetime: 10
+  autoDespawn: 1
+  _dropWeight: 50
   _itemIcon: {fileID: 7482667652216324306, guid: fa4519d153ad56c40af18e5c9521190f, type: 3}
   _itemColor: {r: 1, g: 0.9764706, b: 0.39215687, a: 1}
   _itemName: Speed Potion II

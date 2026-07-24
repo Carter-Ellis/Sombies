@@ -16,6 +16,16 @@ public abstract class Entity : NetworkBehaviour
         NetworkVariableReadPermission.Everyone,
         NetworkVariableWritePermission.Server);
 
+    [SerializeField]
+    protected NetworkVariable<float> _netWalkSpeed = new NetworkVariable<float>(5f,
+        NetworkVariableReadPermission.Everyone,
+        NetworkVariableWritePermission.Server);
+
+    [SerializeField]
+    protected NetworkVariable<float> _netSprintSpeed = new NetworkVariable<float>(7f,
+        NetworkVariableReadPermission.Everyone,
+        NetworkVariableWritePermission.Server);
+
     public virtual int MaxHealth
     {
         get => _netMaxHealth.Value;
@@ -23,7 +33,6 @@ public abstract class Entity : NetworkBehaviour
         {
             if (!IsServer) return;
             _netMaxHealth.Value = value;
-
             Health = value;
         }
     }
@@ -37,12 +46,10 @@ public abstract class Entity : NetworkBehaviour
 
             _netHealth.Value = Mathf.Clamp(value, 0, MaxHealth);
 
-
             if (_netHealth.Value <= 0)
             {
                 Die();
             }
-
         }
     }
 
@@ -52,16 +59,32 @@ public abstract class Entity : NetworkBehaviour
 
     public virtual float BaseWalkSpeed => _baseWalkSpeed;
     public virtual float BaseSprintSpeed => _baseSprintSpeed;
-    public virtual float WalkSpeed { get; set; }
-    public virtual float SprintSpeed { get; set; }
+
+    public virtual float WalkSpeed
+    {
+        get => _netWalkSpeed.Value;
+        set
+        {
+            if (!IsServer) return;
+            _netWalkSpeed.Value = value;
+        }
+    }
+
+    public virtual float SprintSpeed
+    {
+        get => _netSprintSpeed.Value;
+        set
+        {
+            if (!IsServer) return;
+            _netSprintSpeed.Value = value;
+        }
+    }
 
     public BuffManager Buffs { get; private set; }
 
     protected virtual void Awake()
     {
         Buffs = GetComponent<BuffManager>();
-        WalkSpeed = BaseWalkSpeed;
-        SprintSpeed = BaseSprintSpeed;
     }
 
     public override void OnNetworkSpawn()
@@ -71,10 +94,11 @@ public abstract class Entity : NetworkBehaviour
         if (IsServer)
         {
             _netHealth.Value = MaxHealth;
+            _netWalkSpeed.Value = BaseWalkSpeed;
+            _netSprintSpeed.Value = BaseSprintSpeed;
         }
 
         OnHealthChanged(_netHealth.Value, _netHealth.Value);
-
     }
 
     public override void OnNetworkDespawn()
@@ -108,6 +132,5 @@ public abstract class Entity : NetworkBehaviour
         if (!IsServer) return;
 
         GetComponent<NetworkObject>().Despawn();
-
     }
 }
