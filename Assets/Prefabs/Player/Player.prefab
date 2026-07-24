@@ -552,7 +552,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
-  GlobalObjectIdHash: 1885646011
+  GlobalObjectIdHash: 3752267265
   InScenePlacedSourceGlobalObjectIdHash: 0
   DeferredDespawnTick: 0
   Ownership: 1
@@ -895,6 +895,22 @@ MonoBehaviour:
         m_CallState: 2
     m_ActionId: ed8f63c4-7990-43c2-93c9-0c0e5227e77b
     m_ActionName: 'Player/Melee[/Keyboard/f]'
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 2956555394039448100}
+        m_TargetAssemblyTypeName: PlayerAim, Assembly-CSharp
+        m_MethodName: OnAim
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: 612163c6-dc36-4a2e-80a8-d9183698afd0
+    m_ActionName: 'Player/Aim[/Mouse/position,/XInputControllerWindows/rightStick]'
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: 
   m_DefaultActionMap: Player
@@ -933,7 +949,12 @@ MonoBehaviour:
   downedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   defaultLayerName: Player
   downedLayerName: DownedPlayer
-  reviveDuration: 4
+  _netReviveDuration:
+    UpdateTraits:
+      MinSecondsBetweenUpdates: 0
+      MaxSecondsBetweenUpdates: 0
+    m_InternalValue: 4
+  _baseReviveDuration: 4
   healthAfterRevive: 20
   crawlSpeed: 0.5
   maxReviveDistance: 1.5

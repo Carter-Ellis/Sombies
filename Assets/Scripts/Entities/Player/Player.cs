@@ -110,7 +110,7 @@ public class Player : NetworkBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (!IsOwner) return;
+        if (!IsOwner || (_revive != null && _revive.IsDownedSync.Value)) return;
 
         Item hitItem = collision.GetComponent<Item>();
 
@@ -297,13 +297,31 @@ public class Player : NetworkBehaviour
 
     public void SwitchItem(InputAction.CallbackContext context)
     {
-        if (_revive.IsDownedSync.Value) return;
+        if (_revive != null && _revive.IsDownedSync.Value) return;
 
         if (context.performed)
         {
-            int index = Mathf.RoundToInt(context.ReadValue<float>());
-            ChangeSelectedItem(index);
+            float value = context.ReadValue<float>();
+
+            // If the binding sends -1 or +1 (like D-Pad / Shoulder buttons / Mouse Scroll)
+            if (value == 1f || value == -1f)
+            {
+                CycleSelectedItem((int)value);
+            }
+            else
+            {
+                // For direct slot hotkeys (e.g., Key 0, 1, 2)
+                int index = Mathf.RoundToInt(value);
+                ChangeSelectedItem(index);
+            }
         }
+    }
+
+    private void CycleSelectedItem(int direction)
+    {
+        // Cycle forward (+1) or backward (-1) with wrap-around
+        selectedItemIndex = (selectedItemIndex + direction + maxInventorySlots) % maxInventorySlots;
+        UpdateInventoryUI();
     }
 
     private void ChangeSelectedItem(int newIndex)
@@ -366,12 +384,41 @@ public class Player : NetworkBehaviour
 
     public void SwitchSpell(InputAction.CallbackContext context)
     {
-        if (_revive.IsDownedSync.Value) return;
+        if (_revive != null && _revive.IsDownedSync.Value) return;
 
         if (context.performed)
         {
-            int index = Mathf.RoundToInt(context.ReadValue<float>());
-            ChangeSelectedSpell(index);
+            float value = context.ReadValue<float>();
+
+            // If the binding sends -1 or +1 (like D-Pad / Shoulder buttons / Mouse Scroll)
+            if (value == 1f || value == -1f)
+            {
+                CycleSelectedSpell((int)value);
+            }
+            else
+            {
+                // For direct slot hotkeys (e.g., Key 1, 2)
+                int index = Mathf.RoundToInt(value);
+                ChangeSelectedSpell(index);
+            }
+        }
+    }
+
+    private void CycleSelectedSpell(int direction)
+    {
+        // Try cycling to the next available slot that contains a valid spell
+        int nextIndex = ActiveSpellIndex;
+
+        for (int i = 0; i < maxSpellSlots; i++)
+        {
+            nextIndex = (nextIndex + direction + maxSpellSlots) % maxSpellSlots;
+
+            // Skip empty spell slots so you don't switch to nothing
+            if (spells[nextIndex] != null)
+            {
+                ChangeSelectedSpell(nextIndex);
+                break;
+            }
         }
     }
 
@@ -383,6 +430,7 @@ public class Player : NetworkBehaviour
             {
                 return;
             }
+
             ActiveSpellIndex = newIndex;
             activeSpell = spells[ActiveSpellIndex];
 

@@ -169,7 +169,7 @@ MonoBehaviour:
   targetUpdateInterval: 0.2
   hitPrice: 1
   killPrice: 10
-  _dropChance: 0.15
+  _dropChance: 0.07
   _possibleDrops:
   - {fileID: 3993095922639958794, guid: 32f4d1328dd3e7c499b2a959e7d66883, type: 3}
   - {fileID: 3993095922639958794, guid: 4e9a9e0242bf0f1438b051683a8b788d, type: 3}
