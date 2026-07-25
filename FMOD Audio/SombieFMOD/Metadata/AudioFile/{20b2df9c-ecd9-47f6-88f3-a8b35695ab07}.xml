@@ -2,7 +2,7 @@
 <objects serializationModel="Studio.02.03.00">
 	<object class="AudioFile" id="{20b2df9c-ecd9-47f6-88f3-a8b35695ab07}">
 		<property name="assetPath">
-			<value>Melee/knife 1.wav</value>
+			<value>SFX/Melee/knife 1.wav</value>
 		</property>
 		<property name="frequencyInKHz">
 			<value>48</value>

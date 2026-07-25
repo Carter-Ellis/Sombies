@@ -44,7 +44,7 @@ public class Audio : MonoBehaviour
         }
         instance = this;
         DontDestroyOnLoad(gameObject);
-        //fmodEvents = FindObjectOfType<FMODEvents>();
+        fmodEvents = FindAnyObjectByType<FMODEvents>();
 
         clearVariables();
         //setBuses();
@@ -82,18 +82,15 @@ public class Audio : MonoBehaviour
     /*public static void playMainMusic()
     {
         play(TYPE.MUSIC, fmodEvents.mainMusic);
-    }
-
+    }*/
+    
     public static void playGameMusic()
     {
-        EventReference sound = fmodEvents.music;
-        if (Map.current == Map.TYPE.BEACH)
-        {
-            sound = fmodEvents.beachMusic;
-        }
+        EventReference sound = fmodEvents.sombieStyle;
+        
         play(TYPE.MUSIC, sound);
     }
-
+    /*
     public static void playShopMusic()
     {
         play(TYPE.MUSIC, fmodEvents.shopMusic);
@@ -139,6 +136,7 @@ public class Audio : MonoBehaviour
         eventInst.start();
         events[(int)type] = eventInst;
         currentRef[(int)type] = eventRef;
+        print("playing: " + eventRef.Path + " at " + pos);
     }
 
     public static void playSFX(EventReference eventRef, Vector3 pos = default)

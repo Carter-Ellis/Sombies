@@ -22,6 +22,9 @@ public class FMODEvents : MonoBehaviour
     [field: Header("Potion")]
     [field: SerializeField] public EventReference swig { get; private set; }
 
+    [field: Header("Music")]
+    [field: SerializeField] public EventReference sombieStyle { get; private set; }
+
     public static FMODEvents instance { get; private set; }
 
     private void Awake()

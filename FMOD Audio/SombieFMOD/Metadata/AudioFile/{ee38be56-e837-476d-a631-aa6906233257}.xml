@@ -2,7 +2,7 @@
 <objects serializationModel="Studio.02.03.00">
 	<object class="AudioFile" id="{ee38be56-e837-476d-a631-aa6906233257}">
 		<property name="assetPath">
-			<value>Potion/potion swig.mp3</value>
+			<value>SFX/Potion/potion swig.mp3</value>
 		</property>
 		<property name="frequencyInKHz">
 			<value>24</value>

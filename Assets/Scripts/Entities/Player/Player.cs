@@ -74,6 +74,9 @@ public class Player : NetworkBehaviour
         {
             spells.Add(null);
         }
+
+        Audio.playGameMusic();
+
     }
 
     public override void OnNetworkSpawn()

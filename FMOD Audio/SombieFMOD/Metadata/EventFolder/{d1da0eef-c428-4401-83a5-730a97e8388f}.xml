@@ -5,7 +5,7 @@
 			<value>Melee</value>
 		</property>
 		<relationship name="folder">
-			<destination>{a7d8e3c4-bde5-43da-91e4-55b4499f2235}</destination>
+			<destination>{40094ed2-cffb-4680-8ed5-d1730ed88352}</destination>
 		</relationship>
 	</object>
 </objects>

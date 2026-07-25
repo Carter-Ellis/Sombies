@@ -2,7 +2,7 @@
 <objects serializationModel="Studio.02.03.00">
 	<object class="AudioFile" id="{103ae3bf-b737-4991-84a0-17f948bbb82a}">
 		<property name="assetPath">
-			<value>Revive/downed.wav</value>
+			<value>SFX/Revive/downed.wav</value>
 		</property>
 		<property name="frequencyInKHz">
 			<value>48</value>

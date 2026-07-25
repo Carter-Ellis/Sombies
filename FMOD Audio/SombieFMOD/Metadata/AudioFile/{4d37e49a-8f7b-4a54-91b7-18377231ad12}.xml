@@ -2,7 +2,7 @@
 <objects serializationModel="Studio.02.03.00">
 	<object class="AudioFile" id="{4d37e49a-8f7b-4a54-91b7-18377231ad12}">
 		<property name="assetPath">
-			<value>Player/ouchy.wav</value>
+			<value>SFX/Player/ouchy.wav</value>
 		</property>
 		<property name="frequencyInKHz">
 			<value>48</value>
