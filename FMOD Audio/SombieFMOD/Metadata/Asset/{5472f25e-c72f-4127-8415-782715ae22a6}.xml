@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<objects serializationModel="Studio.02.03.00">
+	<object class="EncodableAsset" id="{5472f25e-c72f-4127-8415-782715ae22a6}">
+		<property name="assetPath">
+			<value>Potion/</value>
+		</property>
+		<relationship name="masterAssetFolder">
+			<destination>{b248d80b-4b0c-4635-9b81-ed9db0ddc28b}</destination>
+		</relationship>
+	</object>
+</objects>

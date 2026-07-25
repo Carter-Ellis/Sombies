@@ -1607,6 +1607,48 @@ MonoBehaviour:
       Data3: 1499319462
       Data4: 504645293
     Path: event:/Welcome
+  <mysteryBoxOpen>k__BackingField:
+    Guid:
+      Data1: 0
+      Data2: 0
+      Data3: 0
+      Data4: 0
+    Path: 
+  <meleeAttack>k__BackingField:
+    Guid:
+      Data1: 0
+      Data2: 0
+      Data3: 0
+      Data4: 0
+    Path: 
+  <downed>k__BackingField:
+    Guid:
+      Data1: 0
+      Data2: 0
+      Data3: 0
+      Data4: 0
+    Path: 
+  <reviveSequence>k__BackingField:
+    Guid:
+      Data1: 0
+      Data2: 0
+      Data3: 0
+      Data4: 0
+    Path: 
+  <playerHurt>k__BackingField:
+    Guid:
+      Data1: 0
+      Data2: 0
+      Data3: 0
+      Data4: 0
+    Path: 
+  <swig>k__BackingField:
+    Guid:
+      Data1: 0
+      Data2: 0
+      Data3: 0
+      Data4: 0
+    Path: 
 --- !u!1 &826516831
 GameObject:
   m_ObjectHideFlags: 0
@@ -2185,6 +2227,7 @@ MonoBehaviour:
   useRelay: 1
   sceneToLoad: SampleScene
   playerPrefab: {fileID: 4411116556212734287, guid: 49ea537fa833bcd44a89191b7d2683ba, type: 3}
+  spawnpointsParent: {fileID: 0}
 --- !u!114 &1134226647
 MonoBehaviour:
   m_ObjectHideFlags: 0

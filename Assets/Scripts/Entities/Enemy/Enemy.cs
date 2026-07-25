@@ -11,6 +11,10 @@ public abstract class Enemy : Entity
 
     private RoundManager roundManager;
 
+    [Header("Health Scaling")]
+    [SerializeField] protected int healthIncreasePerRound = 10;
+    [SerializeField] protected int maxScaledHealth = 200;
+
     [Header("Attack")]
     [SerializeField] private int _damageAmount = 10;
 
@@ -87,19 +91,19 @@ public abstract class Enemy : Entity
         agent.updateUpAxis = false;
         agent.updatePosition = false;
 
-        //Speed Scaling
         int currentRound = roundManager != null ? roundManager._netRound.Value : 1;
+
+        int scaledHealth = MaxHealth + (healthIncreasePerRound * (currentRound - 1));
+        MaxHealth = Mathf.Min(scaledHealth, maxScaledHealth);
+
         float scaledSpeed = speed + (speedIncreasePerRound * (currentRound - 1));
         currentSpeed = Mathf.Min(scaledSpeed, maxSpeed);
-
 
         agent.speed = currentSpeed;
         agent.stoppingDistance = stoppingDistance;
 
-        // Damage Scaling
         int scaledDamage = _damageAmount + (damageIncreasePerRound * (currentRound - 1));
         currentDamage = Mathf.Min(scaledDamage, maxDamage);
-
 
         NavMeshHit hit;
         if (NavMesh.SamplePosition(transform.position, out hit, 2f, NavMesh.AllAreas))

@@ -159,13 +159,17 @@ MonoBehaviour:
     m_InternalValue: 7
   _baseWalkSpeed: 5
   _baseSprintSpeed: 7
+  healthIncreasePerRound: 5
+  maxScaledHealth: 200
   _damageAmount: 5
+  damageIncreasePerRound: 2
+  maxDamage: 40
   _knockbackForce: 8
   _knockbackDuration: 0.08
   manaReward: 30
   attackCooldown: 0.5
   speed: 1
-  speedIncreasePerRound: 0.25
+  speedIncreasePerRound: 0.2
   maxSpeed: 5
   stoppingDistance: 1
   targetUpdateInterval: 0.2

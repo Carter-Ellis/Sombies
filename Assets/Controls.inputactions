@@ -43,13 +43,22 @@
                     "initialStateCheck": false
                 },
                 {
-                    "name": "Switch Item",
+                    "name": "Select Item",
                     "type": "Value",
                     "id": "24882096-d069-4292-9662-0ff57a8d2e49",
                     "expectedControlType": "Axis",
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": true
+                },
+                {
+                    "name": "CycleItem",
+                    "type": "Button",
+                    "id": "8fafbe9e-65de-487c-8d8e-eec71d30461b",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
                 },
                 {
                     "name": "Reload Scene",
@@ -248,7 +257,7 @@
                     "interactions": "",
                     "processors": "Scale(factor=0)",
                     "groups": "",
-                    "action": "Switch Item",
+                    "action": "Select Item",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
@@ -259,7 +268,7 @@
                     "interactions": "",
                     "processors": "Scale",
                     "groups": "",
-                    "action": "Switch Item",
+                    "action": "Select Item",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
@@ -270,42 +279,9 @@
                     "interactions": "",
                     "processors": "Scale(factor=2)",
                     "groups": "",
-                    "action": "Switch Item",
+                    "action": "Select Item",
                     "isComposite": false,
                     "isPartOfComposite": false
-                },
-                {
-                    "name": "1D Axis",
-                    "id": "b3d4f87f-a466-405e-901f-588b13a9fa16",
-                    "path": "1DAxis",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "Switch Item",
-                    "isComposite": true,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "negative",
-                    "id": "7fecb348-bd24-4f70-bed2-43de6890823d",
-                    "path": "<Gamepad>/dpad/left",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "Switch Item",
-                    "isComposite": false,
-                    "isPartOfComposite": true
-                },
-                {
-                    "name": "positive",
-                    "id": "960c6b8d-a8db-49df-b17a-7f7898bf2e73",
-                    "path": "<Gamepad>/dpad/right",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "Switch Item",
-                    "isComposite": false,
-                    "isPartOfComposite": true
                 },
                 {
                     "name": "",
@@ -449,6 +425,72 @@
                     "action": "Aim",
                     "isComposite": false,
                     "isPartOfComposite": false
+                },
+                {
+                    "name": "1D Axis",
+                    "id": "b3d4f87f-a466-405e-901f-588b13a9fa16",
+                    "path": "1DAxis",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "CycleItem",
+                    "isComposite": true,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "negative",
+                    "id": "7fecb348-bd24-4f70-bed2-43de6890823d",
+                    "path": "<Gamepad>/dpad/left",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "CycleItem",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "positive",
+                    "id": "960c6b8d-a8db-49df-b17a-7f7898bf2e73",
+                    "path": "<Gamepad>/dpad/right",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "CycleItem",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "Mouse Scroll",
+                    "id": "5fd89f7a-99f3-47ad-b867-77a38e041b60",
+                    "path": "1DAxis",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "CycleItem",
+                    "isComposite": true,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "negative",
+                    "id": "63353981-8bd8-4d8b-bf26-b983361612be",
+                    "path": "<Mouse>/scroll/down",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "CycleItem",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "positive",
+                    "id": "b8c0c384-c070-479e-8fd5-d34e83ebe30a",
+                    "path": "<Mouse>/scroll/up",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "CycleItem",
+                    "isComposite": false,
+                    "isPartOfComposite": true
                 }
             ]
         }

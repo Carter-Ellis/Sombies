@@ -19,6 +19,9 @@ public class FMODEvents : MonoBehaviour
     [field: Header("Player")]
     [field: SerializeField] public EventReference playerHurt { get; private set; }
 
+    [field: Header("Potion")]
+    [field: SerializeField] public EventReference swig { get; private set; }
+
     public static FMODEvents instance { get; private set; }
 
     private void Awake()

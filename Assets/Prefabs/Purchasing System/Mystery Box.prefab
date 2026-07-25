@@ -186,14 +186,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
-  GlobalObjectIdHash: 3217755012
-  InScenePlacedSourceGlobalObjectIdHash: 0
+  GlobalObjectIdHash: 3580260447
+  InScenePlacedSourceGlobalObjectIdHash: 3217755012
   DeferredDespawnTick: 0
   Ownership: 1
   AlwaysReplicateAsRoot: 0
   SynchronizeTransform: 1
   ActiveSceneSynchronization: 0
-  SceneMigrationSynchronization: 1
+  SceneMigrationSynchronization: 0
   SpawnWithObservers: 1
   DontDestroyWithOwner: 0
   AutoObjectParentSync: 1
@@ -212,9 +212,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MysteryBox
   ShowTopMostFoldoutHeaderGroup: 1
-  price: 0
+  price: 200
   spell: {fileID: 0}
   disableOnPurchase: 0
+  type: 1
   possibleSpells:
   - {fileID: 6550845291702011459, guid: 4ce82f0d2e264b14eb8a12a94b36c893, type: 3}
   - {fileID: 1765773271733336997, guid: 48810581af2cd024b9f54f0bee237ce7, type: 3}

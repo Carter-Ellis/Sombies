@@ -113,7 +113,7 @@ public class Player : NetworkBehaviour
         if (!IsOwner || (_revive != null && _revive.IsDownedSync.Value)) return;
 
         Item hitItem = collision.GetComponent<Item>();
-
+        
         if (hitItem != null)
         {
             var itemNetObj = hitItem.GetComponent<NetworkObject>();
@@ -121,6 +121,7 @@ public class Player : NetworkBehaviour
         }
 
         PurchaseSystem shop = collision.GetComponent<PurchaseSystem>();
+
         if (shop != null)
         {
             nearbyPurchaseSystem = shop;
@@ -295,25 +296,26 @@ public class Player : NetworkBehaviour
         _netInventory[index] = -1;
     }
 
-    public void SwitchItem(InputAction.CallbackContext context)
+    public void CycleItemInput(InputAction.CallbackContext context)
     {
         if (_revive != null && _revive.IsDownedSync.Value) return;
 
         if (context.performed)
         {
             float value = context.ReadValue<float>();
+            CycleSelectedItem((int)value);
+        }
+    }
 
-            // If the binding sends -1 or +1 (like D-Pad / Shoulder buttons / Mouse Scroll)
-            if (value == 1f || value == -1f)
-            {
-                CycleSelectedItem((int)value);
-            }
-            else
-            {
-                // For direct slot hotkeys (e.g., Key 0, 1, 2)
-                int index = Mathf.RoundToInt(value);
-                ChangeSelectedItem(index);
-            }
+    public void SelectSpecificItemInput(InputAction.CallbackContext context)
+    {
+        if (_revive != null && _revive.IsDownedSync.Value) return;
+
+        if (context.performed)
+        {
+            float value = context.ReadValue<float>();
+            int index = Mathf.RoundToInt(value);
+            ChangeSelectedItem(index);
         }
     }
 
@@ -366,6 +368,7 @@ public class Player : NetworkBehaviour
                 PurchaseSystem shop = netObj.GetComponent<PurchaseSystem>();
                 if (shop != null && buyer != null)
                 {
+                    print($"Client {clientId} is attempting to purchase from {shop.name}");
                     shop.AttemptPurchase(buyer);
                 }
             }

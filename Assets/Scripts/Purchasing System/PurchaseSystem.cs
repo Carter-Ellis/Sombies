@@ -2,6 +2,13 @@ using TMPro;
 using Unity.Netcode;
 using UnityEngine;
 
+enum PurchaseType
+{
+    SPELL,
+    MYSTERY_BOX,
+    DOOR,
+}   
+
 public abstract class PurchaseSystem : NetworkBehaviour
 {
 
@@ -16,6 +23,8 @@ public abstract class PurchaseSystem : NetworkBehaviour
     );
 
     protected TextMeshPro priceTxt;
+
+    [SerializeField] PurchaseType type;
 
     private void Awake()
     {
@@ -62,17 +71,21 @@ public abstract class PurchaseSystem : NetworkBehaviour
             Debug.LogError("Price Text component is not assigned!");
         }
         
-        if (spell == null)
+        switch(type)
         {
-            // This is the mysterybox
-            priceTxt.text = "E to buy mystery box [Cost: " + price.ToString() + "]";
-        }
-        else
-        {
-            // This is a spell purchase
-            priceTxt.text = "E to buy " + spell.Name + " [Cost: " + price.ToString() + "]";
-        }
-            
+            case PurchaseType.SPELL:
+                priceTxt.text = "E to buy " + spell.Name + " [Cost: " + price.ToString() + "]";
+                break;
+            case PurchaseType.MYSTERY_BOX:
+                priceTxt.text = "E to buy mystery box [Cost: " + price.ToString() + "]";
+                break;
+            case PurchaseType.DOOR:
+                priceTxt.text = "E to unlock door [Cost: " + price.ToString() + "]";
+                break;
+            default:
+                Debug.LogError("Unknown purchase type!");
+                break;
+        }  
         
     }
 
