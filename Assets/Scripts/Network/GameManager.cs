@@ -25,7 +25,6 @@ public class GameManager : NetworkBehaviour
         {
             NetworkManager.Singleton.NetworkConfig.ConnectionApproval = true;
         }
-
     }
 
     async void Start()
@@ -193,7 +192,6 @@ public class GameManager : NetworkBehaviour
         {
             Debug.LogError($"Relay Join Error: {e.Message}");
         }
-
     }
 
     private void DisconnectClient()
@@ -205,6 +203,7 @@ public class GameManager : NetworkBehaviour
             NetworkManager.Singleton.Shutdown();
         }
     }
+
     private void StartLocalHost()
     {
         // 1. Get the transport
@@ -228,11 +227,33 @@ public class GameManager : NetworkBehaviour
 
     public void StartGame()
     {
-        if (IsServer) 
+        if (IsServer)
         {
             NetworkManager.Singleton.SceneManager.LoadScene(sceneToLoad, UnityEngine.SceneManagement.LoadSceneMode.Single);
         }
     }
+
+    // --- NEW: Added Restart Logic ---
+    public void RestartGame()
+    {
+        if (IsServer)
+        {
+            NetworkManager.Singleton.SceneManager.LoadScene(sceneToLoad, UnityEngine.SceneManagement.LoadSceneMode.Single);
+        }
+    }
+
+    private void OnGUI()
+    {
+
+        if (IsServer && UnityEngine.SceneManagement.SceneManager.GetActiveScene().name == sceneToLoad)
+        {
+            if (GUI.Button(new Rect(10, 10, 150, 40), "Restart Game"))
+            {
+                RestartGame();
+            }
+        }
+    }
+    // --------------------------------
 
     private void OnSceneLoaded(string sceneName, UnityEngine.SceneManagement.LoadSceneMode loadMode, List<ulong> clientsCompleted, List<ulong> clientsTimedOut)
     {
@@ -240,13 +261,13 @@ public class GameManager : NetworkBehaviour
 
         foreach (ulong clientId in clientsCompleted)
         {
-            // 1. Find the "Lobby" version of this player
+            // 1. Find the current version of this player (Lobby OR previous round)
             if (NetworkManager.Singleton.ConnectedClients.TryGetValue(clientId, out var networkClient))
             {
                 var oldPlayerObject = networkClient.PlayerObject;
                 if (oldPlayerObject != null)
                 {
-                    // Despawn the Lobby object (it will disappear for everyone)
+                    // Despawn the old object (it will disappear for everyone)
                     oldPlayerObject.Despawn(true);
                 }
             }
@@ -269,5 +290,4 @@ public class GameManager : NetworkBehaviour
     {
         return clientNames.TryGetValue(clientId, out name);
     }
-
 }

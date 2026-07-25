@@ -90,6 +90,15 @@ public class PlayerAim : NetworkBehaviour
         {
             if (Mouse.current != null)
             {
+                // 1. Refresh the camera reference if the old one was destroyed (e.g., on scene reload)
+                if (_mainCam == null)
+                {
+                    _mainCam = Camera.main;
+                }
+
+                // 2. If it's STILL null (scene is currently mid-transition), abort to prevent errors
+                if (_mainCam == null) return;
+
                 Vector3 mouseScreenPos = Mouse.current.position.ReadValue();
                 Vector3 worldMousePos = _mainCam.ScreenToWorldPoint(mouseScreenPos);
                 worldMousePos.z = 0;

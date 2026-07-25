@@ -50,6 +50,19 @@ public class RoundManager : NetworkBehaviour
     {
         _netRound.OnValueChanged -= OnRoundChanged;
         _netEnemiesRemaining.OnValueChanged -= OnEnemiesChanged;
+
+        if (IsServer)
+        {
+            foreach (Enemy enemy in activeEnemies)
+            {
+                if (enemy != null && enemy.TryGetComponent(out NetworkObject netObj) && netObj.IsSpawned)
+                {
+                    netObj.Despawn(true);
+                }
+            }
+            activeEnemies.Clear();
+        }
+
     }
 
     private void OnRoundChanged(int oldVal, int newVal)
