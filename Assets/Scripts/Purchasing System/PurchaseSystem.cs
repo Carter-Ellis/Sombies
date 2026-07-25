@@ -7,6 +7,7 @@ enum PurchaseType
     SPELL,
     MYSTERY_BOX,
     DOOR,
+    VENDOR,
 }   
 
 public abstract class PurchaseSystem : NetworkBehaviour
@@ -81,6 +82,9 @@ public abstract class PurchaseSystem : NetworkBehaviour
                 break;
             case PurchaseType.DOOR:
                 priceTxt.text = "E to unlock door [Cost: " + price.ToString() + "]";
+                break;
+            case PurchaseType.VENDOR:
+                priceTxt.text = "E to buy from vendor [Cost: " + price.ToString() + "]";
                 break;
             default:
                 Debug.LogError("Unknown purchase type!");

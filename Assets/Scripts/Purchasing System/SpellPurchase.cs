@@ -1,4 +1,3 @@
-using TMPro;
 
 public class SpellPurchase : PurchaseSystem
 {
