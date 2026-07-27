@@ -357,7 +357,7 @@ public class Player : NetworkBehaviour
         }
     }
 
-    [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
+    [Rpc(SendTo.Server)]
     public void RequestPurchaseServerRpc(ulong purchaseSystemId, RpcParams rpcParams = default)
     {
         ulong clientId = rpcParams.Receive.SenderClientId;
@@ -468,7 +468,7 @@ public class Player : NetworkBehaviour
             Vector2 attackPoint = (Vector2)transform.position + direction * meleeRange;
             Collider2D[] hitObjects = Physics2D.OverlapCircleAll(attackPoint, meleeRadius);
 
-            ulong? hitEnemyId = null;
+            ulong hitEnemyId = 0;
 
             foreach (Collider2D hitCollider in hitObjects)
             {
@@ -476,21 +476,23 @@ public class Player : NetworkBehaviour
                 if (enemy != null)
                 {
                     hitEnemyId = enemy.NetworkObjectId;
+
+                    Vector2 knockbackDir = (enemy.transform.position - transform.position).normalized;
+                    enemy.ApplyKnockback(knockbackDir * meleeKnockbackForce, meleeKnockbackDuration);
+
                     break;
                 }
             }
 
-            if (hitEnemyId.HasValue)
-            {
-                PerformMeleeServerRpc(hitEnemyId.Value);
-            }
+            PerformMeleeServerRpc(hitEnemyId);
         }
     }
 
-    [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
+    [Rpc(SendTo.Server)]
     private void PerformMeleeServerRpc(ulong enemyId)
     {
-        if (NetworkManager.Singleton.SpawnManager.SpawnedObjects.TryGetValue(enemyId, out var netObj))
+        // Check if enemy was hit or not
+        if (enemyId != 0 && NetworkManager.Singleton.SpawnManager.SpawnedObjects.TryGetValue(enemyId, out var netObj))
         {
             Enemy enemy = netObj.GetComponent<Enemy>();
             if (enemy != null)
@@ -500,6 +502,7 @@ public class Player : NetworkBehaviour
                 enemy.ApplyKnockback(knockbackDir * meleeKnockbackForce, meleeKnockbackDuration);
             }
         }
+
         ShowMeleeVisualClientRpc();
     }
 
@@ -520,7 +523,7 @@ public class Player : NetworkBehaviour
         }
     }
 
-    [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
+    [Rpc(SendTo.Server)]
     public void RequestCastSpellServerRpc(int spellIndex)
     {
         if (spellIndex < 0 || spellIndex >= spells.Count || spells[spellIndex] == null) return;
