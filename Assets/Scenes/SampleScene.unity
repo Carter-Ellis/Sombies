@@ -8274,6 +8274,10 @@ PrefabInstance:
       propertyPath: GlobalObjectIdHash
       value: 746221847
       objectReference: {fileID: 0}
+    - target: {fileID: 4409015688360436899, guid: f3b6f908e7ed0b5488a3dbd28496e2c0, type: 3}
+      propertyPath: currentState
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 6328290744576356839, guid: f3b6f908e7ed0b5488a3dbd28496e2c0, type: 3}
       propertyPath: m_Name
       value: Round Manager

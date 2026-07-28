@@ -126,7 +126,7 @@ public class Player : NetworkBehaviour
 
         Item hitItem = collision.GetComponent<Item>();
         
-        if (hitItem != null)
+        if (hitItem != null && hitItem.CanBePickedUpBy(OwnerClientId))
         {
             var itemNetObj = hitItem.GetComponent<NetworkObject>();
             RequestPickupServerRpc(itemNetObj.NetworkObjectId);
@@ -289,12 +289,12 @@ public class Player : NetworkBehaviour
     {
         if (!context.performed || !IsOwner) return;
 
-        RequestDropItemRpc(selectedItemIndex);
+        RequestDropItemRpc(selectedItemIndex, transform.position, firepoint.right);
 
     }
 
     [Rpc(SendTo.Server)]
-    private void RequestDropItemRpc(int itemIndex)
+    private void RequestDropItemRpc(int itemIndex, Vector3 clientPos, Vector3 clientDir)
     {
         if (itemIndex < 0 || itemIndex >= maxInventorySlots) return;
 
@@ -306,26 +306,25 @@ public class Player : NetworkBehaviour
 
         if (itemPrefab != null)
         {
-            Vector2 throwDirection = firepoint.right;
-
             LayerMask wallLayer = LayerMask.GetMask("Wall");
 
-            RaycastHit2D hit = Physics2D.Raycast(transform.position, throwDirection, itemDropOffset, wallLayer);
+            RaycastHit2D hit = Physics2D.Raycast(clientPos, clientDir, itemDropOffset, wallLayer);
 
             if (hit.collider != null)
             {
                 return;
             }
 
-            Vector3 dropOffset = firepoint.right * itemDropOffset;
-            Vector3 spawnPos = transform.position + dropOffset;
-            
+            Vector3 dropOffset = clientDir * itemDropOffset;
+            Vector3 spawnPos = clientPos + dropOffset;
+
             Item droppedItem = Instantiate(itemPrefab, spawnPos, Quaternion.identity);
             NetworkObject netObj = droppedItem.GetComponent<NetworkObject>();
 
             if (netObj != null)
             {
                 netObj.Spawn();
+                droppedItem.DropperClientId.Value = OwnerClientId;
             }
             else
             {
@@ -335,7 +334,7 @@ public class Player : NetworkBehaviour
             Rigidbody2D itemRb = droppedItem.GetComponent<Rigidbody2D>();
             if (itemRb != null)
             {
-                itemRb.AddForce(throwDirection * throwForce, ForceMode2D.Impulse);
+                itemRb.AddForce(clientDir * throwForce, ForceMode2D.Impulse);
             }
             else
             {

@@ -20,6 +20,11 @@ public abstract class Item : NetworkBehaviour
     [SerializeField] private Sprite _itemIcon;
     [SerializeField] private Color _itemColor = Color.white;
 
+    [Header("Pickup Settings")]
+    private float pickupDelay = 0.5f;
+    public NetworkVariable<ulong> DropperClientId = new NetworkVariable<ulong>(ulong.MaxValue);
+    private bool _cooldownFinished = false;
+
     public Sprite ItemIcon => _itemIcon;
     public Color ItemColor => _itemColor;
 
@@ -39,10 +44,29 @@ public abstract class Item : NetworkBehaviour
     {
         base.OnNetworkSpawn();
 
+        StartCoroutine(PickupCooldownRoutine());
+
         if (IsServer && autoDespawn)
         {
             StartCoroutine(DespawnTimerRoutine());
         }
+    }
+
+    private IEnumerator PickupCooldownRoutine()
+    {
+        _cooldownFinished = false;
+        yield return new WaitForSeconds(pickupDelay);
+        _cooldownFinished = true;
+    }
+
+    public bool CanBePickedUpBy(ulong clientId)
+    {
+
+        if (_cooldownFinished) return true;
+
+        if (DropperClientId.Value == ulong.MaxValue) return true;
+
+        return clientId != DropperClientId.Value;
     }
 
     private IEnumerator DespawnTimerRoutine()
