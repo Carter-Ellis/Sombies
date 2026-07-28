@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using TMPro;
 using Unity.Collections;
 using Unity.Netcode;
+using UnityEditor.PackageManager;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
@@ -20,6 +21,8 @@ public class Player : NetworkBehaviour
     [SerializeField] private NetworkList<int> _netInventory;
     [SerializeField] private int maxInventorySlots = 3;
     [SerializeField] private int selectedItemIndex = 0;
+    [SerializeField] private float itemDropOffset = 2f;
+    [SerializeField] private float throwForce = 8f;
 
     [Header("Magic")]
     public Spell activeSpell;
@@ -103,6 +106,12 @@ public class Player : NetworkBehaviour
             UIManager.Instance.RefreshInventory(inventory, selectedItemIndex);
             UpdateInventoryUI();
         }
+
+        if (!IsOwner)
+        {
+            firepoint.gameObject.SetActive(false);
+        }
+
     }
 
     public override void OnNetworkDespawn()
@@ -273,11 +282,79 @@ public class Player : NetworkBehaviour
         UpdateInventoryUI();
     }
 
+    /*
+        if (NetworkManager.Singleton.ConnectedClients.TryGetValue(clientId, out var client))
+     */
+    public void OnDropItem(InputAction.CallbackContext context)
+    {
+        if (!context.performed || !IsOwner) return;
+
+        RequestDropItemRpc(selectedItemIndex);
+
+    }
+
+    [Rpc(SendTo.Server)]
+    private void RequestDropItemRpc(int itemIndex)
+    {
+        if (itemIndex < 0 || itemIndex >= maxInventorySlots) return;
+
+        int itemID = _netInventory[itemIndex];
+
+        if (itemID == -1) return;
+
+        Item itemPrefab = ItemDatabase.Instance.GetItemByID(itemID);
+
+        if (itemPrefab != null)
+        {
+            Vector2 throwDirection = firepoint.right;
+
+            LayerMask wallLayer = LayerMask.GetMask("Wall");
+
+            RaycastHit2D hit = Physics2D.Raycast(transform.position, throwDirection, itemDropOffset, wallLayer);
+
+            if (hit.collider != null)
+            {
+                return;
+            }
+
+            Vector3 dropOffset = firepoint.right * itemDropOffset;
+            Vector3 spawnPos = transform.position + dropOffset;
+            
+            Item droppedItem = Instantiate(itemPrefab, spawnPos, Quaternion.identity);
+            NetworkObject netObj = droppedItem.GetComponent<NetworkObject>();
+
+            if (netObj != null)
+            {
+                netObj.Spawn();
+            }
+            else
+            {
+                Debug.LogError($"Item Prefab '{itemPrefab.name}' is missing a NetworkObject component!");
+            }
+
+            Rigidbody2D itemRb = droppedItem.GetComponent<Rigidbody2D>();
+            if (itemRb != null)
+            {
+                itemRb.AddForce(throwDirection * throwForce, ForceMode2D.Impulse);
+            }
+            else
+            {
+                Debug.LogWarning($"Dropped item '{droppedItem.name}' does not have a Rigidbody2D component. It will not be thrown.");
+            }
+
+            _netInventory[itemIndex] = -1;
+
+        }
+        else
+        {
+            Debug.LogError($"Item with ID {itemID} not found in ItemDatabase!");
+        }
+
+    }
+
     public void TryUseSelectedItem(InputAction.CallbackContext context)
     {
-        if (!context.performed) return;
-
-        if (!IsOwner) return;
+        if (!context.performed || !IsOwner) return;
 
         if (_revive.IsDownedSync.Value) return;
 

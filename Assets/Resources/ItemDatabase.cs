@@ -27,4 +27,9 @@ public class ItemDatabase : ScriptableObject
     {
         return allItems.Find(item => item.itemID == id);
     }
+
+    public Item GetIDByItem(Item item)
+    {
+        return allItems.Find(i => i == item);
+    }
 }
