@@ -244,7 +244,7 @@ SpriteRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10754, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: bd2b4501e3411f942bdd6c41a5d1c989, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -318,6 +318,7 @@ MonoBehaviour:
   price: 20
   spell: {fileID: 11400000, guid: bc29f01417f159b40a70b6d6ef33893f, type: 2}
   disableOnPurchase: 1
+  type: 0
 --- !u!61 &404648281334506118
 BoxCollider2D:
   m_ObjectHideFlags: 0

@@ -64,7 +64,7 @@ SpriteRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10754, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: bd2b4501e3411f942bdd6c41a5d1c989, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -177,6 +177,11 @@ MonoBehaviour:
   _dropWeight: 50
   _itemIcon: {fileID: -8533221002700457554, guid: 9abc64f3abd18374a951f75c06911a2a, type: 3}
   _itemColor: {r: 1, g: 1, b: 1, a: 1}
+  DropperClientId:
+    UpdateTraits:
+      MinSecondsBetweenUpdates: 0
+      MaxSecondsBetweenUpdates: 0
+    m_InternalValue: 18446744073709551615
   _itemName: Health Potion II
   _itemDescription: Heals +40
   duration: 0
