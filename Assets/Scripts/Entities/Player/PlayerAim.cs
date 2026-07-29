@@ -15,7 +15,7 @@ public class PlayerAim : NetworkBehaviour
 
     private enum ControlDeviceType { Mouse, Gamepad }
 
-    private NetworkVariable<float> syncRotation = new NetworkVariable<float>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
+    public NetworkVariable<float> syncRotation = new NetworkVariable<float>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
 
     private void Awake()
     {
@@ -31,7 +31,6 @@ public class PlayerAim : NetworkBehaviour
         {
             if (Time.timeScale > 0)
             {
-                // Fallback check: If right stick is actively being pushed, force Gamepad mode
                 if (Gamepad.current != null)
                 {
                     Vector2 rightStick = Gamepad.current.rightStick.ReadValue();
@@ -47,7 +46,18 @@ public class PlayerAim : NetworkBehaviour
         }
         else
         {
-            pivot.rotation = Quaternion.Euler(0, 0, syncRotation.Value);
+            // Gradually interpolate towards the network variable's angle instead of snapping
+            float currentAngle = pivot.eulerAngles.z;
+            float targetAngle = syncRotation.Value;
+            float smoothedAngle = Mathf.LerpAngle(currentAngle, targetAngle, Time.deltaTime * 15f);
+
+            pivot.rotation = Quaternion.Euler(0, 0, smoothedAngle);
+        }
+
+        // Unified visual update
+        if (player != null && player.SpriteTransform != null)
+        {
+            player.SpriteTransform.rotation = pivot.rotation * Quaternion.Euler(0, 0, 90f);
         }
     }
 
@@ -66,7 +76,6 @@ public class PlayerAim : NetworkBehaviour
         }
         else if (context.control.device is Mouse or Pointer)
         {
-            // Only switch to mouse if mouse is actually moved substantially (prevents micro-jitter)
             Vector2 mouseDelta = context.ReadValue<Vector2>();
             if (context.control.name == "position" || mouseDelta.sqrMagnitude > 0.5f)
             {
@@ -81,22 +90,19 @@ public class PlayerAim : NetworkBehaviour
 
         if (_lastUsedDevice == ControlDeviceType.Gamepad)
         {
-            // Don't update direction if stick is released; keep aiming where last pushed
             if (_stickInput.sqrMagnitude < 0.1f) return;
 
             lookDir = _stickInput.normalized;
         }
-        else // Mouse
+        else 
         {
             if (Mouse.current != null)
             {
-                // 1. Refresh the camera reference if the old one was destroyed (e.g., on scene reload)
                 if (_mainCam == null)
                 {
                     _mainCam = Camera.main;
                 }
 
-                // 2. If it's STILL null (scene is currently mid-transition), abort to prevent errors
                 if (_mainCam == null) return;
 
                 Vector3 mouseScreenPos = Mouse.current.position.ReadValue();
@@ -112,7 +118,11 @@ public class PlayerAim : NetworkBehaviour
             float angle = Mathf.Atan2(lookDir.y, lookDir.x) * Mathf.Rad2Deg;
 
             pivot.rotation = Quaternion.Euler(0, 0, angle);
-            syncRotation.Value = angle;
+            
+            if (Mathf.Abs(syncRotation.Value - angle) > 0.5f)
+            {
+                syncRotation.Value = angle;
+            }
         }
     }
 

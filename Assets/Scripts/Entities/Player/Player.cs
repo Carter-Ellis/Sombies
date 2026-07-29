@@ -58,6 +58,10 @@ public class Player : NetworkBehaviour
     private Player revivingTarget = null;
     private PlayerStats _playerStats;
 
+    [Header("Visuals")]
+    [SerializeField] private Transform spriteTransform;
+    public Transform SpriteTransform => spriteTransform;
+
     private void Awake()
     {
         _revive = GetComponent<ReviveController>();
@@ -79,7 +83,6 @@ public class Player : NetworkBehaviour
         }
 
         Audio.playGameMusic();
-
     }
 
     public override void OnNetworkSpawn()
@@ -111,7 +114,6 @@ public class Player : NetworkBehaviour
         {
             firepoint.gameObject.SetActive(false);
         }
-
     }
 
     public override void OnNetworkDespawn()
@@ -282,15 +284,11 @@ public class Player : NetworkBehaviour
         UpdateInventoryUI();
     }
 
-    /*
-        if (NetworkManager.Singleton.ConnectedClients.TryGetValue(clientId, out var client))
-     */
     public void OnDropItem(InputAction.CallbackContext context)
     {
         if (!context.performed || !IsOwner) return;
 
         RequestDropItemRpc(selectedItemIndex, transform.position, firepoint.right);
-
     }
 
     [Rpc(SendTo.Server)]
@@ -348,7 +346,6 @@ public class Player : NetworkBehaviour
         {
             Debug.LogError($"Item with ID {itemID} not found in ItemDatabase!");
         }
-
     }
 
     public void TryUseSelectedItem(InputAction.CallbackContext context)
@@ -400,7 +397,6 @@ public class Player : NetworkBehaviour
 
     private void CycleSelectedItem(int direction)
     {
-        // Cycle forward (+1) or backward (-1) with wrap-around
         selectedItemIndex = (selectedItemIndex + direction + maxInventorySlots) % maxInventorySlots;
         UpdateInventoryUI();
     }
@@ -458,7 +454,6 @@ public class Player : NetworkBehaviour
     {
         if (revivingTarget != null)
         {
-
             revivingTarget.GetComponent<ReviveController>().StopBeingRevivedServerRpc();
             revivingTarget = null;
         }
@@ -472,14 +467,12 @@ public class Player : NetworkBehaviour
         {
             float value = context.ReadValue<float>();
 
-            // If the binding sends -1 or +1 (like D-Pad / Shoulder buttons / Mouse Scroll)
             if (value == 1f || value == -1f)
             {
                 CycleSelectedSpell((int)value);
             }
             else
             {
-                // For direct slot hotkeys (e.g., Key 1, 2)
                 int index = Mathf.RoundToInt(value);
                 ChangeSelectedSpell(index);
             }
@@ -488,14 +481,12 @@ public class Player : NetworkBehaviour
 
     private void CycleSelectedSpell(int direction)
     {
-        // Try cycling to the next available slot that contains a valid spell
         int nextIndex = ActiveSpellIndex;
 
         for (int i = 0; i < maxSpellSlots; i++)
         {
             nextIndex = (nextIndex + direction + maxSpellSlots) % maxSpellSlots;
 
-            // Skip empty spell slots so you don't switch to nothing
             if (spells[nextIndex] != null)
             {
                 ChangeSelectedSpell(nextIndex);
@@ -567,7 +558,6 @@ public class Player : NetworkBehaviour
     [Rpc(SendTo.Server)]
     private void PerformMeleeServerRpc(ulong enemyId)
     {
-        // Check if enemy was hit or not
         if (enemyId != 0 && NetworkManager.Singleton.SpawnManager.SpawnedObjects.TryGetValue(enemyId, out var netObj))
         {
             Enemy enemy = netObj.GetComponent<Enemy>();
@@ -641,5 +631,4 @@ public class Player : NetworkBehaviour
             reviveTxt.gameObject.SetActive(false);
         }
     }
-
 }
