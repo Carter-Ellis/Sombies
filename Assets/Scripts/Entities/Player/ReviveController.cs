@@ -103,7 +103,7 @@ public class ReviveController : NetworkBehaviour
 
         if (IsDownedSync.Value) return;
 
-        Audio.playSFX(FMODEvents.instance.downed, transform.position);
+        Audio.PlayNetworkedSFX(FMODEvents.instance.downed, transform.position);
 
         IsDownedSync.Value = true;
         _playerStats.isHidden.Value = true;
@@ -131,7 +131,7 @@ public class ReviveController : NetworkBehaviour
         reviveStartPosition = reviver.transform.position;
 
 
-        Audio.playSFX(FMODEvents.instance.reviveSequence, transform.position);
+        Audio.PlayNetworkedSFX(FMODEvents.instance.reviveSequence, transform.position);
 
 
         SetSliderStateClientRpc(true, 0f);

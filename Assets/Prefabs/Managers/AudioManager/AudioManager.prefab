@@ -1,0 +1,174 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &6165603954090130394
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1791775320457066818}
+  - component: {fileID: 8495623359778649826}
+  m_Layer: 0
+  m_Name: FMODEvents
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1791775320457066818
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6165603954090130394}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 11681977715134945}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &8495623359778649826
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6165603954090130394}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b3566d96c3fa0c94a8d7ac1a754e323a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FMODEvents
+  <welcomeSequence>k__BackingField:
+    Guid:
+      Data1: -1835472300
+      Data2: 1114025124
+      Data3: 1499319462
+      Data4: 504645293
+    Path: event:/SFX/Sequences/Welcome
+  <mysteryBoxOpen>k__BackingField:
+    Guid:
+      Data1: 1202756324
+      Data2: 1163163459
+      Data3: -1453589357
+      Data4: 444639229
+    Path: event:/SFX/MysteryBox/MysteryBoxPurchase
+  <meleeAttack>k__BackingField:
+    Guid:
+      Data1: -908226443
+      Data2: 1139234190
+      Data3: 2142240685
+      Data4: 673343403
+    Path: event:/SFX/Melee/MeleeAttack
+  <downed>k__BackingField:
+    Guid:
+      Data1: -521491720
+      Data2: 1176068445
+      Data3: 1766234500
+      Data4: 175730520
+    Path: event:/SFX/Revive/Downed
+  <reviveSequence>k__BackingField:
+    Guid:
+      Data1: -271032924
+      Data2: 1243261327
+      Data3: -2118420292
+      Data4: -345975275
+    Path: event:/SFX/Revive/Revive Sequence
+  <playerHurt>k__BackingField:
+    Guid:
+      Data1: 207297317
+      Data2: 1212574046
+      Data3: 1885169042
+      Data4: 361911981
+    Path: event:/SFX/Player/PlayerHurt
+  <swig>k__BackingField:
+    Guid:
+      Data1: -469306965
+      Data2: 1261349721
+      Data3: 2095054774
+      Data4: 1683501689
+    Path: event:/SFX/Potion/Swig
+  <sombieStyle>k__BackingField:
+    Guid:
+      Data1: 1525285947
+      Data2: 1266979158
+      Data3: -725782639
+      Data4: 56313053
+    Path: event:/Music/SombieStyle
+--- !u!1 &7597115827806844496
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 11681977715134945}
+  - component: {fileID: 8722583688508776673}
+  - component: {fileID: 5282314333676568375}
+  m_Layer: 0
+  m_Name: AudioManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &11681977715134945
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7597115827806844496}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 1791775320457066818}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &8722583688508776673
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7597115827806844496}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
+  GlobalObjectIdHash: 2377410759
+  InScenePlacedSourceGlobalObjectIdHash: 0
+  DeferredDespawnTick: 0
+  Ownership: 1
+  AlwaysReplicateAsRoot: 0
+  SynchronizeTransform: 1
+  ActiveSceneSynchronization: 0
+  SceneMigrationSynchronization: 0
+  SpawnWithObservers: 1
+  DontDestroyWithOwner: 0
+  AutoObjectParentSync: 1
+  SyncOwnerTransformWhenParented: 1
+  AllowOwnerToParent: 0
+--- !u!114 &5282314333676568375
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7597115827806844496}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3474344d4c5ca65469b4ceab542d3bfb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AudioManager
+  ShowTopMostFoldoutHeaderGroup: 1

@@ -1,8 +1,9 @@
 using UnityEngine;
 using FMODUnity;
 using FMOD.Studio;
+using Unity.Netcode;
 
-public class Audio : MonoBehaviour
+public class Audio : NetworkBehaviour
 {
 
     public enum TYPE
@@ -52,6 +53,50 @@ public class Audio : MonoBehaviour
         /*SceneManager.sceneLoaded += OnSceneLoaded;
         OnSceneLoaded(SceneManager.GetActiveScene(), LoadSceneMode.Single);*/
 
+    }
+
+    public static void PlayNetworkedSFX(EventReference eventRef, Vector3 pos)
+    {
+        if (instance != null && !eventRef.IsNull)
+        {
+            if (instance.IsServer)
+            {
+                instance.PlaySoundClientRpc(
+                    eventRef.Guid.Data1,
+                    eventRef.Guid.Data2,
+                    eventRef.Guid.Data3,
+                    eventRef.Guid.Data4,
+                    pos
+                );
+            }
+            else
+            {
+                instance.RequestPlaySoundServerRpc(
+                    eventRef.Guid.Data1,
+                    eventRef.Guid.Data2,
+                    eventRef.Guid.Data3,
+                    eventRef.Guid.Data4,
+                    pos
+                );
+            }
+        }
+    }
+
+    [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
+    private void RequestPlaySoundServerRpc(int d1, int d2, int d3, int d4, Vector3 position)
+    {
+        PlaySoundClientRpc(d1, d2, d3, d4, position);
+    }
+
+    [Rpc(SendTo.ClientsAndHost)]
+    private void PlaySoundClientRpc(int d1, int d2, int d3, int d4, Vector3 position)
+    {
+        FMOD.GUID networkGuid = new FMOD.GUID { Data1 = d1, Data2 = d2, Data3 = d3, Data4 = d4 };
+
+        EventInstance eventInst = RuntimeManager.CreateInstance(networkGuid);
+        eventInst.set3DAttributes(RuntimeUtils.To3DAttributes(position));
+        eventInst.start();
+        eventInst.release();
     }
 
     private static void clearVariables()

@@ -113,7 +113,7 @@ public abstract class Entity : NetworkBehaviour
 
     public virtual void TakeDamage(int amount)
     {
-        Audio.playSFX(FMODEvents.instance.playerHurt, transform.position);
+        Audio.PlayNetworkedSFX(FMODEvents.instance.playerHurt, transform.position);
         Health -= amount;
     }
 

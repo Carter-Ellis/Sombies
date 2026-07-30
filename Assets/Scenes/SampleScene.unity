@@ -44181,7 +44181,7 @@ MonoBehaviour:
   m_PointLightInnerAngle: 180.63
   m_PointLightOuterAngle: 180.63
   m_PointLightInnerRadius: 0
-  m_PointLightOuterRadius: 3.3169825
+  m_PointLightOuterRadius: 3.7364542
   m_ShapeLightParametricSides: 5
   m_ShapeLightParametricAngleOffset: 0
   m_ShapeLightParametricRadius: 1
@@ -44200,8 +44200,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 210794405}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0.99999017, w: 0.0044371276}
-  m_LocalPosition: {x: -2.95, y: 5.22, z: 0}
+  m_LocalRotation: {x: 0, y: 0, z: -0.7047925, w: 0.7094135}
+  m_LocalPosition: {x: -24.37, y: -2.6, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -45641,51 +45641,6 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 884303464}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &551010806
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 551010808}
-  - component: {fileID: 551010807}
-  m_Layer: 0
-  m_Name: AudioManager
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &551010807
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 551010806}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3474344d4c5ca65469b4ceab542d3bfb, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::AudioManager
---- !u!4 &551010808
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 551010806}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 919714636}
-  m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &562401249
 GameObject:
@@ -47179,106 +47134,6 @@ Transform:
   - {fileID: 1331467487}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &919714635
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 919714636}
-  - component: {fileID: 919714637}
-  m_Layer: 0
-  m_Name: FMODEvents
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &919714636
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 919714635}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 551010808}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &919714637
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 919714635}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b3566d96c3fa0c94a8d7ac1a754e323a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::FMODEvents
-  <welcomeSequence>k__BackingField:
-    Guid:
-      Data1: -1835472300
-      Data2: 1114025124
-      Data3: 1499319462
-      Data4: 504645293
-    Path: event:/SFX/Sequences/Welcome
-  <mysteryBoxOpen>k__BackingField:
-    Guid:
-      Data1: 1202756324
-      Data2: 1163163459
-      Data3: -1453589357
-      Data4: 444639229
-    Path: event:/SFX/MysteryBox/MysteryBoxPurchase
-  <meleeAttack>k__BackingField:
-    Guid:
-      Data1: -908226443
-      Data2: 1139234190
-      Data3: 2142240685
-      Data4: 673343403
-    Path: event:/SFX/Melee/MeleeAttack
-  <downed>k__BackingField:
-    Guid:
-      Data1: -521491720
-      Data2: 1176068445
-      Data3: 1766234500
-      Data4: 175730520
-    Path: event:/SFX/Revive/Downed
-  <reviveSequence>k__BackingField:
-    Guid:
-      Data1: -271032924
-      Data2: 1243261327
-      Data3: -2118420292
-      Data4: -345975275
-    Path: event:/SFX/Revive/Revive Sequence
-  <playerHurt>k__BackingField:
-    Guid:
-      Data1: 207297317
-      Data2: 1212574046
-      Data3: 1885169042
-      Data4: 361911981
-    Path: event:/SFX/Player/PlayerHurt
-  <swig>k__BackingField:
-    Guid:
-      Data1: -469306965
-      Data2: 1261349721
-      Data3: 2095054774
-      Data4: 1683501689
-    Path: event:/SFX/Potion/Swig
-  <sombieStyle>k__BackingField:
-    Guid:
-      Data1: 1525285947
-      Data2: 1266979158
-      Data3: -725782639
-      Data4: 56313053
-    Path: event:/Music/SombieStyle
 --- !u!1001 &955326063
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -48757,6 +48612,7 @@ MonoBehaviour:
   useRelay: 0
   sceneToLoad: SampleScene
   playerPrefab: {fileID: 4411116556212734287, guid: 49ea537fa833bcd44a89191b7d2683ba, type: 3}
+  audioManagerPrefab: {fileID: 7597115827806844496, guid: 0012e7f287be17148be2043a75eea630, type: 3}
 --- !u!114 &1387668360
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -51913,7 +51769,6 @@ SceneRoots:
   - {fileID: 1972525182}
   - {fileID: 875162500}
   - {fileID: 1979305373}
-  - {fileID: 551010808}
   - {fileID: 1475643355}
   - {fileID: 25534616}
   - {fileID: 214334345}

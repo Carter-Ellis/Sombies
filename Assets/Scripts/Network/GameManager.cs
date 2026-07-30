@@ -17,6 +17,9 @@ public class GameManager : NetworkBehaviour
     [SerializeField] private GameObject playerPrefab;
     private Dictionary<ulong, string> clientNames = new Dictionary<ulong, string>();
 
+    [Header("Audio")]
+    [SerializeField] private GameObject audioManagerPrefab;
+
     private void Awake()
     {
         DontDestroyOnLoad(gameObject);
@@ -65,6 +68,17 @@ public class GameManager : NetworkBehaviour
         if (IsServer)
         {
             NetworkManager.Singleton.SceneManager.OnLoadEventCompleted += OnSceneLoaded;
+
+            // Spawn the networked AudioManager across the network
+            if (audioManagerPrefab != null)
+            {
+                GameObject audioInstance = Instantiate(audioManagerPrefab);
+                audioInstance.GetComponent<NetworkObject>().Spawn();
+            }
+            else
+            {
+                Debug.LogError("Audio Manager Prefab is not assigned in the GameManager inspector!");
+            }
         }
     }
 

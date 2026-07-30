@@ -20,7 +20,7 @@ public class MysteryBox : PurchaseSystem
 
     protected override void GrantPurchase(Entity buyer)
     {
-        Audio.playSFX(FMODEvents.instance.mysteryBoxOpen, transform.position);
+        Audio.PlayNetworkedSFX(FMODEvents.instance.mysteryBoxOpen, transform.position);
         StartCoroutine(Sequence());
     }
     private IEnumerator Sequence()

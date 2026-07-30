@@ -238,7 +238,6 @@ public class Player : NetworkBehaviour
         }
         return -1;
     }
-
     [Rpc(SendTo.Server)]
     private void RequestPickupServerRpc(ulong itemNetId)
     {
@@ -527,7 +526,7 @@ public class Player : NetworkBehaviour
 
         if (context.performed && Time.time >= lastMeleeTime + meleeCooldown)
         {
-            Audio.playSFX(FMODEvents.instance.meleeAttack, transform.position);
+            Audio.PlayNetworkedSFX(FMODEvents.instance.meleeAttack, transform.position);
             lastMeleeTime = Time.time;
             StartCoroutine(ShowMeleeVisual());
 

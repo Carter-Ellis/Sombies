@@ -83,7 +83,7 @@ public abstract class Item : NetworkBehaviour
 
     public void Use(Entity entity)
     {
-        Audio.playSFX(FMODEvents.instance.swig, entity.transform.position);
+        Audio.PlayNetworkedSFX(FMODEvents.instance.swig, entity.transform.position);
         OnUse(entity);
     }
 
