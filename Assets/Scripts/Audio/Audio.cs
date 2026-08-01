@@ -48,6 +48,7 @@ public class Audio : NetworkBehaviour
         fmodEvents = FindAnyObjectByType<FMODEvents>();
 
         clearVariables();
+        playGameMusic();
         //setBuses();
 
         /*SceneManager.sceneLoaded += OnSceneLoaded;

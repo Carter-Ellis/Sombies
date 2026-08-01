@@ -51,7 +51,10 @@ public class Player : NetworkBehaviour
     [SerializeField] private float meleeKnockbackDuration = 0.2f;
     [SerializeField] private float meleeCooldown = 0.8f;
     private float lastMeleeTime;
+
     [SerializeField] private GameObject meleeVisual;
+    [SerializeField] private Animator meleeAnimator; // NEW: Reference to the Animator
+    [SerializeField] private float meleeAnimationDuration = 0.3f; // NEW: How long the animation lasts
 
     private ReviveController _revive;
     private Player nearbyDownedPlayer = null;
@@ -81,8 +84,6 @@ public class Player : NetworkBehaviour
         {
             spells.Add(null);
         }
-
-        Audio.playGameMusic();
     }
 
     public override void OnNetworkSpawn()
@@ -127,7 +128,7 @@ public class Player : NetworkBehaviour
         if (!IsOwner || (_revive != null && _revive.IsDownedSync.Value)) return;
 
         Item hitItem = collision.GetComponent<Item>();
-        
+
         if (hitItem != null && hitItem.CanBePickedUpBy(OwnerClientId))
         {
             var itemNetObj = hitItem.GetComponent<NetworkObject>();
@@ -238,6 +239,7 @@ public class Player : NetworkBehaviour
         }
         return -1;
     }
+
     [Rpc(SendTo.Server)]
     private void RequestPickupServerRpc(ulong itemNetId)
     {
@@ -526,7 +528,7 @@ public class Player : NetworkBehaviour
 
         if (context.performed && Time.time >= lastMeleeTime + meleeCooldown)
         {
-            Audio.PlayNetworkedSFX(FMODEvents.instance.meleeAttack, transform.position);
+            Audio.playSFX(FMODEvents.instance.meleeAttack, transform.position);
             lastMeleeTime = Time.time;
             StartCoroutine(ShowMeleeVisual());
 
@@ -578,12 +580,19 @@ public class Player : NetworkBehaviour
         StartCoroutine(ShowMeleeVisual());
     }
 
+    // UPDATED: Now triggers the animator and waits for the proper duration
     private IEnumerator ShowMeleeVisual()
     {
         if (meleeVisual != null)
         {
             meleeVisual.SetActive(true);
-            yield return new WaitForSeconds(0.1f);
+
+            if (meleeAnimator != null)
+            {
+                meleeAnimator.SetTrigger("Melee");
+            }
+
+            yield return new WaitForSeconds(meleeAnimationDuration);
             meleeVisual.SetActive(false);
         }
     }
