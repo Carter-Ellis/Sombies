@@ -57,7 +57,7 @@ public class PlayerAim : NetworkBehaviour
         // Unified visual update
         if (player != null && player.SpriteTransform != null)
         {
-            player.SpriteTransform.rotation = pivot.rotation * Quaternion.Euler(0, 0, 90f);
+            player.SpriteTransform.rotation = pivot.rotation * Quaternion.Euler(0, 0, 0);
         }
     }
 

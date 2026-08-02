@@ -53,8 +53,8 @@ public class Player : NetworkBehaviour
     private float lastMeleeTime;
 
     [SerializeField] private GameObject meleeVisual;
-    [SerializeField] private Animator meleeAnimator; // NEW: Reference to the Animator
-    [SerializeField] private float meleeAnimationDuration = 0.3f; // NEW: How long the animation lasts
+    [SerializeField] private Animator meleeAnimator;
+    [SerializeField] private float meleeAnimationDuration = 0.3f;
 
     private ReviveController _revive;
     private Player nearbyDownedPlayer = null;
@@ -63,6 +63,8 @@ public class Player : NetworkBehaviour
 
     [Header("Visuals")]
     [SerializeField] private Transform spriteTransform;
+    // ---> NEW CODE: Added reference for the Sprite's Animator
+    [SerializeField] private Animator spriteAnimator;
     public Transform SpriteTransform => spriteTransform;
 
     private void Awake()
@@ -580,7 +582,6 @@ public class Player : NetworkBehaviour
         StartCoroutine(ShowMeleeVisual());
     }
 
-    // UPDATED: Now triggers the animator and waits for the proper duration
     private IEnumerator ShowMeleeVisual()
     {
         if (meleeVisual != null)
@@ -608,6 +609,19 @@ public class Player : NetworkBehaviour
 
         _playerStats.Mana -= spellToCast.ManaCost;
         spellToCast.Cast(_playerStats);
+
+        // ---> NEW CODE: Tell all clients to play the casting animation
+        PlayCastAnimationClientRpc();
+    }
+
+    // ---> NEW CODE: Networked RPC to trigger the Cast animation on the Sprite Animator
+    [Rpc(SendTo.Everyone, InvokePermission = RpcInvokePermission.Server)]
+    private void PlayCastAnimationClientRpc()
+    {
+        if (spriteAnimator != null)
+        {
+            spriteAnimator.SetTrigger("Cast");
+        }
     }
 
     [Rpc(SendTo.Server)]
