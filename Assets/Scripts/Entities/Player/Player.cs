@@ -336,6 +336,7 @@ public class Player : NetworkBehaviour
             if (itemRb != null)
             {
                 itemRb.AddForce(clientDir * throwForce, ForceMode2D.Impulse);
+                PlayCastAnimationClientRpc();
             }
             else
             {
@@ -573,6 +574,7 @@ public class Player : NetworkBehaviour
         }
 
         ShowMeleeVisualClientRpc();
+        PlayCastAnimationClientRpc();
     }
 
     [Rpc(SendTo.Everyone, InvokePermission = RpcInvokePermission.Server)]
@@ -610,17 +612,15 @@ public class Player : NetworkBehaviour
         _playerStats.Mana -= spellToCast.ManaCost;
         spellToCast.Cast(_playerStats);
 
-        // ---> NEW CODE: Tell all clients to play the casting animation
         PlayCastAnimationClientRpc();
     }
 
-    // ---> NEW CODE: Networked RPC to trigger the Cast animation on the Sprite Animator
     [Rpc(SendTo.Everyone, InvokePermission = RpcInvokePermission.Server)]
     private void PlayCastAnimationClientRpc()
     {
         if (spriteAnimator != null)
         {
-            spriteAnimator.SetTrigger("Cast");
+            spriteAnimator.Play("Friz_Cast", -1, 0f);
         }
     }
 

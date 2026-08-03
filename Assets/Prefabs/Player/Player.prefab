@@ -803,6 +803,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerMovement
   ShowTopMostFoldoutHeaderGroup: 1
+  baseBobSpeed: 3.5
+  bobAmount: 0.035
 --- !u!114 &2956555394039448100
 MonoBehaviour:
   m_ObjectHideFlags: 0
