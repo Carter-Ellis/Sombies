@@ -136,6 +136,11 @@ public class Audio : NetworkBehaviour
         
         play(TYPE.MUSIC, sound);
     }
+
+    public static void playTimelineSFX(EventReference eventReference, Vector3 pos = default)
+    {
+        play(TYPE.MUSIC, eventReference, pos);
+    }
     /*
     public static void playShopMusic()
     {

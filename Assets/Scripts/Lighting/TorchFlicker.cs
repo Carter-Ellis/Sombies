@@ -17,6 +17,7 @@ public class TorchFlicker : MonoBehaviour
     private Light2D fireLight;
     private float randomOffset;
 
+
     void Start()
     {
         // Grab the Light2D component on this object

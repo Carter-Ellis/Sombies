@@ -126,6 +126,7 @@ GameObject:
   - component: {fileID: 961455541219964008}
   - component: {fileID: 7188818006522827737}
   - component: {fileID: 2479483728138373377}
+  - component: {fileID: 4369125621423132075}
   m_Layer: 0
   m_Name: Fire Light
   m_TagString: Untagged
@@ -142,7 +143,7 @@ Transform:
   m_GameObject: {fileID: 5184977193092519946}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 1, w: 0}
-  m_LocalPosition: {x: 0, y: -0.3615, z: 0}
+  m_LocalPosition: {x: 0, y: -0.376, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -178,7 +179,7 @@ MonoBehaviour:
   m_NormalMapQuality: 2
   m_UseNormalMap: 0
   m_ShadowsEnabled: 1
-  m_ShadowIntensity: 0.75
+  m_ShadowIntensity: 1
   m_ShadowSoftness: 0.3
   m_ShadowSoftnessFalloffIntensity: 0.5
   m_ShadowVolumeIntensityEnabled: 0
@@ -215,3 +216,34 @@ MonoBehaviour:
   minIntensity: 2
   maxIntensity: 3
   flickerSpeed: 8
+--- !u!114 &4369125621423132075
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5184977193092519946}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9a6610d2e704f1648819acc8d7460285, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: FMODUnity::FMODUnity.StudioEventEmitter
+  CollisionTag: 
+  EventReference:
+    Guid:
+      Data1: -1591047401
+      Data2: 1246040458
+      Data3: -988246600
+      Data4: 630777841
+    Path: event:/SFX/Fire/FireCrackling
+  Event: 
+  EventPlayTrigger: 1
+  EventStopTrigger: 0
+  AllowFadeout: 1
+  TriggerOnce: 0
+  Preload: 0
+  NonRigidbodyVelocity: 0
+  Params: []
+  OverrideAttenuation: 0
+  OverrideMinDistance: 1
+  OverrideMaxDistance: 20
