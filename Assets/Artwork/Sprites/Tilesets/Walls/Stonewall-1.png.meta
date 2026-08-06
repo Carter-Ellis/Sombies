@@ -17,6 +17,12 @@ TextureImporter:
   - first:
       213: 6062144258878579028
     second: Stonewall-1_4
+  - first:
+      213: 5097460794332279024
+    second: Stonewall-1_5
+  - first:
+      213: 9006263245523879554
+    second: Stonewall-1_6
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -216,8 +222,8 @@ TextureImporter:
       name: Stonewall-1_4
       rect:
         serializedVersion: 2
-        x: 0
-        y: 80
+        x: 96
+        y: 112
         width: 16
         height: 16
       alignment: 0
@@ -238,8 +244,8 @@ TextureImporter:
       name: Stonewall-1_5
       rect:
         serializedVersion: 2
-        x: 32
-        y: 80
+        x: 112
+        y: 112
         width: 16
         height: 16
       alignment: 0
@@ -248,10 +254,10 @@ TextureImporter:
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: 0
+      tessellationDetail: -1
       bones: []
-      spriteID: e330478a8243b4a4ebe0bb2018e2d020
-      internalID: 1035200745
+      spriteID: 0f0f7aeb591ddb640800000000000000
+      internalID: 5097460794332279024
       vertices: []
       indices: 
       edges: []
@@ -260,8 +266,8 @@ TextureImporter:
       name: Stonewall-1_6
       rect:
         serializedVersion: 2
-        x: 48
-        y: 80
+        x: 96
+        y: 96
         width: 16
         height: 16
       alignment: 0
@@ -270,10 +276,10 @@ TextureImporter:
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: 0
+      tessellationDetail: -1
       bones: []
-      spriteID: e1ec00243f0571c4984195b4cd83a812
-      internalID: -559050428
+      spriteID: 2868b1f54bcacfc70800000000000000
+      internalID: 9006263245523879554
       vertices: []
       indices: 
       edges: []
@@ -282,8 +288,8 @@ TextureImporter:
       name: Stonewall-1_7
       rect:
         serializedVersion: 2
-        x: 64
-        y: 80
+        x: 112
+        y: 96
         width: 16
         height: 16
       alignment: 0
@@ -294,8 +300,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 2849e0db489f2144db7a363a1b8cda3d
-      internalID: -1199602482
+      spriteID: ef4194c790fdb8f40ad683d6fcb9476c
+      internalID: 1211062888
       vertices: []
       indices: 
       edges: []
@@ -305,6 +311,94 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 0
+        y: 80
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 26995a57a57322c4ead18faf6e74bf45
+      internalID: 2137016784
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Stonewall-1_9
+      rect:
+        serializedVersion: 2
+        x: 32
+        y: 80
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 7b78dba8b623d684db086d972a4a3b1b
+      internalID: -986231845
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Stonewall-1_10
+      rect:
+        serializedVersion: 2
+        x: 48
+        y: 80
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6e02dc2d0c989a94d8fd108092a1217c
+      internalID: -1768923146
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Stonewall-1_11
+      rect:
+        serializedVersion: 2
+        x: 64
+        y: 80
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 1ef4dcd0d33c0a845b088b4a778a161e
+      internalID: 1469982486
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Stonewall-1_12
+      rect:
+        serializedVersion: 2
+        x: 0
         y: 64
         width: 16
         height: 16
@@ -316,14 +410,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 4ac5487d55d6da549a36b563ca66842f
-      internalID: 111201400
+      spriteID: 5f271677d93a7a4498b157f7b2740bc7
+      internalID: 823277274
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Stonewall-1_9
+      name: Stonewall-1_13
       rect:
         serializedVersion: 2
         x: 32
@@ -338,14 +432,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 2ef6c74cee4161d4da830f077ef3ba87
-      internalID: -19232142
+      spriteID: 4e27b68ce0109e246a7f2a61fce83376
+      internalID: -1925357525
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Stonewall-1_10
+      name: Stonewall-1_14
       rect:
         serializedVersion: 2
         x: 48
@@ -360,14 +454,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: b9b99639306b66d4aadd739337bbedc7
-      internalID: 1550132285
+      spriteID: 404bef17e8e0cce4a9d6f4b19d57aaf4
+      internalID: -1618290415
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Stonewall-1_11
+      name: Stonewall-1_15
       rect:
         serializedVersion: 2
         x: 64
@@ -382,14 +476,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 80f239a33723224408d8f6614a0158f8
-      internalID: -406214921
+      spriteID: 982d62b74a7703a48b4612158960a61f
+      internalID: -1277084039
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Stonewall-1_12
+      name: Stonewall-1_16
       rect:
         serializedVersion: 2
         x: 96
@@ -404,36 +498,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 09b1c177c47685143a8837e7f4c99274
-      internalID: 220235084
+      spriteID: 3c93d3f2af8943d4aa79d6f02c583c88
+      internalID: -1332552203
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Stonewall-1_13
-      rect:
-        serializedVersion: 2
-        x: 112
-        y: 64
-        width: 16
-        height: 16
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: 310927b7e74f3194b9b94d68d574e365
-      internalID: -1896277813
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Stonewall-1_14
+      name: Stonewall-1_17
       rect:
         serializedVersion: 2
         x: 0
@@ -448,14 +520,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 447245875aa640941a9a0a54c10c5970
-      internalID: 500210320
+      spriteID: e79857f340e70cb40a05d04dc0d1c40e
+      internalID: -96476770
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Stonewall-1_15
+      name: Stonewall-1_18
       rect:
         serializedVersion: 2
         x: 32
@@ -470,14 +542,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: ef9a6b00e6632824a8a8e4219757add7
-      internalID: 126046851
+      spriteID: 0499d9275f3de824ead0bdacc4031fa4
+      internalID: 1057976927
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Stonewall-1_16
+      name: Stonewall-1_19
       rect:
         serializedVersion: 2
         x: 48
@@ -492,14 +564,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 44ffc1bb6cdbba2409da9445227789ef
-      internalID: -2124456464
+      spriteID: 973d0d51e52a4844ab749fbf582f6b2b
+      internalID: -744912188
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Stonewall-1_17
+      name: Stonewall-1_20
       rect:
         serializedVersion: 2
         x: 64
@@ -514,18 +586,18 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: fdab374ee3f02ad4088e19dc434ed655
-      internalID: 736917697
+      spriteID: 46007a4a1c5e2724f8c8d55bc91a67f2
+      internalID: 939836890
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Stonewall-1_18
+      name: Stonewall-1_21
       rect:
         serializedVersion: 2
-        x: 96
-        y: 48
+        x: 0
+        y: 16
         width: 16
         height: 16
       alignment: 0
@@ -536,18 +608,18 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 38ad56d5b052a454fb18fa680aefc2f0
-      internalID: 436206215
+      spriteID: f8c5021a3d3ba5f49bc5fa2de5344c34
+      internalID: 1163805579
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Stonewall-1_19
+      name: Stonewall-1_22
       rect:
         serializedVersion: 2
-        x: 112
-        y: 48
+        x: 16
+        y: 16
         width: 16
         height: 16
       alignment: 0
@@ -558,8 +630,52 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 5f9fffbdd8d7611498121c3fb5a59720
-      internalID: 587133914
+      spriteID: fb7fb33924fdea743a37d655fcab7a44
+      internalID: 970610633
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Stonewall-1_23
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 16a6e460895664d4fab6c86dc086010f
+      internalID: -1314698038
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Stonewall-1_24
+      rect:
+        serializedVersion: 2
+        x: 16
+        y: 0
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 551421f93ade626468276ad6fe36dd3f
+      internalID: 1393760051
       vertices: []
       indices: 
       edges: []
@@ -568,7 +684,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 2f3f7c549d5011445ae55ce7d103a9cf
+    spriteID: d1a7449b5ca8a2a43aae7f550c900810
     internalID: 0
     vertices: []
     indices: 
@@ -582,24 +698,29 @@ TextureImporter:
     nameFileIdTable:
       Stonewall-1_0: 5977361489016249670
       Stonewall-1_1: -8684185434469839791
-      Stonewall-1_10: 1550132285
-      Stonewall-1_11: -406214921
-      Stonewall-1_12: 220235084
-      Stonewall-1_13: -1896277813
-      Stonewall-1_14: 500210320
-      Stonewall-1_15: 126046851
-      Stonewall-1_16: -2124456464
-      Stonewall-1_17: 736917697
-      Stonewall-1_18: 436206215
-      Stonewall-1_19: 587133914
+      Stonewall-1_10: -1768923146
+      Stonewall-1_11: 1469982486
+      Stonewall-1_12: 823277274
+      Stonewall-1_13: -1925357525
+      Stonewall-1_14: -1618290415
+      Stonewall-1_15: -1277084039
+      Stonewall-1_16: -1332552203
+      Stonewall-1_17: -96476770
+      Stonewall-1_18: 1057976927
+      Stonewall-1_19: -744912188
       Stonewall-1_2: 5291912901623732912
+      Stonewall-1_20: 939836890
+      Stonewall-1_21: 1163805579
+      Stonewall-1_22: 970610633
+      Stonewall-1_23: -1314698038
+      Stonewall-1_24: 1393760051
       Stonewall-1_3: 6066667591345258848
       Stonewall-1_4: 6062144258878579028
-      Stonewall-1_5: 1035200745
-      Stonewall-1_6: -559050428
-      Stonewall-1_7: -1199602482
-      Stonewall-1_8: 111201400
-      Stonewall-1_9: -19232142
+      Stonewall-1_5: 5097460794332279024
+      Stonewall-1_6: 9006263245523879554
+      Stonewall-1_7: 1211062888
+      Stonewall-1_8: 2137016784
+      Stonewall-1_9: -986231845
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
