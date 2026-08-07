@@ -8,6 +8,7 @@ public class PlayerStats : Entity
     [Header("Testing / Initial Settings")]
     [SerializeField] private int initialMana = 100;
     [SerializeField] private int initialHealth = 100;
+    [SerializeField] private int initialCoins = 500;
 
     [Header("Network Stats")]
     public NetworkVariable<int> _netCoins = new NetworkVariable<int>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
@@ -55,6 +56,7 @@ public class PlayerStats : Entity
         {
             _netHealth.Value = initialHealth;
             _netMana.Value = initialMana;
+            _netCoins.Value = initialCoins;
         }
 
         if (IsOwner)
