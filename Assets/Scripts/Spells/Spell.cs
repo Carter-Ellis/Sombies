@@ -8,10 +8,13 @@ public abstract class Spell : ScriptableObject
     [SerializeField] protected string _description;
     [SerializeField] protected int _manaCost;
     [SerializeField] protected int damage;
+    [SerializeField] protected float cooldown = 0.5f;
+
     public Sprite sprite;
     public int spellID;
     public string Name => _name;
     public string Description => _description;
     public int ManaCost => _manaCost;
+    public float Cooldown => cooldown;
     public abstract void Cast(Entity entity);
 }

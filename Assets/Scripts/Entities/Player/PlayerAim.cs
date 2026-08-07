@@ -12,6 +12,8 @@ public class PlayerAim : NetworkBehaviour
 
     private Vector2 _stickInput;
     private ControlDeviceType _lastUsedDevice = ControlDeviceType.Mouse;
+    private bool _isHoldingClick = false;
+    private float _lastSpellCastTime = 0f;
 
     private enum ControlDeviceType { Mouse, Gamepad }
 
@@ -42,6 +44,11 @@ public class PlayerAim : NetworkBehaviour
                 }
 
                 RotateFirePoint();
+
+                if (_isHoldingClick)
+                {
+                    TryCastActiveSpell();
+                }
             }
         }
         else
@@ -130,18 +137,31 @@ public class PlayerAim : NetworkBehaviour
     {
         if (!IsOwner) return;
 
-        if (_revive != null && _revive.IsDownedSync.Value) return;
+        if (context.started)
+        {
+            _isHoldingClick = true;
+            TryCastActiveSpell();
+        }
+        else if (context.canceled)
+        {
+            _isHoldingClick = false;
+        }
+    }
 
-        if (!context.started) return;
+    private void TryCastActiveSpell()
+    {
+        if (_revive != null && _revive.IsDownedSync.Value) return;
 
         if (player.activeSpell == null) return;
 
+        if (Time.time < _lastSpellCastTime + player.activeSpell.Cooldown) return;
+
         if (_playerStats.Mana < player.activeSpell.ManaCost)
         {
-            Debug.Log($"Need {player.activeSpell.ManaCost} Mana! Current: {_playerStats.Mana}");
             return;
         }
 
+        _lastSpellCastTime = Time.time;
         player.RequestCastSpellServerRpc(player.ActiveSpellIndex);
     }
 }

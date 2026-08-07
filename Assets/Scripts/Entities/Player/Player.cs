@@ -598,6 +598,8 @@ public class Player : NetworkBehaviour
         }
     }
 
+    private float _lastServerSpellCastTime = 0f;
+
     [Rpc(SendTo.Server)]
     public void RequestCastSpellServerRpc(int spellIndex)
     {
@@ -605,7 +607,11 @@ public class Player : NetworkBehaviour
 
         Spell spellToCast = spells[spellIndex];
 
+        if (Time.time < _lastServerSpellCastTime + spellToCast.Cooldown) return;
+
         if (_playerStats.Mana < spellToCast.ManaCost) return;
+
+        _lastServerSpellCastTime = Time.time;
 
         _playerStats.Mana -= spellToCast.ManaCost;
         spellToCast.Cast(_playerStats);
