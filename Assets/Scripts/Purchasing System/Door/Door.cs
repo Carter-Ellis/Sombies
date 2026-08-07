@@ -5,20 +5,26 @@ using UnityEngine;
 public class Door : PurchaseSystem
 {
     private Vector3Int[] doorCellPositions;
-    private int myDoorTypeIndex; // Remembers if this is a vertical or horizontal door
+    private int myDoorTypeIndex;
 
-    public void Initialize(Vector3Int[] cellPositions, int doorTypeIndex)
+    // Add 'int setPrice' to the parameters
+    public void Initialize(Vector3Int[] cellPositions, int doorTypeIndex, int setPrice)
     {
         doorCellPositions = cellPositions;
         myDoorTypeIndex = doorTypeIndex;
+
+        // Set the price in the base PurchaseSystem class
+        price = setPrice;
+
+        // Force the text to update with the new dynamic price!
+        UpdatePriceText();
     }
 
     protected override void GrantPurchase(Entity buyer)
     {
         if (DoorTilemapManager.Instance != null)
         {
-            // Pass both the coordinates and the index to the RPC
-            DoorTilemapManager.Instance.OpenDoorClientRpc(doorCellPositions, myDoorTypeIndex);
+            DoorTilemapManager.Instance.OpenDoorRpc(doorCellPositions, myDoorTypeIndex);
         }
         else
         {

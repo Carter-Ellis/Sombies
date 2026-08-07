@@ -2,13 +2,15 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 using Unity.Netcode;
+using System.Linq;
 
 [System.Serializable]
 public struct DoorTilePair
 {
-    public string doorName; // Just to keep things organized in the inspector!
+    public string doorName;
     public TileBase closedTile;
     public TileBase openTile;
+    public int price;
 }
 
 public class DoorTilemapManager : NetworkBehaviour
@@ -117,27 +119,76 @@ public class DoorTilemapManager : NetworkBehaviour
         GameObject doorObj = Instantiate(doorTriggerPrefab, centerWorld, Quaternion.identity);
         doorObj.GetComponent<NetworkObject>().Spawn();
 
+        // Calculate size based on tiles
+        float width = (maxX - minX + 1) * doorTilemap.cellSize.x;
+        float height = (maxY - minY + 1) * doorTilemap.cellSize.y;
+
         BoxCollider2D col = doorObj.GetComponent<BoxCollider2D>();
         if (col != null)
         {
-            float width = (maxX - minX + 1) * doorTilemap.cellSize.x;
-            float height = (maxY - minY + 1) * doorTilemap.cellSize.y;
             col.size = new Vector2(width, height);
         }
 
+        // --- Dynamic NavMesh Obstacle Sizing for Horizontal & Vertical Doors ---
+        UnityEngine.AI.NavMeshObstacle obstacle = doorObj.GetComponent<UnityEngine.AI.NavMeshObstacle>();
+        if (obstacle != null)
+        {
+            bool isHorizontal = (maxX - minX) >= (maxY - minY);
+            float obstacleWidth, obstacleHeight;
+
+            if (isHorizontal)
+            {
+                // Horizontal door: spans full width, but thinned out on height so enemies get close
+                obstacleWidth = width;
+                obstacleHeight = 0.4f;
+            }
+            else
+            {
+                // Vertical door: thinned out on width so enemies get close, but spans full height
+                obstacleWidth = 0.4f;
+                obstacleHeight = height;
+            }
+
+            obstacle.size = new Vector3(obstacleWidth, obstacleHeight, 1f);
+        }
+
+        int doorPrice = doorTypes[doorTypeIndex].price;
+
         // Send the index of the door pair to the Door script
-        doorObj.GetComponent<Door>().Initialize(doorCells.ToArray(), doorTypeIndex);
+        doorObj.GetComponent<Door>().Initialize(doorCells.ToArray(), doorTypeIndex, doorPrice);
     }
 
-    [ClientRpc]
-    public void OpenDoorClientRpc(Vector3Int[] cellPositions, int doorTypeIndex)
+    [Rpc(SendTo.ClientsAndHost)]
+    public void OpenDoorRpc(Vector3Int[] cellPositions, int doorTypeIndex)
     {
-        // Use the index to grab the correct open tile for this specific door
         TileBase openTile = doorTypes[doorTypeIndex].openTile;
 
+        // Loop 1: Change all visuals first
         foreach (Vector3Int pos in cellPositions)
         {
             doorTilemap.SetTile(pos, openTile);
+        }
+
+        Vector3Int[] sortedCells = cellPositions.OrderBy(pos => pos.x).ThenBy(pos => pos.y).ToArray();
+
+        // Loop 2: Set the specific hitboxes
+        for (int i = 0; i < sortedCells.Length; i++)
+        {
+            if (i == 0 || i == sortedCells.Length - 1)
+            {
+                doorTilemap.SetColliderType(sortedCells[i], Tile.ColliderType.Sprite);
+            }
+            else
+            {
+                doorTilemap.SetColliderType(sortedCells[i], Tile.ColliderType.None);
+            }
+        }
+
+        UnityEngine.Rendering.Universal.ShadowCaster2D shadowCaster = GetComponent<UnityEngine.Rendering.Universal.ShadowCaster2D>();
+        if (shadowCaster != null)
+        {
+            shadowCaster.enabled = false;
+            shadowCaster.enabled = true;
         }
     }
 }

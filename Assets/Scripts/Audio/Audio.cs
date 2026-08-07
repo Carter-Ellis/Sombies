@@ -187,7 +187,7 @@ public class Audio : NetworkBehaviour
         eventInst.start();
         events[(int)type] = eventInst;
         currentRef[(int)type] = eventRef;
-        print("playing: " + eventRef.Path + " at " + pos);
+        //print("playing: " + eventRef.Path + " at " + pos);
     }
 
     public static void playSFX(EventReference eventRef, Vector3 pos = default)
