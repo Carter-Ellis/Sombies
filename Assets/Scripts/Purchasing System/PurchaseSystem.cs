@@ -50,7 +50,19 @@ public abstract class PurchaseSystem : NetworkBehaviour
 
             if (disableOnPurchase)
             {
-                GetComponent<NetworkObject>().Despawn();
+                NetworkObject netObj = GetComponent<NetworkObject>();
+                if (netObj != null && netObj.IsSpawned)
+                {
+                    if (netObj.IsSceneObject == true)
+                    {
+                        netObj.Despawn(false);
+                        gameObject.SetActive(false);
+                    }
+                    else
+                    {
+                        netObj.Despawn(true);
+                    }
+                }
             }
             
         }
