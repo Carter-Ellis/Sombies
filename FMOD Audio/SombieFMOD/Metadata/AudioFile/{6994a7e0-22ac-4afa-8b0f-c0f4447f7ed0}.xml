@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<objects serializationModel="Studio.02.03.00">
+	<object class="AudioFile" id="{6994a7e0-22ac-4afa-8b0f-c0f4447f7ed0}">
+		<property name="assetPath">
+			<value>Music/119 cherub for sombies_.mp3</value>
+		</property>
+		<property name="isStreaming">
+			<value>true</value>
+		</property>
+		<property name="frequencyInKHz">
+			<value>48</value>
+		</property>
+		<property name="channelCount">
+			<value>2</value>
+		</property>
+		<property name="length">
+			<value>145.24799999999999</value>
+		</property>
+		<relationship name="masterAssetFolder">
+			<destination>{b248d80b-4b0c-4635-9b81-ed9db0ddc28b}</destination>
+		</relationship>
+	</object>
+</objects>
