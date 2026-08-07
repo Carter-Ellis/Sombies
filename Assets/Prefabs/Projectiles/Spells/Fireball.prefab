@@ -203,6 +203,8 @@ MonoBehaviour:
   buffType: 0
   buffAmount: 0
   buffDuration: 0
+  splashRadius: 3.5
+  splashDamage: 30
 --- !u!114 &-2092850474077965402
 MonoBehaviour:
   m_ObjectHideFlags: 0
