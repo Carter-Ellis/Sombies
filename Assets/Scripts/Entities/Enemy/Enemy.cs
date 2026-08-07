@@ -75,11 +75,21 @@ public abstract class Enemy : Entity
     [Header("States")]
     protected bool isKnockedBack = false;
 
+    [Header("Visual Feedback")]
+    protected SpriteRenderer spriteRenderer;
+    protected Color originalColor = Color.white;
+    private Coroutine flashCoroutine;
+
     protected override void Awake()
     {
         base.Awake();
         _netTransform = GetComponent<NetworkTransform>();
         _netRB = GetComponent<NetworkRigidbody2D>();
+        spriteRenderer = GetComponentInChildren<SpriteRenderer>();
+        if (spriteRenderer != null)
+        {
+            originalColor = spriteRenderer.color;
+        }
     }
 
     protected virtual void Start()
@@ -189,11 +199,31 @@ public abstract class Enemy : Entity
     public void TakeDamage(int amount, PlayerStats playerStats)
     {
         Health -= amount;
+        FlashRed();
 
         if (Health <= 0)
         {
             playerStats.AddCoins(killPrice);
             playerStats.AddMana(manaReward);
+        }
+    }
+
+    private void FlashRed()
+    {
+        if (spriteRenderer != null)
+        {
+            if (flashCoroutine != null) StopCoroutine(flashCoroutine);
+            flashCoroutine = StartCoroutine(FlashRoutine());
+        }
+    }
+
+    private IEnumerator FlashRoutine()
+    {
+        spriteRenderer.color = Color.red;
+        yield return new WaitForSeconds(0.1f);
+        if (spriteRenderer != null)
+        {
+            spriteRenderer.color = originalColor;
         }
     }
 

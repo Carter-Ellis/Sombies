@@ -48,6 +48,10 @@ public class FireballProj : Projectile
 
                 nearbyEnemy.TakeDamage(splashDamage, ownerStats);
 
+                // Push splash enemies outward from the explosion center
+                Vector2 splashKnockbackDir = (nearbyEnemy.transform.position - transform.position).normalized;
+                nearbyEnemy.ApplyKnockback(splashKnockbackDir * 6f, 0.15f);
+
                 if (appliesBuff && nearbyEnemy.TryGetComponent(out BuffManager bm))
                 {
                     StatBuff debuff = new StatBuff(nearbyEnemy, buffType, buffAmount);

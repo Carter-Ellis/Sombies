@@ -51,6 +51,9 @@ public abstract class Projectile : NetworkBehaviour
         ownerStats.AddCoins(enemy.hitPrice);
         enemy.TakeDamage(damage, ownerStats);
 
+        Vector2 knockbackDir = (enemy.transform.position - transform.position).normalized;
+        enemy.ApplyKnockback(knockbackDir * 5f, 0.15f);
+
         if (appliesBuff && enemy.TryGetComponent(out BuffManager bm))
         {
             StatBuff debuff = new StatBuff(enemy, buffType, buffAmount);
