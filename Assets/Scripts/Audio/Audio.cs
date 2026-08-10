@@ -58,7 +58,12 @@ public class Audio : MonoBehaviour
     {
         fmodEvents = FMODEvents.instance ?? FindAnyObjectByType<FMODEvents>();
         EnsureMessagingRegistered();
-        StartCoroutine(WaitForBanksAndPlayMusic());
+
+        string currentScene = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
+        if (currentScene != "MainMenu" && currentScene != "Main Menu")
+        {
+            StartCoroutine(WaitForBanksAndPlayMusic());
+        }
     }
 
     private IEnumerator WaitForBanksAndPlayMusic()
@@ -73,6 +78,7 @@ public class Audio : MonoBehaviour
 
     private void OnEnable()
     {
+        UnityEngine.SceneManagement.SceneManager.sceneLoaded += OnSceneLoaded;
         if (NetworkManager.Singleton != null)
         {
             NetworkManager.Singleton.OnClientStarted += OnNetworkStarted;
@@ -84,6 +90,7 @@ public class Audio : MonoBehaviour
 
     private void OnDisable()
     {
+        UnityEngine.SceneManagement.SceneManager.sceneLoaded -= OnSceneLoaded;
         if (NetworkManager.Singleton != null)
         {
             NetworkManager.Singleton.OnClientStarted -= OnNetworkStarted;
@@ -92,6 +99,18 @@ public class Audio : MonoBehaviour
             NetworkManager.Singleton.OnServerStopped -= OnNetworkStopped;
         }
         isMessagingRegistered = false;
+    }
+
+    private void OnSceneLoaded(UnityEngine.SceneManagement.Scene scene, UnityEngine.SceneManagement.LoadSceneMode mode)
+    {
+        if (scene.name == "MainMenu" || scene.name == "Main Menu")
+        {
+            stop(TYPE.MUSIC);
+        }
+        else if (scene.name == "SampleScene")
+        {
+            StartCoroutine(WaitForBanksAndPlayMusic());
+        }
     }
 
     private void OnNetworkStarted()

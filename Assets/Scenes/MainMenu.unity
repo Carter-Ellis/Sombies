@@ -1606,49 +1606,63 @@ MonoBehaviour:
       Data2: 1114025124
       Data3: 1499319462
       Data4: 504645293
-    Path: event:/Welcome
+    Path: event:/SFX/Sequences/Welcome
   <mysteryBoxOpen>k__BackingField:
     Guid:
-      Data1: 0
-      Data2: 0
-      Data3: 0
-      Data4: 0
-    Path: 
+      Data1: 1202756324
+      Data2: 1163163459
+      Data3: -1453589357
+      Data4: 444639229
+    Path: event:/SFX/MysteryBox/MysteryBoxPurchase
   <meleeAttack>k__BackingField:
     Guid:
-      Data1: 0
-      Data2: 0
-      Data3: 0
-      Data4: 0
-    Path: 
+      Data1: -908226443
+      Data2: 1139234190
+      Data3: 2142240685
+      Data4: 673343403
+    Path: event:/SFX/Melee/MeleeAttack
   <downed>k__BackingField:
     Guid:
-      Data1: 0
-      Data2: 0
-      Data3: 0
-      Data4: 0
-    Path: 
+      Data1: -521491720
+      Data2: 1176068445
+      Data3: 1766234500
+      Data4: 175730520
+    Path: event:/SFX/Revive/Downed
   <reviveSequence>k__BackingField:
     Guid:
-      Data1: 0
-      Data2: 0
-      Data3: 0
-      Data4: 0
-    Path: 
+      Data1: -271032924
+      Data2: 1243261327
+      Data3: -2118420292
+      Data4: -345975275
+    Path: event:/SFX/Revive/Revive Sequence
   <playerHurt>k__BackingField:
     Guid:
-      Data1: 0
-      Data2: 0
-      Data3: 0
-      Data4: 0
-    Path: 
+      Data1: 207297317
+      Data2: 1212574046
+      Data3: 1885169042
+      Data4: 361911981
+    Path: event:/SFX/Player/PlayerHurt
   <swig>k__BackingField:
     Guid:
-      Data1: 0
-      Data2: 0
-      Data3: 0
-      Data4: 0
-    Path: 
+      Data1: -469306965
+      Data2: 1261349721
+      Data3: 2095054774
+      Data4: 1683501689
+    Path: event:/SFX/Potion/Swig
+  <sombieStyle>k__BackingField:
+    Guid:
+      Data1: 1525285947
+      Data2: 1266979158
+      Data3: -725782639
+      Data4: 56313053
+    Path: event:/Music/SombieStyle
+  <fireCrackling>k__BackingField:
+    Guid:
+      Data1: -1591047401
+      Data2: 1246040458
+      Data3: -988246600
+      Data4: 630777841
+    Path: event:/SFX/Fire/FireCrackling
 --- !u!1 &826516831
 GameObject:
   m_ObjectHideFlags: 0
