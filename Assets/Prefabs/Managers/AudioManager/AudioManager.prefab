@@ -107,6 +107,13 @@ MonoBehaviour:
       Data3: -988246600
       Data4: 630777841
     Path: event:/SFX/Fire/FireCrackling
+  <doorOpen>k__BackingField:
+    Guid:
+      Data1: 1051446028
+      Data2: 1162502515
+      Data3: -704582984
+      Data4: 1010327865
+    Path: event:/SFX/DoorOpen/DoorOpen
 --- !u!1 &7597115827806844496
 GameObject:
   m_ObjectHideFlags: 0
@@ -178,4 +185,3 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3474344d4c5ca65469b4ceab542d3bfb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AudioManager
-  ShowTopMostFoldoutHeaderGroup: 1

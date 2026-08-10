@@ -28,6 +28,9 @@ public class FMODEvents : MonoBehaviour
     [field: Header("FireCrackling")]
     [field: SerializeField] public EventReference fireCrackling { get; set; }
 
+    [field: Header("Door")]
+    [field: SerializeField] public EventReference doorOpen { get; set; }
+
     public static FMODEvents instance { get; private set; }
 
     private void Awake()
@@ -54,5 +57,6 @@ public class FMODEvents : MonoBehaviour
         if (swig.IsNull) swig = RuntimeManager.PathToEventReference("event:/SFX/Potion/Swig");
         if (sombieStyle.IsNull) sombieStyle = RuntimeManager.PathToEventReference("event:/Music/SombieStyle");
         if (fireCrackling.IsNull) fireCrackling = RuntimeManager.PathToEventReference("event:/SFX/Fire/FireCrackling");
+        if (doorOpen.IsNull) doorOpen = RuntimeManager.PathToEventReference("event:/SFX/DoorOpen/DoorOpen");
     }
 }

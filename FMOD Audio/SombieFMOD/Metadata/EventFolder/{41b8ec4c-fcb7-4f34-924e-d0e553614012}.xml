@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<objects serializationModel="Studio.02.03.00">
+	<object class="EventFolder" id="{41b8ec4c-fcb7-4f34-924e-d0e553614012}">
+		<property name="name">
+			<value>DoorOpen</value>
+		</property>
+		<relationship name="folder">
+			<destination>{40094ed2-cffb-4680-8ed5-d1730ed88352}</destination>
+		</relationship>
+	</object>
+</objects>

@@ -195,6 +195,13 @@ public class DoorTilemapManager : NetworkBehaviour
 
         TileBase openTile = doorTypes[doorTypeIndex].openTile;
 
+        // Play 3D door open sound for all connected clients and host
+        if (cellPositions != null && cellPositions.Length > 0 && FMODEvents.instance != null)
+        {
+            Vector3 soundPos = targetTilemap.GetCellCenterWorld(cellPositions[0]);
+            Audio.playSFX(FMODEvents.instance.doorOpen, soundPos);
+        }
+
         // Loop 1: Change visuals and clear colliders so the doorway becomes passable
         print("Opening door on tilemap: " + targetTilemap.name);
         foreach (Vector3Int pos in cellPositions)
