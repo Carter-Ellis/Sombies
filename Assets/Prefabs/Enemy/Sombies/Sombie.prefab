@@ -163,7 +163,7 @@ MonoBehaviour:
   healthIncreasePerRound: 5
   maxScaledHealth: 200
   _damageAmount: 10
-  damageIncreasePerRound: 2
+  damageIncreasePerRound: 0
   maxDamage: 40
   _knockbackForce: 8
   _knockbackDuration: 0.08

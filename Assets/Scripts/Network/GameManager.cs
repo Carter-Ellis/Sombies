@@ -23,32 +23,27 @@ public class GameManager : NetworkBehaviour
     private void Awake()
     {
         DontDestroyOnLoad(gameObject);
+    }
 
+    private void OnEnable()
+    {
         if (NetworkManager.Singleton != null)
         {
-            NetworkManager.Singleton.NetworkConfig.ConnectionApproval = true;
-            NetworkManager.Singleton.ConnectionApprovalCallback = ApprovalCheck;
+            NetworkManager.Singleton.OnClientDisconnectCallback += OnClientDisconnected;
         }
     }
 
-    async void Start()
+    private void OnDisable()
     {
-        try
+        if (NetworkManager.Singleton != null)
         {
-            // Initialize Unity Services (Required for 2024+)
-            await UnityServices.InitializeAsync();
+            NetworkManager.Singleton.OnClientDisconnectCallback -= OnClientDisconnected;
+        }
+    }
 
-            // Sign in if not already (Relay requires an authenticated session)
-            if (!AuthenticationService.Instance.IsSignedIn)
-            {
-                await AuthenticationService.Instance.SignInAnonymouslyAsync();
-                Debug.Log($"Signed in as: {AuthenticationService.Instance.PlayerId}");
-            }
-        }
-        catch (Exception e)
-        {
-            Debug.LogError($"Services Initializatin Failed: {e.Message}");
-        }
+    private async void Start()
+    {
+        await EnsureServicesInitialized();
 
         if (networkManagerUI != null)
         {
@@ -61,6 +56,31 @@ public class GameManager : NetworkBehaviour
         if (IsServer)
         {
             NetworkManager.Singleton.SceneManager.OnLoadEventCompleted += OnSceneLoaded;
+        }
+    }
+
+    private async System.Threading.Tasks.Task EnsureServicesInitialized()
+    {
+        try
+        {
+            if (UnityServices.State != ServicesInitializationState.Initialized)
+            {
+                var options = new InitializationOptions();
+                string profile = "Player_" + UnityEngine.Random.Range(10000, 999999);
+                options.SetProfile(profile);
+
+                await UnityServices.InitializeAsync(options);
+            }
+
+            if (!AuthenticationService.Instance.IsSignedIn)
+            {
+                await AuthenticationService.Instance.SignInAnonymouslyAsync();
+                Debug.Log($"Signed in as: {AuthenticationService.Instance.PlayerId}");
+            }
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"Services Initialization Failed: {e.Message}");
         }
     }
 
@@ -90,6 +110,47 @@ public class GameManager : NetworkBehaviour
         }
     }
 
+    private string GeneratePlayerName(string requestedName)
+    {
+        string trimmed = string.IsNullOrWhiteSpace(requestedName) ? "" : requestedName.Trim();
+
+        // If requested name is empty or generic default (e.g. "Player", "Player 1"), generate next available "Player X"
+        if (string.IsNullOrEmpty(trimmed) || trimmed.Equals("Player", StringComparison.OrdinalIgnoreCase) || trimmed.Equals("Player 1", StringComparison.OrdinalIgnoreCase))
+        {
+            int number = 1;
+            while (IsNameTaken($"Player {number}"))
+            {
+                number++;
+            }
+            return $"Player {number}";
+        }
+
+        // If custom name is requested, ensure uniqueness
+        if (IsNameTaken(trimmed))
+        {
+            int number = 2;
+            while (IsNameTaken($"{trimmed} ({number})"))
+            {
+                number++;
+            }
+            return $"{trimmed} ({number})";
+        }
+
+        return trimmed;
+    }
+
+    private bool IsNameTaken(string name)
+    {
+        foreach (var pair in clientNames)
+        {
+            if (string.Equals(pair.Value, name, StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private void ApprovalCheck(NetworkManager.ConnectionApprovalRequest request, NetworkManager.ConnectionApprovalResponse response)
     {
         // Check if host
@@ -101,19 +162,17 @@ public class GameManager : NetworkBehaviour
             return;
         }
 
-        string payloadName = "Player " + (clientNames.Count + 1);
+        string rawName = "";
         if (request.Payload != null && request.Payload.Length > 0)
         {
-            string decodedName = System.Text.Encoding.UTF8.GetString(request.Payload);
-            if (!string.IsNullOrEmpty(decodedName))
-            {
-                payloadName = decodedName;
-            }
+            rawName = System.Text.Encoding.UTF8.GetString(request.Payload);
         }
 
-        Debug.Log($"Server received approval request for Client: {request.ClientNetworkId} with name: {payloadName}");
+        string assignedName = GeneratePlayerName(rawName);
 
-        clientNames[request.ClientNetworkId] = payloadName;
+        Debug.Log($"Server received approval request for Client: {request.ClientNetworkId} with requested name: '{rawName}', assigned: '{assignedName}'");
+
+        clientNames[request.ClientNetworkId] = assignedName;
 
         response.Approved = true;
         response.CreatePlayerObject = true;
@@ -124,14 +183,18 @@ public class GameManager : NetworkBehaviour
     {
         networkManagerUI.DisableButtons();
 
-        string myName = networkManagerUI.GetPlayerName();
+        await EnsureServicesInitialized();
 
-        if (string.IsNullOrEmpty(myName))
-        {
-            myName = "Player 1";
-        }
+        string rawName = networkManagerUI.GetPlayerName();
+        string myName = GeneratePlayerName(rawName);
 
         clientNames[NetworkManager.ServerClientId] = myName;
+
+        if (NetworkManager.Singleton != null)
+        {
+            NetworkManager.Singleton.NetworkConfig.ConnectionApproval = true;
+            NetworkManager.Singleton.ConnectionApprovalCallback = ApprovalCheck;
+        }
 
         if (!useRelay)
         {
@@ -158,9 +221,11 @@ public class GameManager : NetworkBehaviour
             // 5. Start Host
             NetworkManager.Singleton.StartHost();
         }
-        catch (RelayServiceException e)
+        catch (Exception e)
         {
             Debug.LogError($"Relay Host Error: {e.Message}");
+            networkManagerUI.EnableButtons();
+            networkManagerUI.ShowLobbyUI(false);
         }
     }
 
@@ -168,13 +233,14 @@ public class GameManager : NetworkBehaviour
     {
         networkManagerUI.DisableButtons();
 
-        string myName = networkManagerUI.GetPlayerName();
-        if (string.IsNullOrEmpty(myName))
-        {
-            myName = "Player " + (clientNames.Count + 1);
-        }
+        await EnsureServicesInitialized();
 
-        NetworkManager.Singleton.NetworkConfig.ConnectionData = System.Text.Encoding.UTF8.GetBytes(myName);
+        string myName = networkManagerUI.GetPlayerName();
+
+        if (NetworkManager.Singleton != null)
+        {
+            NetworkManager.Singleton.NetworkConfig.ConnectionData = System.Text.Encoding.UTF8.GetBytes(myName ?? "");
+        }
 
         if (!useRelay)
         {
@@ -184,16 +250,23 @@ public class GameManager : NetworkBehaviour
 
         // Grab the code typed into the InputField
         string joinCode = networkManagerUI.GetJoinCodeFromInput();
+        if (!string.IsNullOrEmpty(joinCode))
+        {
+            joinCode = joinCode.Trim().ToUpper();
+        }
 
         if (string.IsNullOrEmpty(joinCode))
         {
-            //If no code was entered, just re-enable buttons and exit
+            Debug.LogWarning("No join code entered into input field!");
             networkManagerUI.EnableButtons();
+            networkManagerUI.ShowLobbyUI(false);
             return;
         }
 
         try
         {
+            Debug.Log($"Client attempting to join Relay allocation with code: '{joinCode}'");
+
             // 1. Join Allocation
             JoinAllocation joinAllocation = await RelayService.Instance.JoinAllocationAsync(joinCode);
 
@@ -202,11 +275,35 @@ public class GameManager : NetworkBehaviour
             transport.SetRelayServerData(AllocationUtils.ToRelayServerData(joinAllocation, "dtls"));
 
             // 3. Start Client
-            NetworkManager.Singleton.StartClient();
+            bool started = NetworkManager.Singleton.StartClient();
+            Debug.Log($"NetworkManager.StartClient() result: {started}");
         }
-        catch (RelayServiceException e)
+        catch (Exception e)
         {
             Debug.LogError($"Relay Join Error: {e.Message}");
+            networkManagerUI.EnableButtons();
+            networkManagerUI.ShowLobbyUI(false);
+        }
+    }
+
+    private void OnClientDisconnected(ulong clientId)
+    {
+        if (NetworkManager.Singleton != null)
+        {
+            if (IsServer)
+            {
+                clientNames.Remove(clientId);
+            }
+
+            if (!NetworkManager.Singleton.IsServer && clientId == NetworkManager.Singleton.LocalClientId)
+            {
+                Debug.LogWarning($"Client disconnected or failed to connect. Reason: {NetworkManager.Singleton.DisconnectReason}");
+                if (networkManagerUI != null)
+                {
+                    networkManagerUI.EnableButtons();
+                    networkManagerUI.ShowLobbyUI(false);
+                }
+            }
         }
     }
 
