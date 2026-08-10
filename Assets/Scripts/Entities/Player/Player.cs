@@ -376,7 +376,6 @@ public class Player : NetworkBehaviour
 
     public void CycleItemInput(InputAction.CallbackContext context)
     {
-        if (_revive != null && _revive.IsDownedSync.Value) return;
 
         if (context.performed)
         {
@@ -387,7 +386,6 @@ public class Player : NetworkBehaviour
 
     public void SelectSpecificItemInput(InputAction.CallbackContext context)
     {
-        if (_revive != null && _revive.IsDownedSync.Value) return;
 
         if (context.performed)
         {
@@ -529,7 +527,7 @@ public class Player : NetworkBehaviour
 
         if (context.performed && Time.time >= lastMeleeTime + meleeCooldown)
         {
-            Audio.playSFX(FMODEvents.instance.meleeAttack, transform.position);
+            Audio.PlayNetworkedSFX(FMODEvents.instance.meleeAttack, transform.position);
             lastMeleeTime = Time.time;
             StartCoroutine(ShowMeleeVisual());
 
