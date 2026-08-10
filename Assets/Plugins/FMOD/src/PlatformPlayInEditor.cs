@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
@@ -70,6 +70,11 @@ namespace FMODUnity
             if (globalSettings.HasPlatforms)
             {
                 bankFolder = RuntimeUtils.GetCommonPlatformPath(Path.Combine(bankFolder, BuildDirectory));
+            }
+
+            if (!System.IO.Directory.Exists(bankFolder) && System.IO.Directory.Exists(Application.streamingAssetsPath))
+            {
+                return Application.streamingAssetsPath;
             }
 
             return bankFolder;

@@ -27,6 +27,7 @@ public class GameManager : NetworkBehaviour
         if (NetworkManager.Singleton != null)
         {
             NetworkManager.Singleton.NetworkConfig.ConnectionApproval = true;
+            NetworkManager.Singleton.ConnectionApprovalCallback = ApprovalCheck;
         }
     }
 
@@ -46,7 +47,7 @@ public class GameManager : NetworkBehaviour
         }
         catch (Exception e)
         {
-            Debug.LogError($"Services Initialization Failed: {e.Message}");
+            Debug.LogError($"Services Initializatin Failed: {e.Message}");
         }
 
         if (networkManagerUI != null)
@@ -69,15 +70,14 @@ public class GameManager : NetworkBehaviour
         {
             NetworkManager.Singleton.SceneManager.OnLoadEventCompleted += OnSceneLoaded;
 
-            // Spawn the networked AudioManager across the network
-            if (audioManagerPrefab != null)
+            // Spawn or instantiate the Audio Manager safely
+            if (audioManagerPrefab != null && FindAnyObjectByType<Audio>() == null)
             {
                 GameObject audioInstance = Instantiate(audioManagerPrefab);
-                audioInstance.GetComponent<NetworkObject>().Spawn();
-            }
-            else
-            {
-                Debug.LogError("Audio Manager Prefab is not assigned in the GameManager inspector!");
+                if (audioInstance.TryGetComponent(out NetworkObject netObj))
+                {
+                    netObj.Spawn();
+                }
             }
         }
     }
@@ -101,14 +101,17 @@ public class GameManager : NetworkBehaviour
             return;
         }
 
-        string payloadName = System.Text.Encoding.UTF8.GetString(request.Payload);
+        string payloadName = "Player " + (clientNames.Count + 1);
+        if (request.Payload != null && request.Payload.Length > 0)
+        {
+            string decodedName = System.Text.Encoding.UTF8.GetString(request.Payload);
+            if (!string.IsNullOrEmpty(decodedName))
+            {
+                payloadName = decodedName;
+            }
+        }
 
         Debug.Log($"Server received approval request for Client: {request.ClientNetworkId} with name: {payloadName}");
-
-        if (string.IsNullOrEmpty(payloadName))
-        {
-            payloadName = "Player " + (clientNames.Count + 1);
-        }
 
         clientNames[request.ClientNetworkId] = payloadName;
 
@@ -123,15 +126,12 @@ public class GameManager : NetworkBehaviour
 
         string myName = networkManagerUI.GetPlayerName();
 
-        // If host did not put name, assign default "Player 1"
         if (string.IsNullOrEmpty(myName))
         {
             myName = "Player 1";
         }
 
         clientNames[NetworkManager.ServerClientId] = myName;
-
-        NetworkManager.Singleton.ConnectionApprovalCallback = ApprovalCheck;
 
         if (!useRelay)
         {
@@ -169,10 +169,12 @@ public class GameManager : NetworkBehaviour
         networkManagerUI.DisableButtons();
 
         string myName = networkManagerUI.GetPlayerName();
+        if (string.IsNullOrEmpty(myName))
+        {
+            myName = "Player " + (clientNames.Count + 1);
+        }
 
         NetworkManager.Singleton.NetworkConfig.ConnectionData = System.Text.Encoding.UTF8.GetBytes(myName);
-
-        NetworkManager.Singleton.ConnectionApprovalCallback = ApprovalCheck;
 
         if (!useRelay)
         {

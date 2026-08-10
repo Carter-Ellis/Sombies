@@ -2,10 +2,11 @@ using UnityEngine;
 using FMODUnity;
 using FMOD.Studio;
 using Unity.Netcode;
+using Unity.Collections;
+using System.Collections;
 
-public class Audio : NetworkBehaviour
+public class Audio : MonoBehaviour
 {
-
     public enum TYPE
     {
         MASTER,
@@ -32,6 +33,10 @@ public class Audio : NetworkBehaviour
     private static bool isBusSet = false;
 
     private static FMODEvents fmodEvents;
+    private static bool isMessagingRegistered = false;
+
+    private const string MSG_SERVER_TO_CLIENT_SFX = "Audio_S2C_SFX";
+    private const string MSG_CLIENT_TO_SERVER_SFX = "Audio_C2S_SFX";
 
     private void Awake()
     {
@@ -45,76 +50,197 @@ public class Audio : NetworkBehaviour
         }
         instance = this;
         DontDestroyOnLoad(gameObject);
-        fmodEvents = FindAnyObjectByType<FMODEvents>();
-
+        Application.runInBackground = true;
         clearVariables();
-        //playGameMusic();
-        //setBuses();
-
-        /*SceneManager.sceneLoaded += OnSceneLoaded;
-        OnSceneLoaded(SceneManager.GetActiveScene(), LoadSceneMode.Single);*/
-
     }
 
-    public static void PlayNetworkedSFX(EventReference eventRef, Vector3 pos)
+    private void Start()
     {
-        if (instance != null && !eventRef.IsNull)
+        fmodEvents = FMODEvents.instance ?? FindAnyObjectByType<FMODEvents>();
+        EnsureMessagingRegistered();
+        StartCoroutine(WaitForBanksAndPlayMusic());
+    }
+
+    private IEnumerator WaitForBanksAndPlayMusic()
+    {
+        while (!RuntimeManager.IsInitialized || !RuntimeManager.HaveMasterBanksLoaded)
         {
-            if (instance.IsServer)
+            yield return null;
+        }
+
+        playGameMusic();
+    }
+
+    private void OnEnable()
+    {
+        if (NetworkManager.Singleton != null)
+        {
+            NetworkManager.Singleton.OnClientStarted += OnNetworkStarted;
+            NetworkManager.Singleton.OnServerStarted += OnNetworkStarted;
+            NetworkManager.Singleton.OnClientStopped += OnNetworkStopped;
+            NetworkManager.Singleton.OnServerStopped += OnNetworkStopped;
+        }
+    }
+
+    private void OnDisable()
+    {
+        if (NetworkManager.Singleton != null)
+        {
+            NetworkManager.Singleton.OnClientStarted -= OnNetworkStarted;
+            NetworkManager.Singleton.OnServerStarted -= OnNetworkStarted;
+            NetworkManager.Singleton.OnClientStopped -= OnNetworkStopped;
+            NetworkManager.Singleton.OnServerStopped -= OnNetworkStopped;
+        }
+        isMessagingRegistered = false;
+    }
+
+    private void OnNetworkStarted()
+    {
+        EnsureMessagingRegistered();
+    }
+
+    private void OnNetworkStopped(bool isServer)
+    {
+        isMessagingRegistered = false;
+    }
+
+    private static void EnsureMessagingRegistered()
+    {
+        if (NetworkManager.Singleton != null && NetworkManager.Singleton.IsListening && NetworkManager.Singleton.CustomMessagingManager != null)
+        {
+            if (!isMessagingRegistered)
             {
-                instance.PlaySoundClientRpc(
-                    eventRef.Guid.Data1,
-                    eventRef.Guid.Data2,
-                    eventRef.Guid.Data3,
-                    eventRef.Guid.Data4,
-                    pos
-                );
-            }
-            else
-            {
-                instance.RequestPlaySoundServerRpc(
-                    eventRef.Guid.Data1,
-                    eventRef.Guid.Data2,
-                    eventRef.Guid.Data3,
-                    eventRef.Guid.Data4,
-                    pos
-                );
+                NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler(MSG_SERVER_TO_CLIENT_SFX, OnReceiveSFXClient);
+                NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler(MSG_CLIENT_TO_SERVER_SFX, OnReceiveSFXServer);
+                isMessagingRegistered = true;
             }
         }
     }
 
-    [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
-    private void RequestPlaySoundServerRpc(int d1, int d2, int d3, int d4, Vector3 position)
+    public static void PlayNetworkedSFX(EventReference eventRef, Vector3 pos)
     {
-        PlaySoundClientRpc(d1, d2, d3, d4, position);
+        if (eventRef.IsNull) return;
+
+        EnsureMessagingRegistered();
+
+        if (NetworkManager.Singleton == null || !NetworkManager.Singleton.IsListening || NetworkManager.Singleton.CustomMessagingManager == null)
+        {
+            playSFXInternal(eventRef.Guid, pos);
+            return;
+        }
+
+        if (NetworkManager.Singleton.IsServer)
+        {
+            BroadcastSFXToClients(eventRef.Guid, pos);
+        }
+        else
+        {
+            SendSFXToServer(eventRef.Guid, pos);
+        }
     }
 
-    [Rpc(SendTo.ClientsAndHost)]
-    private void PlaySoundClientRpc(int d1, int d2, int d3, int d4, Vector3 position)
+    private static void BroadcastSFXToClients(FMOD.GUID guid, Vector3 pos)
     {
-        FMOD.GUID networkGuid = new FMOD.GUID { Data1 = d1, Data2 = d2, Data3 = d3, Data4 = d4 };
+        if (NetworkManager.Singleton == null || NetworkManager.Singleton.CustomMessagingManager == null) return;
 
-        EventInstance eventInst = RuntimeManager.CreateInstance(networkGuid);
-        eventInst.set3DAttributes(RuntimeUtils.To3DAttributes(position));
-        eventInst.start();
-        eventInst.release();
+        using FastBufferWriter writer = new FastBufferWriter(256, Allocator.Temp);
+        writer.WriteValueSafe(guid.Data1);
+        writer.WriteValueSafe(guid.Data2);
+        writer.WriteValueSafe(guid.Data3);
+        writer.WriteValueSafe(guid.Data4);
+        writer.WriteValueSafe(pos);
+
+        NetworkManager.Singleton.CustomMessagingManager.SendNamedMessageToAll(MSG_SERVER_TO_CLIENT_SFX, writer);
+
+        // Always play locally on server/host
+        playSFXInternal(guid, pos);
+    }
+
+    private static void SendSFXToServer(FMOD.GUID guid, Vector3 pos)
+    {
+        if (NetworkManager.Singleton == null || NetworkManager.Singleton.CustomMessagingManager == null) return;
+
+        using FastBufferWriter writer = new FastBufferWriter(256, Allocator.Temp);
+        writer.WriteValueSafe(guid.Data1);
+        writer.WriteValueSafe(guid.Data2);
+        writer.WriteValueSafe(guid.Data3);
+        writer.WriteValueSafe(guid.Data4);
+        writer.WriteValueSafe(pos);
+
+        NetworkManager.Singleton.CustomMessagingManager.SendNamedMessage(MSG_CLIENT_TO_SERVER_SFX, NetworkManager.ServerClientId, writer);
+    }
+
+    private static void OnReceiveSFXClient(ulong senderClientId, FastBufferReader reader)
+    {
+        reader.ReadValueSafe(out int d1);
+        reader.ReadValueSafe(out int d2);
+        reader.ReadValueSafe(out int d3);
+        reader.ReadValueSafe(out int d4);
+        reader.ReadValueSafe(out Vector3 pos);
+
+        FMOD.GUID guid = new FMOD.GUID { Data1 = d1, Data2 = d2, Data3 = d3, Data4 = d4 };
+
+        // Client (non-host) plays sound locally upon receiving broadcast
+        if (NetworkManager.Singleton != null && !NetworkManager.Singleton.IsServer)
+        {
+            playSFXInternal(guid, pos);
+        }
+    }
+
+    private static void OnReceiveSFXServer(ulong senderClientId, FastBufferReader reader)
+    {
+        reader.ReadValueSafe(out int d1);
+        reader.ReadValueSafe(out int d2);
+        reader.ReadValueSafe(out int d3);
+        reader.ReadValueSafe(out int d4);
+        reader.ReadValueSafe(out Vector3 pos);
+
+        FMOD.GUID guid = new FMOD.GUID { Data1 = d1, Data2 = d2, Data3 = d3, Data4 = d4 };
+
+        // Server broadcasts to all clients (including local playback on host)
+        BroadcastSFXToClients(guid, pos);
+    }
+
+    private static void playSFXInternal(FMOD.GUID guid, Vector3 pos)
+    {
+        if (guid.IsNull) return;
+
+        try
+        {
+            RuntimeManager.PlayOneShot(guid, pos);
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogWarning($"[Audio] Could not play SFX GUID '{guid}': {ex.Message}");
+        }
+    }
+
+    private static void playSFXInternal(string eventIdentifier, Vector3 pos)
+    {
+        if (string.IsNullOrEmpty(eventIdentifier)) return;
+
+        try
+        {
+            RuntimeManager.PlayOneShot(eventIdentifier, pos);
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogWarning($"[Audio] Could not play SFX '{eventIdentifier}': {ex.Message}");
+        }
     }
 
     private static void clearVariables()
     {
-
         isBusSet = false;
         for (int i = 0; i < (int)TYPE.MAX; i++)
         {
             events[i] = default;
             currentRef[i] = default;
         }
-
     }
 
     private static void setBuses()
     {
-
         if (isBusSet) { return; }
         isBusSet = true;
 
@@ -122,40 +248,28 @@ public class Audio : NetworkBehaviour
         {
             buses[i] = RuntimeManager.GetBus(busPaths[i]);
         }
-
     }
 
-    /*public static void playMainMusic()
-    {
-        play(TYPE.MUSIC, fmodEvents.mainMusic);
-    }*/
-    
     public static void playGameMusic()
     {
+        if (fmodEvents == null)
+        {
+            fmodEvents = FMODEvents.instance ?? FindAnyObjectByType<FMODEvents>();
+        }
+
+        if (fmodEvents == null) return;
+
         EventReference sound = fmodEvents.sombieStyle;
-        
-        play(TYPE.MUSIC, sound);
+        if (!sound.IsNull)
+        {
+            play(TYPE.MUSIC, sound);
+        }
     }
 
     public static void playTimelineSFX(EventReference eventReference, Vector3 pos = default)
     {
         play(TYPE.MUSIC, eventReference, pos);
     }
-    /*
-    public static void playShopMusic()
-    {
-        play(TYPE.MUSIC, fmodEvents.shopMusic);
-    }
-
-    public static void playAmbienceMusic()
-    {
-        EventReference sound = fmodEvents.ambience;
-        if (Map.current == Map.TYPE.BEACH)
-        {
-            sound = fmodEvents.beachAmbience;
-        }
-        play(TYPE.AMBIENCE, sound);
-    }*/
 
     public static float volume(TYPE type, float value = -1)
     {
@@ -171,6 +285,8 @@ public class Audio : NetworkBehaviour
 
     private static void play(TYPE type, EventReference eventRef, Vector3 pos = default)
     {
+        if (eventRef.IsNull) return;
+
         if (type == TYPE.SFX)
         {
             RuntimeManager.PlayOneShot(eventRef, pos);
@@ -178,7 +294,7 @@ public class Audio : NetworkBehaviour
         }
         if (currentRef[(int)type].Guid == eventRef.Guid)
         {
-            return; //Don't restart music/ambience
+            return; // Don't restart music/ambience
         }
         stop(type);
 
@@ -187,7 +303,6 @@ public class Audio : NetworkBehaviour
         eventInst.start();
         events[(int)type] = eventInst;
         currentRef[(int)type] = eventRef;
-        //print("playing: " + eventRef.Path + " at " + pos);
     }
 
     public static void playSFX(EventReference eventRef, Vector3 pos = default)
@@ -211,22 +326,5 @@ public class Audio : NetworkBehaviour
         eventInst.stop(FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
         eventInst.release();
         events[(int)type] = default;
-
     }
-
-    /*private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
-    {
-        if (scene.name == "Main Menu")
-        {
-            playMainMusic();
-        }
-        else
-        {
-            playGameMusic();
-        }
-
-        playAmbienceMusic();
-
-    }*/
-
 }

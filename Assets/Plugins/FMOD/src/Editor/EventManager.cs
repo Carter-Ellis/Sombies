@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEditor;
 using System;
 using System.Collections.Generic;
@@ -135,8 +135,15 @@ namespace FMODUnity
 
             if (!Directory.Exists(defaultBankFolder))
             {
-                ClearCache();
-                return string.Format("Directory {0} doesn't exist. Please confirm project directory in the settings.", defaultBankFolder);
+                if (Directory.Exists(Application.streamingAssetsPath) && Directory.GetFiles(Application.streamingAssetsPath, "*.bank").Length > 0)
+                {
+                    defaultBankFolder = Application.streamingAssetsPath;
+                }
+                else
+                {
+                    ClearCache();
+                    return string.Format("Directory {0} doesn't exist. Please confirm project directory in the settings.", defaultBankFolder);
+                }
             }
 
             // Get all banks and set cache time to most recent write time

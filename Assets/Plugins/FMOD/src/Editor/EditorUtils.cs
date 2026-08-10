@@ -1,4 +1,4 @@
-﻿#if UNITY_ADDRESSABLES_EXIST
+#if UNITY_ADDRESSABLES_EXIST
     // The Addressables package depends on the ScriptableBuildPipeline package
     #define UNITY_SCRIPTABLEBUILDPIPELINE_EXIST
 #endif
@@ -61,6 +61,10 @@ namespace FMODUnity
                 }
                 if (!File.Exists(settings.SourceProjectPath))
                 {
+                    if (Directory.Exists(Application.streamingAssetsPath) && Directory.GetFiles(Application.streamingAssetsPath, "*.bank").Length > 0)
+                    {
+                        return;
+                    }
                     valid = false;
                     reason = string.Format(L10n.Tr("The FMOD Studio project path '{0}' does not exist."), settings.SourceProjectPath);
                     return;
@@ -71,6 +75,10 @@ namespace FMODUnity
                 string buildFolder = RuntimeUtils.GetCommonPlatformPath(Path.Combine(projectFolder, BuildFolder));
                 if (!Directory.Exists(buildFolder) || !Directory.EnumerateDirectories(buildFolder).Any())
                 {
+                    if (Directory.Exists(Application.streamingAssetsPath) && Directory.GetFiles(Application.streamingAssetsPath, "*.bank").Length > 0)
+                    {
+                        return;
+                    }
                     valid = false;
                     reason = string.Format(L10n.Tr("The FMOD Studio project '{0}' does not contain any built banks. Please build your project in FMOD Studio."), settings.SourceProjectPath);
                     return;
@@ -80,6 +88,10 @@ namespace FMODUnity
 
                 if (!Directory.Exists(defaultBankFolder))
                 {
+                    if (Directory.Exists(Application.streamingAssetsPath) && Directory.GetFiles(Application.streamingAssetsPath, "*.bank").Length > 0)
+                    {
+                        return;
+                    }
                     valid = false;
                     reason = string.Format(L10n.Tr("Platform build directory '{0}' does not exist. Please build your project in FMOD Studio."), defaultBankFolder);
                     return;
@@ -95,6 +107,10 @@ namespace FMODUnity
                 }
                 if (!Directory.Exists(settings.SourceBankPath))
                 {
+                    if (Directory.Exists(Application.streamingAssetsPath) && Directory.GetFiles(Application.streamingAssetsPath, "*.bank").Length > 0)
+                    {
+                        return;
+                    }
                     valid = false;
                     reason = string.Format(L10n.Tr("The build path '{0}' does not exist."), settings.SourceBankPath);
                     return;
@@ -105,12 +121,20 @@ namespace FMODUnity
                     string defaultBankFolder = RuntimeUtils.GetCommonPlatformPath(Path.Combine(settings.SourceBankPath, EditorSettings.Instance.CurrentEditorPlatform.BuildDirectory));
                     if (Directory.GetDirectories(settings.SourceBankPath).Length == 0)
                     {
+                        if (Directory.Exists(Application.streamingAssetsPath) && Directory.GetFiles(Application.streamingAssetsPath, "*.bank").Length > 0)
+                        {
+                            return;
+                        }
                         valid = false;
                         reason = string.Format(L10n.Tr("Build path '{0}' does not contain any platform sub-directories. Please check that the build path is correct."), settings.SourceBankPath);
                         return;
                     }
                     else if (!Directory.Exists(defaultBankFolder))
                     {
+                        if (Directory.Exists(Application.streamingAssetsPath) && Directory.GetFiles(Application.streamingAssetsPath, "*.bank").Length > 0)
+                        {
+                            return;
+                        }
                         valid = false;
                         reason = string.Format(L10n.Tr("Platform sub-directory '{0}' does not exist. Please check that the build path is correct."), defaultBankFolder);
                         return;
