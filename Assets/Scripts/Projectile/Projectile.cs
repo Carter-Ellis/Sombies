@@ -17,6 +17,12 @@ public abstract class Projectile : NetworkBehaviour
         NetworkVariableWritePermission.Server
     );
 
+    protected NetworkVariable<ulong> _ownerNetworkObjectId = new NetworkVariable<ulong>(
+        0,
+        NetworkVariableReadPermission.Everyone,
+        NetworkVariableWritePermission.Server
+    );
+
     protected int damage;
     protected PlayerStats ownerStats;
     private float initialSpeed = 15f;
@@ -30,9 +36,32 @@ public abstract class Projectile : NetworkBehaviour
         if (IsSpawned && IsServer)
         {
             _launchSpeed.Value = speed;
+            if (playerStats != null && playerStats.TryGetComponent<NetworkObject>(out var netObj))
+            {
+                _ownerNetworkObjectId.Value = netObj.NetworkObjectId;
+            }
         }
 
         ApplyVelocity();
+    }
+
+    public PlayerStats GetOwnerStats()
+    {
+        if (ownerStats != null) return ownerStats;
+
+        if (NetworkManager.Singleton != null && NetworkManager.Singleton.SpawnManager != null)
+        {
+            if (_ownerNetworkObjectId.Value != 0 && NetworkManager.Singleton.SpawnManager.SpawnedObjects.TryGetValue(_ownerNetworkObjectId.Value, out var netObj))
+            {
+                ownerStats = netObj.GetComponent<PlayerStats>();
+            }
+            else if (NetworkManager.Singleton.LocalClient != null && NetworkManager.Singleton.LocalClient.PlayerObject != null)
+            {
+                ownerStats = NetworkManager.Singleton.LocalClient.PlayerObject.GetComponent<PlayerStats>();
+            }
+        }
+
+        return ownerStats;
     }
 
     public override void OnNetworkSpawn()
@@ -43,6 +72,11 @@ public abstract class Projectile : NetworkBehaviour
         if (IsServer)
         {
             _launchSpeed.Value = initialSpeed;
+
+            if (ownerStats != null && ownerStats.TryGetComponent<NetworkObject>(out var netObj))
+            {
+                _ownerNetworkObjectId.Value = netObj.NetworkObjectId;
+            }
         }
 
         if (!IsServer)
