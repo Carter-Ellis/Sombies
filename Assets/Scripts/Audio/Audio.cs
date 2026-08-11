@@ -73,7 +73,7 @@ public class Audio : MonoBehaviour
             yield return null;
         }
 
-        playGameMusic();
+        //playGameMusic();
     }
 
     private void OnEnable()

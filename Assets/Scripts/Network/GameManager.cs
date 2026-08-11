@@ -43,7 +43,10 @@ public class GameManager : NetworkBehaviour
 
     private async void Start()
     {
-        await EnsureServicesInitialized();
+        if (useRelay)
+        {
+            await EnsureServicesInitialized();
+        }
 
         if (networkManagerUI != null)
         {
@@ -59,28 +62,66 @@ public class GameManager : NetworkBehaviour
         }
     }
 
+    private static bool isInitializingServices = false;
+    private static bool isSigningIn = false;
+
     private async System.Threading.Tasks.Task EnsureServicesInitialized()
     {
-        try
+        if (UnityServices.State == ServicesInitializationState.Initialized && AuthenticationService.Instance != null && AuthenticationService.Instance.IsSignedIn)
         {
-            if (UnityServices.State != ServicesInitializationState.Initialized)
+            return;
+        }
+
+        while (isInitializingServices || isSigningIn)
+        {
+            await System.Threading.Tasks.Task.Delay(100);
+            if (AuthenticationService.Instance != null && AuthenticationService.Instance.IsSignedIn)
+            {
+                return;
+            }
+        }
+
+        if (UnityServices.State != ServicesInitializationState.Initialized)
+        {
+            isInitializingServices = true;
+            try
             {
                 var options = new InitializationOptions();
                 string profile = "Player_" + UnityEngine.Random.Range(10000, 999999);
                 options.SetProfile(profile);
 
                 await UnityServices.InitializeAsync(options);
+                Debug.Log("Unity Services Initialized");
             }
-
-            if (!AuthenticationService.Instance.IsSignedIn)
+            catch (Exception e)
             {
-                await AuthenticationService.Instance.SignInAnonymouslyAsync();
-                Debug.Log($"Signed in as: {AuthenticationService.Instance.PlayerId}");
+                Debug.LogError($"Services Initialization Failed: {e.Message}");
+            }
+            finally
+            {
+                isInitializingServices = false;
             }
         }
-        catch (Exception e)
+
+        if (AuthenticationService.Instance != null && !AuthenticationService.Instance.IsSignedIn && !isSigningIn)
         {
-            Debug.LogError($"Services Initialization Failed: {e.Message}");
+            isSigningIn = true;
+            try
+            {
+                await AuthenticationService.Instance.SignInAnonymouslyAsync();
+                Debug.Log($"Signed in! Player ID: {AuthenticationService.Instance.PlayerId}");
+            }
+            catch (Exception e)
+            {
+                if (!e.Message.Contains("already signing in"))
+                {
+                    Debug.LogError($"Sign in failed: {e.Message}");
+                }
+            }
+            finally
+            {
+                isSigningIn = false;
+            }
         }
     }
 
@@ -183,7 +224,10 @@ public class GameManager : NetworkBehaviour
     {
         networkManagerUI.DisableButtons();
 
-        await EnsureServicesInitialized();
+        if (useRelay)
+        {
+            await EnsureServicesInitialized();
+        }
 
         string rawName = networkManagerUI.GetPlayerName();
         string myName = GeneratePlayerName(rawName);
@@ -233,12 +277,16 @@ public class GameManager : NetworkBehaviour
     {
         networkManagerUI.DisableButtons();
 
-        await EnsureServicesInitialized();
+        if (useRelay)
+        {
+            await EnsureServicesInitialized();
+        }
 
         string myName = networkManagerUI.GetPlayerName();
 
         if (NetworkManager.Singleton != null)
         {
+            NetworkManager.Singleton.NetworkConfig.ConnectionApproval = true;
             NetworkManager.Singleton.NetworkConfig.ConnectionData = System.Text.Encoding.UTF8.GetBytes(myName ?? "");
         }
 

@@ -91,7 +91,10 @@ public class Player : NetworkBehaviour
         playerName.OnValueChanged -= OnNameChanged;
         playerName.OnValueChanged += OnNameChanged;
 
-        nameTagText.text = playerName.Value.ToString();
+        if (nameTagText != null)
+        {
+            nameTagText.text = playerName.Value.ToString();
+        }
 
         if (IsServer)
         {
@@ -106,14 +109,20 @@ public class Player : NetworkBehaviour
 
         if (IsOwner)
         {
-            UIManager.Instance.InitializeInventoryUI(maxInventorySlots);
-            UIManager.Instance.RefreshInventory(inventory, selectedItemIndex);
+            if (UIManager.Instance != null)
+            {
+                UIManager.Instance.InitializeInventoryUI(maxInventorySlots);
+                UIManager.Instance.RefreshInventory(inventory, selectedItemIndex);
+            }
             UpdateInventoryUI();
         }
 
         if (!IsOwner)
         {
-            firepoint.gameObject.SetActive(false);
+            if (firepoint != null)
+            {
+                firepoint.gameObject.SetActive(false);
+            }
         }
     }
 
