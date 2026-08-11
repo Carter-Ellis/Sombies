@@ -25,7 +25,7 @@ public class GaleProj : Projectile
 
         if (!isReturning && returnTimer >= outwardDuration)
         {
-            isReturning = true;
+            SetReturning();
         }
 
         if (isReturning)
@@ -69,7 +69,7 @@ public class GaleProj : Projectile
         {
             if (collision.CompareTag("Wall"))
             {
-                isReturning = true;
+                SetReturning();
             }
             return;
         }
@@ -77,7 +77,7 @@ public class GaleProj : Projectile
         Enemy enemy = collision.GetComponentInParent<Enemy>();
         if (enemy != null)
         {
-            // Piercing: Damage each enemy ONCE and continue flying!
+            // Piercing: Damage each enemy ONCE per leg (outward / returning)
             if (hitEnemies.Add(enemy))
             {
                 OnHitEnemy(enemy);
@@ -88,13 +88,33 @@ public class GaleProj : Projectile
             if (!isReturning)
             {
                 // Immediately switch to return mode upon hitting a wall
-                isReturning = true;
+                SetReturning();
             }
             else
             {
                 // Despawn if hitting a wall while already returning
                 Destroy(gameObject);
             }
+        }
+    }
+
+    private void OnTriggerStay2D(Collider2D collision)
+    {
+        if (!IsServer) return;
+
+        Enemy enemy = collision.GetComponentInParent<Enemy>();
+        if (enemy != null && hitEnemies.Add(enemy))
+        {
+            OnHitEnemy(enemy);
+        }
+    }
+
+    private void SetReturning()
+    {
+        if (!isReturning)
+        {
+            isReturning = true;
+            hitEnemies.Clear();
         }
     }
 }
