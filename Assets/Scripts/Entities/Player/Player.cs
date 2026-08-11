@@ -626,6 +626,69 @@ public class Player : NetworkBehaviour
         PlayCastAnimationClientRpc();
     }
 
+    private PulseProj _activeChargingPulse;
+
+    [Rpc(SendTo.Server)]
+    public void RequestStartChargingSpellServerRpc(int spellIndex)
+    {
+        if (spellIndex < 0 || spellIndex >= spells.Count || spells[spellIndex] == null) return;
+        Spell spellToCast = spells[spellIndex];
+
+        if (Time.time < _lastServerSpellCastTime + spellToCast.Cooldown) return;
+        if (_playerStats.Mana < spellToCast.ManaCost) return;
+
+        _lastServerSpellCastTime = Time.time;
+        _playerStats.Mana -= spellToCast.ManaCost;
+
+        if (spellToCast is ProjectileSpell projSpell)
+        {
+            GameObject ball = Instantiate(projSpell.ProjectilePrefab, firepoint.position, firepoint.rotation);
+
+            if (ball.TryGetComponent(out PulseProj pulse))
+            {
+                pulse.Initialize(_playerStats, spellToCast.Damage, projSpell.LaunchForce);
+                _activeChargingPulse = pulse;
+            }
+            else if (ball.TryGetComponent(out Projectile proj))
+            {
+                proj.Initialize(_playerStats, spellToCast.Damage, projSpell.LaunchForce);
+            }
+
+            if (ball.TryGetComponent(out NetworkObject netObj))
+            {
+                netObj.Spawn();
+            }
+        }
+        else
+        {
+            spellToCast.Cast(_playerStats);
+        }
+
+        PlayCastAnimationClientRpc();
+    }
+
+    [Rpc(SendTo.Server)]
+    public void RequestReleaseChargingSpellServerRpc()
+    {
+        if (_activeChargingPulse != null)
+        {
+            _activeChargingPulse.LaunchServerRpc();
+            _activeChargingPulse = null;
+        }
+        else
+        {
+            // Failsafe: find any unlaunched PulseProj owned by this player
+            PulseProj[] activePulses = Object.FindObjectsByType<PulseProj>(FindObjectsInactive.Exclude);
+            foreach (var pulse in activePulses)
+            {
+                if (pulse.GetOwnerStats() == _playerStats)
+                {
+                    pulse.LaunchServerRpc();
+                }
+            }
+        }
+    }
+
     [Rpc(SendTo.Everyone, InvokePermission = RpcInvokePermission.Server)]
     private void PlayCastAnimationClientRpc()
     {

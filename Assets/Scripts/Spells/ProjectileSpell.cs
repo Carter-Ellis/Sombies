@@ -7,7 +7,30 @@ public class ProjectileSpell : Spell
     [SerializeField] private GameObject projectilePrefab;
     [SerializeField] private float launchForce = 15f;
 
+    public GameObject ProjectilePrefab => projectilePrefab;
+    public float LaunchForce => launchForce;
+
     public override void Cast(Entity entity)
+    {
+        Player player = entity.GetComponent<Player>();
+        PlayerStats playerStats = entity.GetComponent<PlayerStats>();
+
+        if (player == null || playerStats == null || player.firepoint == null) return;
+
+        GameObject ball = Instantiate(projectilePrefab, player.firepoint.position, player.firepoint.rotation);
+
+        if (ball.TryGetComponent(out Projectile proj))
+        {
+            proj.Initialize(playerStats, damage, launchForce);
+        }
+
+        if (ball.TryGetComponent(out NetworkObject netObj))
+        {
+            netObj.Spawn();
+        }
+    }
+
+    public override void Cast(Entity entity, float chargeTime)
     {
         Player player = entity.GetComponent<Player>();
         PlayerStats playerStats = entity.GetComponent<PlayerStats>();

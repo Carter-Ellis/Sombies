@@ -45,7 +45,7 @@ public class PlayerAim : NetworkBehaviour
 
                 RotateFirePoint();
 
-                if (_isHoldingClick)
+                if (_isHoldingClick && !_isChargingSpell)
                 {
                     TryCastActiveSpell();
                 }
@@ -133,6 +133,8 @@ public class PlayerAim : NetworkBehaviour
         }
     }
 
+    private bool _isChargingSpell = false;
+
     public void OnClick(InputAction.CallbackContext context)
     {
         if (!IsOwner) return;
@@ -140,11 +142,30 @@ public class PlayerAim : NetworkBehaviour
         if (context.started)
         {
             _isHoldingClick = true;
-            TryCastActiveSpell();
+
+            if (player.activeSpell != null && (player.activeSpell.IsChargeSpell || player.activeSpell.Name.Contains("Pulse")))
+            {
+                _isChargingSpell = true;
+                player.RequestStartChargingSpellServerRpc(player.ActiveSpellIndex);
+            }
+            else
+            {
+                TryCastActiveSpell();
+            }
         }
         else if (context.canceled)
         {
             _isHoldingClick = false;
+
+            if (_isChargingSpell)
+            {
+                _isChargingSpell = false;
+                if (PulseProj.LocalChargingPulse != null)
+                {
+                    PulseProj.LocalChargingPulse.LaunchFromClient();
+                }
+                player.RequestReleaseChargingSpellServerRpc();
+            }
         }
     }
 
