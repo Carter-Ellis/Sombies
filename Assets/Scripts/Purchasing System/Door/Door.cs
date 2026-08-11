@@ -15,11 +15,8 @@ public class Door : PurchaseSystem
         myDoorTypeIndex = doorTypeIndex;
         myTilemapIndex = tilemapIndex;
 
-        // Set the price in the base PurchaseSystem class
-        price = setPrice;
-
-        // Force the text to update with the new dynamic price!
-        UpdatePriceText();
+        // Set and sync the price in the base PurchaseSystem class
+        SetPrice(setPrice);
     }
 
     protected override void GrantPurchase(Entity buyer)

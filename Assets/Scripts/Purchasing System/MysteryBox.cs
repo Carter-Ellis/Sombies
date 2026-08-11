@@ -56,7 +56,7 @@ public class MysteryBox : PurchaseSystem
 
         // 4. Reset the Box
         Debug.Log("Box is ready for another spin!");
-        hasBeenPurchased.Value = false;
+        _hasBeenPurchased.Value = false;
     }
 
 }

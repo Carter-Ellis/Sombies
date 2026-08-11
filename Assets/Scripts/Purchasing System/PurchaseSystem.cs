@@ -17,8 +17,14 @@ public abstract class PurchaseSystem : NetworkBehaviour
     [SerializeField] protected Spell spell;
     [SerializeField] protected bool disableOnPurchase = true;
 
-    protected NetworkVariable<bool> hasBeenPurchased = new NetworkVariable<bool>(
+    protected NetworkVariable<bool> _hasBeenPurchased = new NetworkVariable<bool>(
         false,
+        NetworkVariableReadPermission.Everyone,
+        NetworkVariableWritePermission.Server
+    );
+
+    protected NetworkVariable<int> _netPrice = new NetworkVariable<int>(
+        0,
         NetworkVariableReadPermission.Everyone,
         NetworkVariableWritePermission.Server
     );
@@ -40,9 +46,21 @@ public abstract class PurchaseSystem : NetworkBehaviour
     public override void OnNetworkSpawn()
     {
         base.OnNetworkSpawn();
-        hasBeenPurchased.OnValueChanged += OnPurchasedStateChanged;
+        _hasBeenPurchased.OnValueChanged += OnPurchasedStateChanged;
+        _netPrice.OnValueChanged += OnPriceNetworkChanged;
 
-        if (hasBeenPurchased.Value && disableOnPurchase)
+        if (IsServer && price != 0 && _netPrice.Value == 0)
+        {
+            _netPrice.Value = price;
+        }
+
+        if (_netPrice.Value != 0)
+        {
+            price = _netPrice.Value;
+            UpdatePriceText();
+        }
+
+        if (_hasBeenPurchased.Value && disableOnPurchase)
         {
             gameObject.SetActive(false);
         }
@@ -51,12 +69,19 @@ public abstract class PurchaseSystem : NetworkBehaviour
     public override void OnNetworkDespawn()
     {
         base.OnNetworkDespawn();
-        hasBeenPurchased.OnValueChanged -= OnPurchasedStateChanged;
+        _hasBeenPurchased.OnValueChanged -= OnPurchasedStateChanged;
+        _netPrice.OnValueChanged -= OnPriceNetworkChanged;
 
         if (disableOnPurchase)
         {
             gameObject.SetActive(false);
         }
+    }
+
+    private void OnPriceNetworkChanged(int previousValue, int newValue)
+    {
+        price = newValue;
+        UpdatePriceText();
     }
 
     private void OnPurchasedStateChanged(bool previousValue, bool newValue)
@@ -67,6 +92,16 @@ public abstract class PurchaseSystem : NetworkBehaviour
         }
     }
 
+    public void SetPrice(int newPrice)
+    {
+        price = newPrice;
+        if (IsServer)
+        {
+            _netPrice.Value = newPrice;
+        }
+        UpdatePriceText();
+    }
+
     public virtual void AttemptPurchase(Entity buyer)
     {
 
@@ -75,9 +110,9 @@ public abstract class PurchaseSystem : NetworkBehaviour
         if (playerStats == null) return;
 
         // TrySpendCoins will return true if the player has enough money
-        if (!hasBeenPurchased.Value && playerStats.TrySpendCoins(price))
+        if (!_hasBeenPurchased.Value && playerStats.TrySpendCoins(price))
         {
-            hasBeenPurchased.Value = true;
+            _hasBeenPurchased.Value = true;
 
             GrantPurchase(buyer);
 
