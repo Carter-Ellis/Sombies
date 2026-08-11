@@ -28,6 +28,7 @@ public class Player : NetworkBehaviour
     [SerializeField] private List<Spell> spells = new List<Spell>();
     [SerializeField] private int activeSpellIndex = 0;
     [SerializeField] private int maxSpellSlots = 2;
+    [SerializeField] private float spellCastCheckDistance = 1.2f;
 
     public int ActiveSpellIndex
     {
@@ -605,12 +606,29 @@ public class Player : NetworkBehaviour
         }
     }
 
+    public bool IsWallBlockingCast()
+    {
+        if (firepoint == null) return false;
+
+        LayerMask wallLayer = LayerMask.GetMask("Wall");
+        Vector3 origin = transform.position;
+        Vector3 direction = firepoint.right;
+
+        float distance = Vector3.Distance(origin, firepoint.position);
+        if (distance < 0.5f) distance = spellCastCheckDistance;
+
+        RaycastHit2D hit = Physics2D.Raycast(origin, direction, distance, wallLayer);
+        return hit.collider != null;
+    }
+
     private float _lastServerSpellCastTime = 0f;
 
     [Rpc(SendTo.Server)]
     public void RequestCastSpellServerRpc(int spellIndex)
     {
         if (spellIndex < 0 || spellIndex >= spells.Count || spells[spellIndex] == null) return;
+
+        if (IsWallBlockingCast()) return;
 
         Spell spellToCast = spells[spellIndex];
 
@@ -632,6 +650,9 @@ public class Player : NetworkBehaviour
     public void RequestStartChargingSpellServerRpc(int spellIndex)
     {
         if (spellIndex < 0 || spellIndex >= spells.Count || spells[spellIndex] == null) return;
+
+        if (IsWallBlockingCast()) return;
+
         Spell spellToCast = spells[spellIndex];
 
         if (Time.time < _lastServerSpellCastTime + spellToCast.Cooldown) return;

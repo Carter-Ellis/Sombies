@@ -17,6 +17,8 @@ public class ProjectileSpell : Spell
 
         if (player == null || playerStats == null || player.firepoint == null) return;
 
+        if (player.IsWallBlockingCast()) return;
+
         GameObject ball = Instantiate(projectilePrefab, player.firepoint.position, player.firepoint.rotation);
 
         if (ball.TryGetComponent(out Projectile proj))
@@ -36,6 +38,8 @@ public class ProjectileSpell : Spell
         PlayerStats playerStats = entity.GetComponent<PlayerStats>();
 
         if (player == null || playerStats == null || player.firepoint == null) return;
+
+        if (player.IsWallBlockingCast()) return;
 
         GameObject ball = Instantiate(projectilePrefab, player.firepoint.position, player.firepoint.rotation);
 

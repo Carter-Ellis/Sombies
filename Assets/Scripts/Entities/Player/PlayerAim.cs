@@ -143,6 +143,11 @@ public class PlayerAim : NetworkBehaviour
         {
             _isHoldingClick = true;
 
+            if (player != null && player.IsWallBlockingCast())
+            {
+                return;
+            }
+
             if (player.activeSpell != null && (player.activeSpell.IsChargeSpell || player.activeSpell.Name.Contains("Pulse")))
             {
                 _isChargingSpell = true;
@@ -174,6 +179,8 @@ public class PlayerAim : NetworkBehaviour
         if (_revive != null && _revive.IsDownedSync.Value) return;
 
         if (player.activeSpell == null) return;
+
+        if (player.IsWallBlockingCast()) return;
 
         if (Time.time < _lastSpellCastTime + player.activeSpell.Cooldown) return;
 
