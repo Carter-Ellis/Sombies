@@ -5,6 +5,8 @@ using Unity.Netcode;
 
 public class RoundManager : NetworkBehaviour
 {
+    public static RoundManager Instance { get; private set; }
+
     // Simple states to keep the logic clean
     public enum RoundState { Waiting, Spawning, Fighting }
 
@@ -25,6 +27,16 @@ public class RoundManager : NetworkBehaviour
     private List<Enemy> activeEnemies = new List<Enemy>();
     private EnemySpawnPoint[] spawnPoints;
 
+    private void Awake()
+    {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+        Instance = this;
+    }
+
     public override void OnNetworkSpawn()
     {
         _netRound.OnValueChanged += OnRoundChanged;
@@ -34,7 +46,7 @@ public class RoundManager : NetworkBehaviour
         // Only the server starts the round logic
         if (IsServer)
         {
-            spawnPoints = FindObjectsByType<EnemySpawnPoint>(FindObjectsInactive.Exclude);
+            spawnPoints = FindObjectsByType<EnemySpawnPoint>(FindObjectsInactive.Include);
 
             if (spawnPoints.Length == 0)
             {
@@ -63,6 +75,103 @@ public class RoundManager : NetworkBehaviour
             activeEnemies.Clear();
         }
 
+    }
+
+    public void UnlockDoor(Door door, string areaId = "")
+    {
+        if (spawnPoints == null || spawnPoints.Length == 0)
+        {
+            spawnPoints = FindObjectsByType<EnemySpawnPoint>(FindObjectsInactive.Include);
+        }
+
+        foreach (EnemySpawnPoint sp in spawnPoints)
+        {
+            if (sp == null) continue;
+
+            // Direct door reference match
+            if (sp.LinkedDoor != null && sp.LinkedDoor == door)
+            {
+                sp.SetActive(true);
+            }
+            // Area identifier match
+            else if (!string.IsNullOrEmpty(areaId) && sp.AreaId == areaId)
+            {
+                sp.SetActive(true);
+            }
+            else if (door != null && !string.IsNullOrEmpty(door.AreaToUnlock) && sp.AreaId == door.AreaToUnlock)
+            {
+                sp.SetActive(true);
+            }
+        }
+    }
+
+    public void UnlockArea(string areaId)
+    {
+        if (string.IsNullOrEmpty(areaId)) return;
+
+        if (spawnPoints == null || spawnPoints.Length == 0)
+        {
+            spawnPoints = FindObjectsByType<EnemySpawnPoint>(FindObjectsInactive.Include);
+        }
+
+        foreach (EnemySpawnPoint sp in spawnPoints)
+        {
+            if (sp != null && sp.AreaId == areaId)
+            {
+                sp.SetActive(true);
+            }
+        }
+    }
+
+    private List<EnemySpawnPoint> GetActiveSpawnPoints()
+    {
+        List<EnemySpawnPoint> activeList = new List<EnemySpawnPoint>();
+        if (spawnPoints != null)
+        {
+            foreach (EnemySpawnPoint sp in spawnPoints)
+            {
+                if (sp != null && sp.IsActive)
+                {
+                    activeList.Add(sp);
+                }
+            }
+        }
+        return activeList;
+    }
+
+    private void SpawnEnemy()
+    {
+        if (!IsServer) return;
+
+        List<EnemySpawnPoint> activeSpawnPoints = GetActiveSpawnPoints();
+        if (activeSpawnPoints.Count == 0)
+        {
+            Debug.LogWarning("No active EnemySpawnPoints available! Falling back to all spawn points.");
+            if (spawnPoints != null)
+            {
+                activeSpawnPoints.AddRange(spawnPoints);
+            }
+        }
+
+        if (activeSpawnPoints.Count == 0)
+        {
+            Debug.LogError("No EnemySpawnPoints found in scene!");
+            return;
+        }
+
+        Enemy prefab = enemyPrefabs[Random.Range(0, enemyPrefabs.Length)];
+        Transform spawnPos = activeSpawnPoints[Random.Range(0, activeSpawnPoints.Count)].transform;
+
+        Enemy newEnemy = Instantiate(prefab, spawnPos.position, Quaternion.identity);
+
+        NetworkObject netObj = newEnemy.GetComponent<NetworkObject>();
+        if (netObj != null)
+        {
+            netObj.Spawn(); // This tells all clients to create this enemy
+        }
+
+        newEnemy.SetManager(this);
+        activeEnemies.Add(newEnemy);
     }
 
     private void OnRoundChanged(int oldVal, int newVal)
@@ -126,24 +235,7 @@ public class RoundManager : NetworkBehaviour
         currentState = RoundState.Fighting;
     }
 
-    private void SpawnEnemy()
-    {
-        if (!IsServer) return;
 
-        Enemy prefab = enemyPrefabs[Random.Range(0, enemyPrefabs.Length)];
-        Transform spawnPos = spawnPoints[Random.Range(0, spawnPoints.Length)].transform;
-
-        Enemy newEnemy = Instantiate(prefab, spawnPos.position, Quaternion.identity);
-
-        NetworkObject netObj = newEnemy.GetComponent<NetworkObject>();
-        if (netObj != null)
-        {
-            netObj.Spawn(); // This tells all clients to create this enemy
-        }
-
-        newEnemy.SetManager(this);
-        activeEnemies.Add(newEnemy);
-    }
 
     private int CalculateEnemyCount()
     {

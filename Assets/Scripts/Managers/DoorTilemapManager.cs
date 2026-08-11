@@ -11,6 +11,7 @@ public struct DoorTilePair
     public TileBase closedTile;
     public TileBase openTile;
     public int price;
+    public string areaToUnlock;
 }
 
 [System.Serializable]
@@ -19,6 +20,8 @@ public struct DoorTilemapConfig
     public Tilemap tilemap;
     [Tooltip("If > 0, overrides the price for all doors painted on this tilemap. If 0, uses the price from DoorTilePair.")]
     public int priceOverride;
+    [Tooltip("The Area ID (e.g. 'Room2') unlocked when purchasing doors on this tilemap.")]
+    public string areaToUnlock;
 }
 
 public class DoorTilemapManager : NetworkBehaviour
@@ -97,7 +100,10 @@ public class DoorTilemapManager : NetworkBehaviour
                 List<Vector3Int> doorGroup = GetConnectedTiles(tilemap, cellPos, visitedTiles, doorTypes[doorTypeIndex].closedTile);
 
                 int finalPrice = (priceOverride > 0) ? priceOverride : doorTypes[doorTypeIndex].price;
-                SpawnDoorTrigger(tilemap, doorGroup, doorTypeIndex, t, finalPrice);
+                string areaFromTilemap = doorTilemaps[t].areaToUnlock;
+                string finalAreaToUnlock = !string.IsNullOrEmpty(areaFromTilemap) ? areaFromTilemap : doorTypes[doorTypeIndex].areaToUnlock;
+
+                SpawnDoorTrigger(tilemap, doorGroup, doorTypeIndex, t, finalPrice, finalAreaToUnlock);
             }
         }
     }
@@ -129,7 +135,7 @@ public class DoorTilemapManager : NetworkBehaviour
         return group;
     }
 
-    private void SpawnDoorTrigger(Tilemap tilemap, List<Vector3Int> doorCells, int doorTypeIndex, int tilemapIndex, int doorPrice)
+    private void SpawnDoorTrigger(Tilemap tilemap, List<Vector3Int> doorCells, int doorTypeIndex, int tilemapIndex, int doorPrice, string areaToUnlock = "")
     {
         int minX = int.MaxValue, minY = int.MaxValue;
         int maxX = int.MinValue, maxY = int.MinValue;
@@ -182,8 +188,8 @@ public class DoorTilemapManager : NetworkBehaviour
             obstacle.size = new Vector3(obstacleWidth, obstacleHeight, 1f);
         }
 
-        // Send the index of the door pair, tilemap index, and resolved price to the Door script
-        doorObj.GetComponent<Door>().Initialize(doorCells.ToArray(), doorTypeIndex, tilemapIndex, doorPrice);
+        // Send the index of the door pair, tilemap index, price, and area identifier to the Door script
+        doorObj.GetComponent<Door>().Initialize(doorCells.ToArray(), doorTypeIndex, tilemapIndex, doorPrice, areaToUnlock);
     }
 
     [Rpc(SendTo.ClientsAndHost)]
