@@ -19,15 +19,19 @@ public abstract class Projectile : NetworkBehaviour
 
     protected int damage;
     protected PlayerStats ownerStats;
+    private float initialSpeed = 15f;
 
     public void Initialize(PlayerStats playerStats, int damage, float speed = 15f)
     {
         ownerStats = playerStats;
         this.damage = damage;
-        if (IsServer)
+        initialSpeed = speed;
+
+        if (IsSpawned && IsServer)
         {
             _launchSpeed.Value = speed;
         }
+
         ApplyVelocity();
     }
 
@@ -35,6 +39,11 @@ public abstract class Projectile : NetworkBehaviour
     {
         base.OnNetworkSpawn();
         _launchSpeed.OnValueChanged += OnLaunchSpeedChanged;
+
+        if (IsServer)
+        {
+            _launchSpeed.Value = initialSpeed;
+        }
 
         if (!IsServer)
         {

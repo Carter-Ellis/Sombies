@@ -25,11 +25,5 @@ public class ProjectileSpell : Spell
         {
             netObj.Spawn();
         }
-
-        Rigidbody2D rb = ball.GetComponent<Rigidbody2D>();
-        if (rb != null)
-        {
-            rb.linearVelocity = player.firepoint.right * launchForce;
-        }
     }
 }

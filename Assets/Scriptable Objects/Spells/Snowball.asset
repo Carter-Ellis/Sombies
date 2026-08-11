@@ -14,8 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ProjectileSpell
   _name: Snowball
   _description: Throw a snowball at unsuspecting enemies brrrr...
-  _manaCost: 1
-  damage: 5
+  _manaCost: 2
+  damage: 10
   cooldown: 0.25
   sprite: {fileID: -2413806693520163455, guid: d0d74d53d768e1741918c95e7bd8ff1c, type: 3}
   spellID: 1
