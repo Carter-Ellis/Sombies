@@ -687,6 +687,7 @@ MonoBehaviour:
   _baseSprintSpeed: 7
   initialMana: 100
   initialHealth: 100
+  initialCoins: 1000
   _netCoins:
     UpdateTraits:
       MinSecondsBetweenUpdates: 0
@@ -778,6 +779,7 @@ MonoBehaviour:
   spells: []
   activeSpellIndex: 0
   maxSpellSlots: 2
+  spellCastCheckDistance: 1.2
   reviveTxt: {fileID: 0}
   meleeDamage: 35
   meleeRange: 1.5
