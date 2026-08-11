@@ -30,8 +30,41 @@ public abstract class PurchaseSystem : NetworkBehaviour
     private void Awake()
     {
         priceTxt = GetComponentInChildren<TextMeshPro>();
-        priceTxt.gameObject.SetActive(false);
+        if (priceTxt != null)
+        {
+            priceTxt.gameObject.SetActive(false);
+        }
         UpdatePriceText();
+    }
+
+    public override void OnNetworkSpawn()
+    {
+        base.OnNetworkSpawn();
+        hasBeenPurchased.OnValueChanged += OnPurchasedStateChanged;
+
+        if (hasBeenPurchased.Value && disableOnPurchase)
+        {
+            gameObject.SetActive(false);
+        }
+    }
+
+    public override void OnNetworkDespawn()
+    {
+        base.OnNetworkDespawn();
+        hasBeenPurchased.OnValueChanged -= OnPurchasedStateChanged;
+
+        if (disableOnPurchase)
+        {
+            gameObject.SetActive(false);
+        }
+    }
+
+    private void OnPurchasedStateChanged(bool previousValue, bool newValue)
+    {
+        if (newValue && disableOnPurchase)
+        {
+            gameObject.SetActive(false);
+        }
     }
 
     public virtual void AttemptPurchase(Entity buyer)
