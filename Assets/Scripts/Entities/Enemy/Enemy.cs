@@ -196,19 +196,29 @@ public abstract class Enemy : Entity
         return bestTarget;
     }
 
+    public override void TakeDamage(int amount)
+    {
+        Health -= amount;
+        FlashRedRpc();
+    }
+
     public void TakeDamage(int amount, PlayerStats playerStats)
     {
         Health -= amount;
-        FlashRed();
+        FlashRedRpc();
 
         if (Health <= 0)
         {
-            playerStats.AddCoins(killPrice);
-            playerStats.AddMana(manaReward);
+            if (playerStats != null)
+            {
+                playerStats.AddCoins(killPrice);
+                playerStats.AddMana(manaReward);
+            }
         }
     }
 
-    private void FlashRed()
+    [Rpc(SendTo.ClientsAndHost)]
+    private void FlashRedRpc()
     {
         if (spriteRenderer != null)
         {
