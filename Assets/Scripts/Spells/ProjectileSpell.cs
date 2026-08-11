@@ -18,7 +18,7 @@ public class ProjectileSpell : Spell
 
         if (ball.TryGetComponent(out Projectile proj))
         {
-            proj.Initialize(playerStats, damage);
+            proj.Initialize(playerStats, damage, launchForce);
         }
 
         if (ball.TryGetComponent(out NetworkObject netObj))

@@ -11,13 +11,61 @@ public abstract class Projectile : NetworkBehaviour
     [SerializeField] protected float buffAmount;
     [SerializeField] protected float buffDuration;
 
+    protected NetworkVariable<float> _launchSpeed = new NetworkVariable<float>(
+        15f,
+        NetworkVariableReadPermission.Everyone,
+        NetworkVariableWritePermission.Server
+    );
+
     protected int damage;
     protected PlayerStats ownerStats;
 
-    public void Initialize(PlayerStats playerStats, int damage)
+    public void Initialize(PlayerStats playerStats, int damage, float speed = 15f)
     {
         ownerStats = playerStats;
         this.damage = damage;
+        if (IsServer)
+        {
+            _launchSpeed.Value = speed;
+        }
+        ApplyVelocity();
+    }
+
+    public override void OnNetworkSpawn()
+    {
+        base.OnNetworkSpawn();
+        _launchSpeed.OnValueChanged += OnLaunchSpeedChanged;
+
+        if (!IsServer)
+        {
+            // Disable NetworkTransform on client so client physics moves projectile locally without network interpolation lag
+            if (TryGetComponent<Unity.Netcode.Components.NetworkTransform>(out var netTransform))
+            {
+                netTransform.enabled = false;
+            }
+        }
+
+        ApplyVelocity();
+    }
+
+    public override void OnNetworkDespawn()
+    {
+        base.OnNetworkDespawn();
+        _launchSpeed.OnValueChanged -= OnLaunchSpeedChanged;
+    }
+
+    private void OnLaunchSpeedChanged(float oldVal, float newVal)
+    {
+        ApplyVelocity();
+    }
+
+    protected void ApplyVelocity()
+    {
+        Rigidbody2D rb = GetComponent<Rigidbody2D>();
+        if (rb != null)
+        {
+            rb.linearVelocity = transform.right * _launchSpeed.Value;
+        }
     }
 
     protected virtual void Start()
@@ -26,12 +74,23 @@ public abstract class Projectile : NetworkBehaviour
         {
             Destroy(gameObject, lifetime);
         }
-        
+        ApplyVelocity();
     }
 
     protected virtual void OnTriggerEnter2D(Collider2D collision)
     {
-        if (!IsServer) return;
+        if (!IsServer)
+        {
+            if (collision.TryGetComponent(out Enemy _) || collision.CompareTag("Wall"))
+            {
+                SpriteRenderer sr = GetComponent<SpriteRenderer>();
+                if (sr != null) sr.enabled = false;
+
+                Collider2D col = GetComponent<Collider2D>();
+                if (col != null) col.enabled = false;
+            }
+            return;
+        }
 
         if (collision.TryGetComponent(out Enemy enemy))
         {
@@ -42,8 +101,6 @@ public abstract class Projectile : NetworkBehaviour
         {
             Destroy(gameObject);
         }
-
-
     }
 
     protected virtual void OnHitEnemy(Enemy enemy)
