@@ -13,11 +13,11 @@ GameObject:
   - component: {fileID: -5770442317345697406}
   - component: {fileID: -4548985320488933393}
   - component: {fileID: -723256668154110964}
-  - component: {fileID: -628816561602908376}
   - component: {fileID: -5381304032835263680}
   - component: {fileID: 4952663019549314735}
+  - component: {fileID: -1880991168465010357}
   m_Layer: 0
-  m_Name: Lightning
+  m_Name: Thorn
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -88,7 +88,7 @@ SpriteRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_Sprite: {fileID: -2413806693520163455, guid: a86470a33a6bf42c4b3595704624658b, type: 3}
-  m_Color: {r: 1, g: 0.90440524, b: 0.0047169924, a: 1}
+  m_Color: {r: 0.18396226, g: 0.735849, b: 0.1915039, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -172,7 +172,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
-  GlobalObjectIdHash: 776495909
+  GlobalObjectIdHash: 2183016587
   InScenePlacedSourceGlobalObjectIdHash: 0
   DeferredDespawnTick: 0
   Ownership: 1
@@ -185,29 +185,6 @@ MonoBehaviour:
   AutoObjectParentSync: 1
   SyncOwnerTransformWhenParented: 1
   AllowOwnerToParent: 0
---- !u!114 &-628816561602908376
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2797691783092432233}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2198c58793c5d7a44a7fb0d7f67d1790, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::StunProj
-  ShowTopMostFoldoutHeaderGroup: 1
-  lifetime: 3
-  appliesBuff: 1
-  buffType: 4
-  buffAmount: 0
-  buffDuration: 1
-  maxChainTargets: 5
-  chainRadius: 3
-  beamColorStart: {r: 0.99799925, g: 1, b: 0.19999999, a: 1}
-  beamColorEnd: {r: 0.5518868, g: 1, b: 0.90914476, a: 1}
-  beamDuration: 0.2
 --- !u!114 &-5381304032835263680
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -271,3 +248,15 @@ MonoBehaviour:
   UseRigidBodyForMotion: 0
   AutoUpdateKinematicState: 1
   AutoSetKinematicOnDespawn: 1
+--- !u!114 &-1880991168465010357
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2797691783092432233}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 69275dbd2290e904ea09c06eb4b91e58, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ThornProj
