@@ -17,7 +17,7 @@ GameObject:
   - component: {fileID: -5381304032835263680}
   - component: {fileID: 4952663019549314735}
   m_Layer: 0
-  m_Name: Zap
+  m_Name: Lightning
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -88,7 +88,7 @@ SpriteRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_Sprite: {fileID: -2413806693520163455, guid: a86470a33a6bf42c4b3595704624658b, type: 3}
-  m_Color: {r: 0.9473056, g: 1, b: 0.5613208, a: 1}
+  m_Color: {r: 1, g: 0.90440524, b: 0.0047169924, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -172,7 +172,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
-  GlobalObjectIdHash: 2799912988
+  GlobalObjectIdHash: 776495909
   InScenePlacedSourceGlobalObjectIdHash: 0
   DeferredDespawnTick: 0
   Ownership: 1
@@ -203,8 +203,8 @@ MonoBehaviour:
   buffType: 4
   buffAmount: 0
   buffDuration: 1
-  maxChainTargets: 0
-  chainRadius: 0
+  maxChainTargets: 5
+  chainRadius: 3
 --- !u!114 &-5381304032835263680
 MonoBehaviour:
   m_ObjectHideFlags: 0
