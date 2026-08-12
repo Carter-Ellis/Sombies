@@ -81,6 +81,25 @@ public abstract class Item : NetworkBehaviour
         
     }
 
+    private float lastBounceSoundTime = -1f;
+
+    protected virtual void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (!IsServer) return;
+
+        if (collision.gameObject.CompareTag("Wall") || collision.gameObject.layer == LayerMask.NameToLayer("Wall"))
+        {
+            if (Time.time >= lastBounceSoundTime + 0.15f)
+            {
+                lastBounceSoundTime = Time.time;
+                if (FMODEvents.instance != null)
+                {
+                    Audio.PlayNetworkedSFX(FMODEvents.instance.potionBounce, transform.position);
+                }
+            }
+        }
+    }
+
     public void Use(Entity entity)
     {
         Audio.PlayNetworkedSFX(FMODEvents.instance.swig, entity.transform.position);

@@ -270,6 +270,10 @@ public class Player : NetworkBehaviour
                     if (_netInventory[i] == -1)
                     {
                         _netInventory[i] = worldItem.itemID;
+                        if (FMODEvents.instance != null)
+                        {
+                            Audio.PlayNetworkedSFX(FMODEvents.instance.itemPickup, transform.position);
+                        }
                         netObj.Despawn();
                         break;
                     }
@@ -345,6 +349,10 @@ public class Player : NetworkBehaviour
             {
                 itemRb.AddForce(clientDir * throwForce, ForceMode2D.Impulse);
                 PlayCastAnimationClientRpc();
+                if (FMODEvents.instance != null)
+                {
+                    Audio.PlayNetworkedSFX(FMODEvents.instance.itemThrow, transform.position);
+                }
             }
             else
             {

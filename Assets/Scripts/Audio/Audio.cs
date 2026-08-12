@@ -144,46 +144,54 @@ public class Audio : MonoBehaviour
 
         if (NetworkManager.Singleton == null || !NetworkManager.Singleton.IsListening || NetworkManager.Singleton.CustomMessagingManager == null)
         {
-            playSFXInternal(eventRef.Guid, pos);
+            playSFXInternal(eventRef, pos);
             return;
         }
 
         if (NetworkManager.Singleton.IsServer)
         {
-            BroadcastSFXToClients(eventRef.Guid, pos);
+            BroadcastSFXToClients(eventRef, pos);
         }
         else
         {
-            SendSFXToServer(eventRef.Guid, pos);
+            SendSFXToServer(eventRef, pos);
         }
     }
 
-    private static void BroadcastSFXToClients(FMOD.GUID guid, Vector3 pos)
+    private static void BroadcastSFXToClients(EventReference eventRef, Vector3 pos)
     {
         if (NetworkManager.Singleton == null || NetworkManager.Singleton.CustomMessagingManager == null) return;
 
-        using FastBufferWriter writer = new FastBufferWriter(256, Allocator.Temp);
+        FMOD.GUID guid = eventRef.Guid;
+        string path = eventRef.Path ?? "";
+
+        using FastBufferWriter writer = new FastBufferWriter(256 + (path.Length * 2), Allocator.Temp);
         writer.WriteValueSafe(guid.Data1);
         writer.WriteValueSafe(guid.Data2);
         writer.WriteValueSafe(guid.Data3);
         writer.WriteValueSafe(guid.Data4);
+        writer.WriteValueSafe(path);
         writer.WriteValueSafe(pos);
 
         NetworkManager.Singleton.CustomMessagingManager.SendNamedMessageToAll(MSG_SERVER_TO_CLIENT_SFX, writer);
 
         // Always play locally on server/host
-        playSFXInternal(guid, pos);
+        playSFXInternal(eventRef, pos);
     }
 
-    private static void SendSFXToServer(FMOD.GUID guid, Vector3 pos)
+    private static void SendSFXToServer(EventReference eventRef, Vector3 pos)
     {
         if (NetworkManager.Singleton == null || NetworkManager.Singleton.CustomMessagingManager == null) return;
 
-        using FastBufferWriter writer = new FastBufferWriter(256, Allocator.Temp);
+        FMOD.GUID guid = eventRef.Guid;
+        string path = eventRef.Path ?? "";
+
+        using FastBufferWriter writer = new FastBufferWriter(256 + (path.Length * 2), Allocator.Temp);
         writer.WriteValueSafe(guid.Data1);
         writer.WriteValueSafe(guid.Data2);
         writer.WriteValueSafe(guid.Data3);
         writer.WriteValueSafe(guid.Data4);
+        writer.WriteValueSafe(path);
         writer.WriteValueSafe(pos);
 
         NetworkManager.Singleton.CustomMessagingManager.SendNamedMessage(MSG_CLIENT_TO_SERVER_SFX, NetworkManager.ServerClientId, writer);
@@ -195,14 +203,16 @@ public class Audio : MonoBehaviour
         reader.ReadValueSafe(out int d2);
         reader.ReadValueSafe(out int d3);
         reader.ReadValueSafe(out int d4);
+        reader.ReadValueSafe(out string path);
         reader.ReadValueSafe(out Vector3 pos);
 
         FMOD.GUID guid = new FMOD.GUID { Data1 = d1, Data2 = d2, Data3 = d3, Data4 = d4 };
+        EventReference eventRef = new EventReference { Guid = guid, Path = path };
 
         // Client (non-host) plays sound locally upon receiving broadcast
         if (NetworkManager.Singleton != null && !NetworkManager.Singleton.IsServer)
         {
-            playSFXInternal(guid, pos);
+            playSFXInternal(eventRef, pos);
         }
     }
 
@@ -212,12 +222,33 @@ public class Audio : MonoBehaviour
         reader.ReadValueSafe(out int d2);
         reader.ReadValueSafe(out int d3);
         reader.ReadValueSafe(out int d4);
+        reader.ReadValueSafe(out string path);
         reader.ReadValueSafe(out Vector3 pos);
 
         FMOD.GUID guid = new FMOD.GUID { Data1 = d1, Data2 = d2, Data3 = d3, Data4 = d4 };
+        EventReference eventRef = new EventReference { Guid = guid, Path = path };
 
         // Server broadcasts to all clients (including local playback on host)
-        BroadcastSFXToClients(guid, pos);
+        BroadcastSFXToClients(eventRef, pos);
+    }
+
+    private static void playSFXInternal(EventReference eventRef, Vector3 pos)
+    {
+        if (eventRef.IsNull) return;
+
+        try
+        {
+            if (!RuntimeManager.IsInitialized || !RuntimeManager.HaveMasterBanksLoaded) return;
+
+            var eventDesc = RuntimeManager.GetEventDescription(eventRef);
+            if (!eventDesc.isValid()) return;
+
+            RuntimeManager.PlayOneShot(eventRef, pos);
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogWarning($"[Audio] Could not play SFX '{eventRef}': {ex.Message}");
+        }
     }
 
     private static void playSFXInternal(FMOD.GUID guid, Vector3 pos)
@@ -226,6 +257,11 @@ public class Audio : MonoBehaviour
 
         try
         {
+            if (!RuntimeManager.IsInitialized || !RuntimeManager.HaveMasterBanksLoaded) return;
+
+            var eventDesc = RuntimeManager.GetEventDescription(guid);
+            if (!eventDesc.isValid()) return;
+
             RuntimeManager.PlayOneShot(guid, pos);
         }
         catch (System.Exception ex)

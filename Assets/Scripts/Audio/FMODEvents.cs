@@ -21,6 +21,7 @@ public class FMODEvents : MonoBehaviour
 
     [field: Header("Potion")]
     [field: SerializeField] public EventReference swig { get; set; }
+    [field: SerializeField] public EventReference potionBounce { get; set; }
 
     [field: Header("Music")]
     [field: SerializeField] public EventReference sombieStyle { get; set; }
@@ -30,6 +31,14 @@ public class FMODEvents : MonoBehaviour
 
     [field: Header("Door")]
     [field: SerializeField] public EventReference doorOpen { get; set; }
+
+    [field: Header("ItemPickup")]
+    [field: SerializeField] public EventReference itemPickup { get; set; }
+
+    [field: Header("Throw")]
+    [field: SerializeField] public EventReference itemThrow { get; set; }
+
+
 
     public static FMODEvents instance { get; private set; }
 
@@ -55,8 +64,11 @@ public class FMODEvents : MonoBehaviour
         if (reviveSequence.IsNull) reviveSequence = RuntimeManager.PathToEventReference("event:/SFX/Revive/Revive Sequence");
         if (playerHurt.IsNull) playerHurt = RuntimeManager.PathToEventReference("event:/SFX/Player/PlayerHurt");
         if (swig.IsNull) swig = RuntimeManager.PathToEventReference("event:/SFX/Potion/Swig");
+        if (potionBounce.IsNull) potionBounce = RuntimeManager.PathToEventReference("event:/SFX/Potion/PotionBounce");
         if (sombieStyle.IsNull) sombieStyle = RuntimeManager.PathToEventReference("event:/Music/SombieStyle");
         if (fireCrackling.IsNull) fireCrackling = RuntimeManager.PathToEventReference("event:/SFX/Fire/FireCrackling");
         if (doorOpen.IsNull) doorOpen = RuntimeManager.PathToEventReference("event:/SFX/DoorOpen/DoorOpen");
+        if (itemPickup.IsNull) itemPickup = RuntimeManager.PathToEventReference("event:/SFX/ItemPickup/ItemPickup");
+        if (itemThrow.IsNull) itemThrow = RuntimeManager.PathToEventReference("event:/SFX/Throw/ItemThrow");
     }
 }

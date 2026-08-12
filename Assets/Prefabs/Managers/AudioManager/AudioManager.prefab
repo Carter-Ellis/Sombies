@@ -93,6 +93,13 @@ MonoBehaviour:
       Data3: 2095054774
       Data4: 1683501689
     Path: event:/SFX/Potion/Swig
+  <potionBounce>k__BackingField:
+    Guid:
+      Data1: -1076465169
+      Data2: 1091620843
+      Data3: -1665579330
+      Data4: 1718535336
+    Path: event:/SFX/Potion/PotionBounce
   <sombieStyle>k__BackingField:
     Guid:
       Data1: 1525285947
@@ -114,6 +121,20 @@ MonoBehaviour:
       Data3: -704582984
       Data4: 1010327865
     Path: event:/SFX/DoorOpen/DoorOpen
+  <itemPickup>k__BackingField:
+    Guid:
+      Data1: 1674572206
+      Data2: 1188419311
+      Data3: 982303410
+      Data4: -936821227
+    Path: event:/SFX/ItemPickup/ItemPickup
+  <itemThrow>k__BackingField:
+    Guid:
+      Data1: 28001704
+      Data2: 1123960491
+      Data3: -1613221199
+      Data4: 1275833370
+    Path: event:/SFX/Throw/Throw
 --- !u!1 &7597115827806844496
 GameObject:
   m_ObjectHideFlags: 0

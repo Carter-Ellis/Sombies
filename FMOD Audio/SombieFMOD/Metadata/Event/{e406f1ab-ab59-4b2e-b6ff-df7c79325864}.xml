@@ -5,7 +5,7 @@
 			<value>Swig</value>
 		</property>
 		<property name="outputFormat">
-			<value>1</value>
+			<value>2</value>
 		</property>
 		<relationship name="folder">
 			<destination>{dd2d5cbb-0e9a-416d-941e-af16d4a75d94}</destination>
@@ -96,19 +96,27 @@
 	<object class="MixerBusEffectChain" id="{93b6a67f-3895-41a1-9db6-1b7bb297830f}">
 		<relationship name="effects">
 			<destination>{250ecc21-8648-4cb1-9077-489b3ee993bf}</destination>
+			<destination>{6c58211d-0ee2-46db-bc81-ebf1bfa4e6d8}</destination>
 		</relationship>
 	</object>
 	<object class="MixerBusPanner" id="{601f22f1-6f46-491d-9f0d-28046b7a3a8a}" />
 	<object class="MultiSound" id="{36b3d89d-a501-4092-91d9-0f58289fc847}">
 		<relationship name="sounds">
 			<destination>{903c2f99-4632-4838-b6e5-3e120a773363}</destination>
+			<destination>{2abe5999-1c33-4d13-b890-bf82e3ea197f}</destination>
 		</relationship>
 	</object>
 	<object class="MixerBusFader" id="{5a35fd1d-6c23-4adc-b51d-830c0d2d8adf}" />
 	<object class="MixerBusFader" id="{250ecc21-8648-4cb1-9077-489b3ee993bf}" />
+	<object class="SpatialiserEffect" id="{6c58211d-0ee2-46db-bc81-ebf1bfa4e6d8}" />
 	<object class="SingleSound" id="{903c2f99-4632-4838-b6e5-3e120a773363}">
 		<relationship name="audioFile">
 			<destination>{0c675566-73e4-4a6a-ae79-ef9e198bfddf}</destination>
+		</relationship>
+	</object>
+	<object class="SingleSound" id="{2abe5999-1c33-4d13-b890-bf82e3ea197f}">
+		<relationship name="audioFile">
+			<destination>{ee38be56-e837-476d-a631-aa6906233257}</destination>
 		</relationship>
 	</object>
 </objects>
