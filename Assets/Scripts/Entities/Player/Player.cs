@@ -37,7 +37,129 @@ public class Player : NetworkBehaviour
     }
 
     [Header("Interaction")]
-    private PurchaseSystem nearbyPurchaseSystem = null;
+    private System.Collections.Generic.List<PurchaseSystem> nearbyPurchaseSystems = new System.Collections.Generic.List<PurchaseSystem>();
+    private PurchaseSystem lastActivePurchaseTarget = null;
+
+    private void Update()
+    {
+        if (!IsOwner) return;
+
+        if (nearbyPurchaseSystems.Count > 0)
+        {
+            RefreshPurchaseSystemUI();
+        }
+    }
+
+    public PurchaseSystem GetActivePurchaseTarget()
+    {
+        for (int i = nearbyPurchaseSystems.Count - 1; i >= 0; i--)
+        {
+            PurchaseSystem system = nearbyPurchaseSystems[i];
+            if (system == null || system.gameObject == null || !system.gameObject.activeInHierarchy)
+            {
+                nearbyPurchaseSystems.RemoveAt(i);
+            }
+            else if (system.TryGetComponent<NetworkObject>(out var netObj) && !netObj.IsSpawned)
+            {
+                nearbyPurchaseSystems.RemoveAt(i);
+            }
+        }
+
+        if (nearbyPurchaseSystems.Count == 0) return null;
+
+        // Priority 1: Pick a spawned SpellPurchase over a MysteryBox
+        PurchaseSystem spellPurchase = nearbyPurchaseSystems.Find(p => p is SpellPurchase && p.gameObject.activeInHierarchy);
+        if (spellPurchase != null)
+        {
+            return spellPurchase;
+        }
+
+        // Priority 2: Pick the closest purchase target to the player
+        PurchaseSystem closest = nearbyPurchaseSystems[0];
+        float minDistance = Vector3.Distance(transform.position, closest.transform.position);
+
+        for (int i = 1; i < nearbyPurchaseSystems.Count; i++)
+        {
+            float dist = Vector3.Distance(transform.position, nearbyPurchaseSystems[i].transform.position);
+            if (dist < minDistance)
+            {
+                minDistance = dist;
+                closest = nearbyPurchaseSystems[i];
+            }
+        }
+
+        return closest;
+    }
+
+    private void RefreshPurchaseSystemUI()
+    {
+        PurchaseSystem activeTarget = GetActivePurchaseTarget();
+
+        if (activeTarget != lastActivePurchaseTarget)
+        {
+            if (lastActivePurchaseTarget != null)
+            {
+                lastActivePurchaseTarget.HidePrice();
+            }
+            lastActivePurchaseTarget = activeTarget;
+        }
+
+        if (activeTarget != null)
+        {
+            activeTarget.DisplayPrice();
+        }
+    }
+
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        if (!IsOwner || (_revive != null && _revive.IsDownedSync.Value)) return;
+
+        Item hitItem = collision.GetComponent<Item>();
+
+        if (hitItem != null && hitItem.CanBePickedUpBy(OwnerClientId))
+        {
+            var itemNetObj = hitItem.GetComponent<NetworkObject>();
+            RequestPickupServerRpc(itemNetObj.NetworkObjectId);
+        }
+
+        PurchaseSystem shop = collision.GetComponent<PurchaseSystem>();
+
+        if (shop != null && !nearbyPurchaseSystems.Contains(shop))
+        {
+            nearbyPurchaseSystems.Add(shop);
+            RefreshPurchaseSystemUI();
+        }
+
+        Player other = collision.GetComponent<Player>();
+        if (other != null && other != this)
+        {
+            ReviveController otherRevive = other.GetComponent<ReviveController>();
+            if (otherRevive != null && otherRevive.IsDownedSync.Value)
+            {
+                nearbyDownedPlayer = other;
+                nearbyDownedPlayer.DisplayReviveText();
+            }
+        }
+    }
+
+    private void OnTriggerExit2D(Collider2D collision)
+    {
+        PurchaseSystem shop = collision.GetComponent<PurchaseSystem>();
+        if (shop != null && nearbyPurchaseSystems.Contains(shop))
+        {
+            shop.HidePrice();
+            nearbyPurchaseSystems.Remove(shop);
+            RefreshPurchaseSystemUI();
+        }
+
+        Player other = collision.GetComponent<Player>();
+        if (other != null && other == nearbyDownedPlayer)
+        {
+            CancelMyReviveAction();
+            nearbyDownedPlayer.HideReviveText();
+            nearbyDownedPlayer = null;
+        }
+    }
 
     [Header("Revive")]
     [SerializeField] private TextMeshPro reviveTxt;
@@ -131,56 +253,6 @@ public class Player : NetworkBehaviour
     {
         playerName.OnValueChanged -= OnNameChanged;
         _netInventory.OnListChanged -= OnInventoryChanged;
-    }
-
-    private void OnTriggerEnter2D(Collider2D collision)
-    {
-        if (!IsOwner || (_revive != null && _revive.IsDownedSync.Value)) return;
-
-        Item hitItem = collision.GetComponent<Item>();
-
-        if (hitItem != null && hitItem.CanBePickedUpBy(OwnerClientId))
-        {
-            var itemNetObj = hitItem.GetComponent<NetworkObject>();
-            RequestPickupServerRpc(itemNetObj.NetworkObjectId);
-        }
-
-        PurchaseSystem shop = collision.GetComponent<PurchaseSystem>();
-
-        if (shop != null)
-        {
-            nearbyPurchaseSystem = shop;
-            shop.DisplayPrice();
-        }
-
-        Player other = collision.GetComponent<Player>();
-        if (other != null && other != this)
-        {
-            ReviveController otherRevive = other.GetComponent<ReviveController>();
-            if (otherRevive != null && otherRevive.IsDownedSync.Value)
-            {
-                nearbyDownedPlayer = other;
-                nearbyDownedPlayer.DisplayReviveText();
-            }
-        }
-    }
-
-    private void OnTriggerExit2D(Collider2D collision)
-    {
-        PurchaseSystem shop = collision.GetComponent<PurchaseSystem>();
-        if (shop != null && shop == nearbyPurchaseSystem)
-        {
-            shop.HidePrice();
-            nearbyPurchaseSystem = null;
-        }
-
-        Player other = collision.GetComponent<Player>();
-        if (other != null && other == nearbyDownedPlayer)
-        {
-            CancelMyReviveAction();
-            nearbyDownedPlayer.HideReviveText();
-            nearbyDownedPlayer = null;
-        }
     }
 
     private void OnNameChanged(FixedString32Bytes oldVal, FixedString32Bytes newVal)
@@ -440,9 +512,13 @@ public class Player : NetworkBehaviour
                 revivingTarget.HideReviveText();
                 nearbyDownedPlayer.GetComponent<ReviveController>().StartBeingRevivedServerRpc(NetworkObjectId);
             }
-            else if (nearbyPurchaseSystem != null)
+            else
             {
-                RequestPurchaseServerRpc(nearbyPurchaseSystem.NetworkObjectId);
+                PurchaseSystem activeTarget = GetActivePurchaseTarget();
+                if (activeTarget != null)
+                {
+                    RequestPurchaseServerRpc(activeTarget.NetworkObjectId);
+                }
             }
         }
     }

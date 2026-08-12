@@ -20,6 +20,7 @@ public class MysteryBox : PurchaseSystem
 
     protected override void GrantPurchase(Entity buyer)
     {
+        HidePrice();
         Audio.PlayNetworkedSFX(FMODEvents.instance.mysteryBoxOpen, transform.position);
         StartCoroutine(Sequence());
     }
@@ -29,9 +30,8 @@ public class MysteryBox : PurchaseSystem
         int randomIndex = Random.Range(0, possibleSpells.Length);
         SpellPurchase spawnedSpell = Instantiate(possibleSpells[randomIndex], spawnPoint.position, spawnPoint.rotation);
 
-        spawnedSpell.GetComponent<NetworkObject>().Spawn();
-
         spawnedSpell.MakeFree();
+        spawnedSpell.GetComponent<NetworkObject>().Spawn();
 
         // 2. Wait
         // During this time, hasBeenPurchased is TRUE, 

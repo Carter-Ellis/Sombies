@@ -49,16 +49,13 @@ public abstract class PurchaseSystem : NetworkBehaviour
         _hasBeenPurchased.OnValueChanged += OnPurchasedStateChanged;
         _netPrice.OnValueChanged += OnPriceNetworkChanged;
 
-        if (IsServer && price != 0 && _netPrice.Value == 0)
+        if (IsServer)
         {
             _netPrice.Value = price;
         }
 
-        if (_netPrice.Value != 0)
-        {
-            price = _netPrice.Value;
-            UpdatePriceText();
-        }
+        price = _netPrice.Value;
+        UpdatePriceText();
 
         if (_hasBeenPurchased.Value && disableOnPurchase)
         {
@@ -142,7 +139,7 @@ public abstract class PurchaseSystem : NetworkBehaviour
 
     public void MakeFree()
     {
-        price = 0;
+        SetPrice(0);
     }
 
     protected void UpdatePriceText()
@@ -175,7 +172,7 @@ public abstract class PurchaseSystem : NetworkBehaviour
 
     public void DisplayPrice()
     {
-        if (priceTxt != null)
+        if (priceTxt != null && !_hasBeenPurchased.Value)
         {
             priceTxt.gameObject.SetActive(true);
         }
