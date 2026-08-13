@@ -68,8 +68,10 @@ public class Audio : MonoBehaviour
 
     private IEnumerator WaitForBanksAndPlayMusic()
     {
-        while (!RuntimeManager.IsInitialized || !RuntimeManager.HaveMasterBanksLoaded)
+        float timer = 0f;
+        while (!RuntimeManager.IsInitialized && timer < 5f)
         {
+            timer += Time.deltaTime;
             yield return null;
         }
 
@@ -165,6 +167,19 @@ public class Audio : MonoBehaviour
         FMOD.GUID guid = eventRef.Guid;
         string path = eventRef.Path ?? "";
 
+        if (string.IsNullOrEmpty(path) && !guid.IsNull && RuntimeManager.IsInitialized && RuntimeManager.HaveMasterBanksLoaded)
+        {
+            try
+            {
+                var desc = RuntimeManager.GetEventDescription(guid);
+                if (desc.isValid())
+                {
+                    desc.getPath(out path);
+                }
+            }
+            catch { }
+        }
+
         using FastBufferWriter writer = new FastBufferWriter(256 + (path.Length * 2), Allocator.Temp);
         writer.WriteValueSafe(guid.Data1);
         writer.WriteValueSafe(guid.Data2);
@@ -185,6 +200,19 @@ public class Audio : MonoBehaviour
 
         FMOD.GUID guid = eventRef.Guid;
         string path = eventRef.Path ?? "";
+
+        if (string.IsNullOrEmpty(path) && !guid.IsNull && RuntimeManager.IsInitialized && RuntimeManager.HaveMasterBanksLoaded)
+        {
+            try
+            {
+                var desc = RuntimeManager.GetEventDescription(guid);
+                if (desc.isValid())
+                {
+                    desc.getPath(out path);
+                }
+            }
+            catch { }
+        }
 
         using FastBufferWriter writer = new FastBufferWriter(256 + (path.Length * 2), Allocator.Temp);
         writer.WriteValueSafe(guid.Data1);
@@ -207,7 +235,16 @@ public class Audio : MonoBehaviour
         reader.ReadValueSafe(out Vector3 pos);
 
         FMOD.GUID guid = new FMOD.GUID { Data1 = d1, Data2 = d2, Data3 = d3, Data4 = d4 };
-        EventReference eventRef = new EventReference { Guid = guid, Path = path };
+        
+        EventReference eventRef = default;
+        if (!string.IsNullOrEmpty(path))
+        {
+            eventRef = RuntimeManager.PathToEventReference(path);
+        }
+        if (eventRef.IsNull)
+        {
+            eventRef = new EventReference { Guid = guid, Path = path };
+        }
 
         // Client (non-host) plays sound locally upon receiving broadcast
         if (NetworkManager.Singleton != null && !NetworkManager.Singleton.IsServer)
@@ -226,7 +263,16 @@ public class Audio : MonoBehaviour
         reader.ReadValueSafe(out Vector3 pos);
 
         FMOD.GUID guid = new FMOD.GUID { Data1 = d1, Data2 = d2, Data3 = d3, Data4 = d4 };
-        EventReference eventRef = new EventReference { Guid = guid, Path = path };
+        
+        EventReference eventRef = default;
+        if (!string.IsNullOrEmpty(path))
+        {
+            eventRef = RuntimeManager.PathToEventReference(path);
+        }
+        if (eventRef.IsNull)
+        {
+            eventRef = new EventReference { Guid = guid, Path = path };
+        }
 
         // Server broadcasts to all clients (including local playback on host)
         BroadcastSFXToClients(eventRef, pos);
@@ -234,21 +280,61 @@ public class Audio : MonoBehaviour
 
     private static void playSFXInternal(EventReference eventRef, Vector3 pos)
     {
-        if (eventRef.IsNull) return;
+        if (eventRef.IsNull && string.IsNullOrEmpty(eventRef.Path)) return;
 
         try
         {
-            if (!RuntimeManager.IsInitialized || !RuntimeManager.HaveMasterBanksLoaded) return;
+            if (!RuntimeManager.IsInitialized) return;
 
-            var eventDesc = RuntimeManager.GetEventDescription(eventRef);
-            if (!eventDesc.isValid()) return;
+            // 1. Try StudioSystem getEvent directly using string Path (works on virtual clients)
+            if (!string.IsNullOrEmpty(eventRef.Path))
+            {
+                try
+                {
+                    var res = RuntimeManager.StudioSystem.getEvent(eventRef.Path, out var desc);
+                    if (res == FMOD.RESULT.OK && desc.isValid())
+                    {
+                        desc.createInstance(out var inst);
+                        if (inst.isValid())
+                        {
+                            inst.set3DAttributes(RuntimeUtils.To3DAttributes(pos));
+                            inst.start();
+                            inst.release();
+                            return;
+                        }
+                    }
+                }
+                catch { }
+            }
 
-            RuntimeManager.PlayOneShot(eventRef, pos);
+            // 2. Try StudioSystem getEventByID directly using GUID
+            if (!eventRef.Guid.IsNull)
+            {
+                try
+                {
+                    var res = RuntimeManager.StudioSystem.getEventByID(eventRef.Guid, out var desc);
+                    if (res == FMOD.RESULT.OK && desc.isValid())
+                    {
+                        desc.createInstance(out var inst);
+                        if (inst.isValid())
+                        {
+                            inst.set3DAttributes(RuntimeUtils.To3DAttributes(pos));
+                            inst.start();
+                            inst.release();
+                            return;
+                        }
+                    }
+                }
+                catch { }
+            }
+
+            // 3. Fallback to RuntimeManager.PlayOneShot
+            if (!eventRef.IsNull)
+            {
+                RuntimeManager.PlayOneShot(eventRef, pos);
+            }
         }
-        catch (System.Exception ex)
-        {
-            Debug.LogWarning($"[Audio] Could not play SFX '{eventRef}': {ex.Message}");
-        }
+        catch { }
     }
 
     private static void playSFXInternal(FMOD.GUID guid, Vector3 pos)
@@ -340,24 +426,27 @@ public class Audio : MonoBehaviour
 
     private static void play(TYPE type, EventReference eventRef, Vector3 pos = default)
     {
-        if (eventRef.IsNull) return;
+        if (eventRef.IsNull && string.IsNullOrEmpty(eventRef.Path)) return;
 
         if (type == TYPE.SFX)
         {
-            RuntimeManager.PlayOneShot(eventRef, pos);
+            playSFXInternal(eventRef, pos);
             return;
         }
-        if (currentRef[(int)type].Guid == eventRef.Guid)
+        if (currentRef[(int)type].Guid == eventRef.Guid && !currentRef[(int)type].Guid.IsNull)
         {
             return; // Don't restart music/ambience
         }
         stop(type);
 
-        EventInstance eventInst = RuntimeManager.CreateInstance(eventRef);
-        eventInst.set3DAttributes(RuntimeUtils.To3DAttributes(pos));
-        eventInst.start();
-        events[(int)type] = eventInst;
-        currentRef[(int)type] = eventRef;
+        EventInstance eventInst = CreateSFXInstance(eventRef);
+        if (eventInst.isValid())
+        {
+            eventInst.set3DAttributes(RuntimeUtils.To3DAttributes(pos));
+            eventInst.start();
+            events[(int)type] = eventInst;
+            currentRef[(int)type] = eventRef;
+        }
     }
 
     public static void playSFX(EventReference eventRef, Vector3 pos = default)
@@ -365,11 +454,57 @@ public class Audio : MonoBehaviour
         play(TYPE.SFX, eventRef, pos);
     }
 
+    public static EventInstance CreateSFXInstance(EventReference eventRef)
+    {
+        if (eventRef.IsNull && string.IsNullOrEmpty(eventRef.Path)) return default;
+
+        try
+        {
+            if (!RuntimeManager.IsInitialized) return default;
+
+            // 1. Try StudioSystem getEvent directly using string Path
+            if (!string.IsNullOrEmpty(eventRef.Path))
+            {
+                try
+                {
+                    var res = RuntimeManager.StudioSystem.getEvent(eventRef.Path, out var desc);
+                    if (res == FMOD.RESULT.OK && desc.isValid())
+                    {
+                        desc.createInstance(out var inst);
+                        return inst;
+                    }
+                }
+                catch { }
+            }
+
+            // 2. Try StudioSystem getEventByID directly using GUID
+            if (!eventRef.Guid.IsNull)
+            {
+                try
+                {
+                    var res = RuntimeManager.StudioSystem.getEventByID(eventRef.Guid, out var desc);
+                    if (res == FMOD.RESULT.OK && desc.isValid())
+                    {
+                        desc.createInstance(out var inst);
+                        return inst;
+                    }
+                }
+                catch { }
+            }
+        }
+        catch { }
+
+        return default;
+    }
+
     public static EventInstance playSFXInstance(EventReference eventRef, Vector3 pos = default)
     {
-        EventInstance eventInst = RuntimeManager.CreateInstance(eventRef);
-        eventInst.set3DAttributes(RuntimeUtils.To3DAttributes(pos));
-        eventInst.start();
+        EventInstance eventInst = CreateSFXInstance(eventRef);
+        if (eventInst.isValid())
+        {
+            eventInst.set3DAttributes(RuntimeUtils.To3DAttributes(pos));
+            eventInst.start();
+        }
         return eventInst;
     }
 

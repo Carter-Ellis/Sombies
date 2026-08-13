@@ -2,6 +2,7 @@ using System.Collections;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using FMODUnity;
 
 public class PlayerMovement : NetworkBehaviour
 {
@@ -12,7 +13,7 @@ public class PlayerMovement : NetworkBehaviour
     private bool _isSprinting;
     private ReviveController _revive;
 
-    // ---> NEW VARIABLES FOR WALKING BOB <---
+    // ---> NEW VARIABLES FOR WALKING BOB & AUDIO <---
     [Header("Visual Walking Bob")]
     [SerializeField] private float baseBobSpeed = 2f;
     [SerializeField] private float bobAmount = 0.1f;
@@ -20,6 +21,10 @@ public class PlayerMovement : NetworkBehaviour
     private Vector3 _defaultSpriteLocalPos;
     private Vector3 _lastPos;
     private float _bobTimer;
+
+    private FMOD.Studio.EventInstance _footstepInstance;
+    private bool _isFootstepPlaying;
+    private float _nextFootstepRetryTime;
 
     public float CurrentSpeed
     {
@@ -51,20 +56,28 @@ public class PlayerMovement : NetworkBehaviour
             _defaultSpriteLocalPos = _player.SpriteTransform.localPosition;
             _lastPos = transform.position;
         }
+        else
+        {
+            _lastPos = transform.position;
+        }
     }
 
     private void Update()
     {
-        // ---> NEW CODE: Procedural Bobbing <---
+        float visualSpeed = 0f;
+
+        // Calculate actual distance moved this frame (Works for Owner AND other clients observing over the network)
+        float moveDistanceThisFrame = (transform.position - _lastPos).magnitude;
+        _lastPos = transform.position;
+
+        if (Time.deltaTime > 0f)
+        {
+            visualSpeed = moveDistanceThisFrame / Time.deltaTime;
+        }
+
+        // ---> Procedural Bobbing <---
         if (_player != null && _player.SpriteTransform != null)
         {
-            // Calculate actual distance moved this frame (Works for Owner AND other clients observing over the network)
-            float moveDistanceThisFrame = (transform.position - _lastPos).magnitude;
-            _lastPos = transform.position;
-
-            // Convert distance to a speed value
-            float visualSpeed = moveDistanceThisFrame / Time.deltaTime;
-
             // If we are moving fast enough, not knocked back, and not downed...
             if (visualSpeed > 0.1f && !isKnockedBack && (_revive == null || !_revive.IsDownedSync.Value))
             {
@@ -86,6 +99,76 @@ public class PlayerMovement : NetworkBehaviour
                 );
             }
         }
+
+        // ---> Footstep Audio <---
+        UpdateFootstepAudio(visualSpeed);
+    }
+
+    private void UpdateFootstepAudio(float visualSpeed)
+    {
+        bool isMoving = visualSpeed > 0.5f && !isKnockedBack && (_revive == null || !_revive.IsDownedSync.Value);
+
+        if (isMoving && FMODEvents.instance != null && !FMODEvents.instance.walkWood.IsNull)
+        {
+            if (!_isFootstepPlaying || !_footstepInstance.isValid())
+            {
+                if (Time.time >= _nextFootstepRetryTime)
+                {
+                    _footstepInstance = Audio.CreateSFXInstance(FMODEvents.instance.walkWood);
+                    if (_footstepInstance.isValid())
+                    {
+                        _footstepInstance.start();
+                        _isFootstepPlaying = true;
+                    }
+                    else
+                    {
+                        // Cooldown 2s before retrying if the event is unbuilt/missing in FMOD bank
+                        _nextFootstepRetryTime = Time.time + 2f;
+                    }
+                }
+            }
+            else
+            {
+                _footstepInstance.getPlaybackState(out FMOD.Studio.PLAYBACK_STATE playbackState);
+                if (playbackState == FMOD.Studio.PLAYBACK_STATE.STOPPED)
+                {
+                    _footstepInstance.start();
+                }
+            }
+
+            if (_footstepInstance.isValid())
+            {
+                _footstepInstance.set3DAttributes(RuntimeUtils.To3DAttributes(transform.position));
+
+                float baseSpeed = (_entity != null && _entity.BaseWalkSpeed > 0) ? _entity.BaseWalkSpeed : 5f;
+                float pitch = Mathf.Clamp(visualSpeed / baseSpeed, 0.8f, 2.0f);
+                _footstepInstance.setPitch(pitch);
+            }
+        }
+        else
+        {
+            StopFootstepAudio();
+        }
+    }
+
+    private void StopFootstepAudio()
+    {
+        if (_isFootstepPlaying)
+        {
+            _footstepInstance.stop(FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
+            _footstepInstance.release();
+            _isFootstepPlaying = false;
+        }
+    }
+
+    private void OnDisable()
+    {
+        StopFootstepAudio();
+    }
+
+    private void OnDestroy()
+    {
+        StopFootstepAudio();
     }
 
     void FixedUpdate()

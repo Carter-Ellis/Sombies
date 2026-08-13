@@ -81,10 +81,10 @@ MonoBehaviour:
     Path: event:/SFX/Revive/Revive Sequence
   <playerHurt>k__BackingField:
     Guid:
-      Data1: 207297317
-      Data2: 1212574046
-      Data3: 1885169042
-      Data4: 361911981
+      Data1: 1340203011
+      Data2: 1254867550
+      Data3: -1298641264
+      Data4: 1211055108
     Path: event:/SFX/Player/PlayerHurt
   <swig>k__BackingField:
     Guid:
@@ -135,6 +135,20 @@ MonoBehaviour:
       Data3: -1613221199
       Data4: 1275833370
     Path: event:/SFX/Throw/Throw
+  <potionBuy>k__BackingField:
+    Guid:
+      Data1: 422078876
+      Data2: 1152089746
+      Data3: 136362132
+      Data4: -1405744465
+    Path: event:/SFX/PotionVendor/PotionBuy
+  <walkWood>k__BackingField:
+    Guid:
+      Data1: 1360657741
+      Data2: 1180050162
+      Data3: -1252962374
+      Data4: 1065285795
+    Path: event:/SFX/Player/Walk/Wood/WalkWood
 --- !u!1 &7597115827806844496
 GameObject:
   m_ObjectHideFlags: 0

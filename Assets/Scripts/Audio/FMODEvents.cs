@@ -26,7 +26,7 @@ public class FMODEvents : MonoBehaviour
     [field: Header("Music")]
     [field: SerializeField] public EventReference sombieStyle { get; set; }
 
-    [field: Header("FireCrackling")]
+    [field: Header("Fire Crackling")]
     [field: SerializeField] public EventReference fireCrackling { get; set; }
 
     [field: Header("Door")]
@@ -38,7 +38,11 @@ public class FMODEvents : MonoBehaviour
     [field: Header("Throw")]
     [field: SerializeField] public EventReference itemThrow { get; set; }
 
+    [field: Header("Potion Vendor")]
+    [field: SerializeField] public EventReference potionBuy { get; set; }
 
+    [field: Header("Player Walk")]
+    [field: SerializeField] public EventReference walkWood { get; set; }
 
     public static FMODEvents instance { get; private set; }
 
@@ -52,23 +56,5 @@ public class FMODEvents : MonoBehaviour
         }
 
         instance = this;
-        EnsureValidEvents();
-    }
-
-    public void EnsureValidEvents()
-    {
-        if (welcomeSequence.IsNull) welcomeSequence = RuntimeManager.PathToEventReference("event:/SFX/Sequences/Welcome");
-        if (mysteryBoxOpen.IsNull) mysteryBoxOpen = RuntimeManager.PathToEventReference("event:/SFX/MysteryBox/MysteryBoxPurchase");
-        if (meleeAttack.IsNull) meleeAttack = RuntimeManager.PathToEventReference("event:/SFX/Melee/MeleeAttack");
-        if (downed.IsNull) downed = RuntimeManager.PathToEventReference("event:/SFX/Revive/Downed");
-        if (reviveSequence.IsNull) reviveSequence = RuntimeManager.PathToEventReference("event:/SFX/Revive/Revive Sequence");
-        if (playerHurt.IsNull) playerHurt = RuntimeManager.PathToEventReference("event:/SFX/Player/PlayerHurt");
-        if (swig.IsNull) swig = RuntimeManager.PathToEventReference("event:/SFX/Potion/Swig");
-        if (potionBounce.IsNull) potionBounce = RuntimeManager.PathToEventReference("event:/SFX/Potion/PotionBounce");
-        if (sombieStyle.IsNull) sombieStyle = RuntimeManager.PathToEventReference("event:/Music/SombieStyle");
-        if (fireCrackling.IsNull) fireCrackling = RuntimeManager.PathToEventReference("event:/SFX/Fire/FireCrackling");
-        if (doorOpen.IsNull) doorOpen = RuntimeManager.PathToEventReference("event:/SFX/DoorOpen/DoorOpen");
-        if (itemPickup.IsNull) itemPickup = RuntimeManager.PathToEventReference("event:/SFX/ItemPickup/ItemPickup");
-        if (itemThrow.IsNull) itemThrow = RuntimeManager.PathToEventReference("event:/SFX/Throw/ItemThrow");
     }
 }

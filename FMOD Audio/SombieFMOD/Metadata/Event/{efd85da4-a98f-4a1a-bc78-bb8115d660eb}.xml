@@ -5,7 +5,7 @@
 			<value>Revive Sequence</value>
 		</property>
 		<property name="outputFormat">
-			<value>1</value>
+			<value>2</value>
 		</property>
 		<relationship name="folder">
 			<destination>{aae97f04-3f22-4328-9d50-239ad5f97c56}</destination>
@@ -99,6 +99,7 @@
 	<object class="MixerBusEffectChain" id="{048c4390-6da4-4f3b-85b4-b68cd899e0eb}">
 		<relationship name="effects">
 			<destination>{f2c30fc3-3038-4620-89d7-9aea7bc41cdb}</destination>
+			<destination>{2e697484-a5dd-44ae-aead-d7471e564b0e}</destination>
 		</relationship>
 	</object>
 	<object class="MixerBusPanner" id="{1c177328-4441-45b0-8cd8-166e797b923b}" />
@@ -109,4 +110,5 @@
 	</object>
 	<object class="MixerBusFader" id="{a84dcb18-b2c9-460e-9ee2-e4904d2adf79}" />
 	<object class="MixerBusFader" id="{f2c30fc3-3038-4620-89d7-9aea7bc41cdb}" />
+	<object class="SpatialiserEffect" id="{2e697484-a5dd-44ae-aead-d7471e564b0e}" />
 </objects>

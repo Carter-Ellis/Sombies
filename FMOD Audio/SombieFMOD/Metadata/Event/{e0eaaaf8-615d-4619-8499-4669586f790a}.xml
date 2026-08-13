@@ -5,7 +5,7 @@
 			<value>Downed</value>
 		</property>
 		<property name="outputFormat">
-			<value>1</value>
+			<value>2</value>
 		</property>
 		<relationship name="folder">
 			<destination>{aae97f04-3f22-4328-9d50-239ad5f97c56}</destination>
@@ -99,6 +99,7 @@
 	<object class="MixerBusEffectChain" id="{bbed6f8a-4ae0-4e8a-8484-bb9945c186ae}">
 		<relationship name="effects">
 			<destination>{504dad1c-5608-4dfa-8e99-4c8e24537436}</destination>
+			<destination>{cf0b0fa1-e6f4-4515-bc8e-796ae630cb61}</destination>
 		</relationship>
 	</object>
 	<object class="MixerBusPanner" id="{068e0ad7-1418-44b4-bb92-a6c4321d27ee}" />
@@ -109,4 +110,5 @@
 	</object>
 	<object class="MixerBusFader" id="{3b7fca98-f5e8-4b8e-92d2-efd2ae44d9c4}" />
 	<object class="MixerBusFader" id="{504dad1c-5608-4dfa-8e99-4c8e24537436}" />
+	<object class="SpatialiserEffect" id="{cf0b0fa1-e6f4-4515-bc8e-796ae630cb61}" />
 </objects>

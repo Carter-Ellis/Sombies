@@ -10,6 +10,10 @@ public class Vendor : PurchaseSystem
     [SerializeField] private float displayDuration = 7.5f;
     protected override void GrantPurchase(Entity buyer)
     {
+        if (FMODEvents.instance != null)
+        {
+            Audio.PlayNetworkedSFX(FMODEvents.instance.potionBuy, transform.position);
+        }
         StartCoroutine(Sequence());
     }
 

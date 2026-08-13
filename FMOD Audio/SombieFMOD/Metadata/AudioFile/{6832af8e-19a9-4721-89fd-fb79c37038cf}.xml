@@ -2,7 +2,7 @@
 <objects serializationModel="Studio.02.03.00">
 	<object class="AudioFile" id="{6832af8e-19a9-4721-89fd-fb79c37038cf}">
 		<property name="assetPath">
-			<value>SFX/PotionBounce/potion_bounce_1.wav</value>
+			<value>SFX/Potion/PotionBounce/potion_bounce_1.wav</value>
 		</property>
 		<property name="frequencyInKHz">
 			<value>48</value>
