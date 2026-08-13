@@ -160,12 +160,30 @@ public class Audio : MonoBehaviour
         }
     }
 
+    public static string GetEventPath(EventReference eventRef)
+    {
+#if UNITY_EDITOR
+        return eventRef.Path;
+#else
+        return null;
+#endif
+    }
+
+    public static EventReference CreateEventRef(FMOD.GUID guid, string path)
+    {
+#if UNITY_EDITOR
+        return new EventReference { Guid = guid, Path = path };
+#else
+        return new EventReference { Guid = guid };
+#endif
+    }
+
     private static void BroadcastSFXToClients(EventReference eventRef, Vector3 pos)
     {
         if (NetworkManager.Singleton == null || NetworkManager.Singleton.CustomMessagingManager == null) return;
 
         FMOD.GUID guid = eventRef.Guid;
-        string path = eventRef.Path ?? "";
+        string path = GetEventPath(eventRef) ?? "";
 
         if (string.IsNullOrEmpty(path) && !guid.IsNull && RuntimeManager.IsInitialized && RuntimeManager.HaveMasterBanksLoaded)
         {
@@ -199,7 +217,7 @@ public class Audio : MonoBehaviour
         if (NetworkManager.Singleton == null || NetworkManager.Singleton.CustomMessagingManager == null) return;
 
         FMOD.GUID guid = eventRef.Guid;
-        string path = eventRef.Path ?? "";
+        string path = GetEventPath(eventRef) ?? "";
 
         if (string.IsNullOrEmpty(path) && !guid.IsNull && RuntimeManager.IsInitialized && RuntimeManager.HaveMasterBanksLoaded)
         {
@@ -243,7 +261,7 @@ public class Audio : MonoBehaviour
         }
         if (eventRef.IsNull)
         {
-            eventRef = new EventReference { Guid = guid, Path = path };
+            eventRef = CreateEventRef(guid, path);
         }
 
         // Client (non-host) plays sound locally upon receiving broadcast
@@ -271,7 +289,7 @@ public class Audio : MonoBehaviour
         }
         if (eventRef.IsNull)
         {
-            eventRef = new EventReference { Guid = guid, Path = path };
+            eventRef = CreateEventRef(guid, path);
         }
 
         // Server broadcasts to all clients (including local playback on host)
@@ -280,18 +298,19 @@ public class Audio : MonoBehaviour
 
     private static void playSFXInternal(EventReference eventRef, Vector3 pos)
     {
-        if (eventRef.IsNull && string.IsNullOrEmpty(eventRef.Path)) return;
+        string eventPath = GetEventPath(eventRef);
+        if (eventRef.IsNull && string.IsNullOrEmpty(eventPath)) return;
 
         try
         {
             if (!RuntimeManager.IsInitialized) return;
 
             // 1. Try StudioSystem getEvent directly using string Path (works on virtual clients)
-            if (!string.IsNullOrEmpty(eventRef.Path))
+            if (!string.IsNullOrEmpty(eventPath))
             {
                 try
                 {
-                    var res = RuntimeManager.StudioSystem.getEvent(eventRef.Path, out var desc);
+                    var res = RuntimeManager.StudioSystem.getEvent(eventPath, out var desc);
                     if (res == FMOD.RESULT.OK && desc.isValid())
                     {
                         desc.createInstance(out var inst);
@@ -326,12 +345,6 @@ public class Audio : MonoBehaviour
                     }
                 }
                 catch { }
-            }
-
-            // 3. Fallback to RuntimeManager.PlayOneShot
-            if (!eventRef.IsNull)
-            {
-                RuntimeManager.PlayOneShot(eventRef, pos);
             }
         }
         catch { }
@@ -426,7 +439,8 @@ public class Audio : MonoBehaviour
 
     private static void play(TYPE type, EventReference eventRef, Vector3 pos = default)
     {
-        if (eventRef.IsNull && string.IsNullOrEmpty(eventRef.Path)) return;
+        string eventPath = GetEventPath(eventRef);
+        if (eventRef.IsNull && string.IsNullOrEmpty(eventPath)) return;
 
         if (type == TYPE.SFX)
         {
@@ -456,18 +470,19 @@ public class Audio : MonoBehaviour
 
     public static EventInstance CreateSFXInstance(EventReference eventRef)
     {
-        if (eventRef.IsNull && string.IsNullOrEmpty(eventRef.Path)) return default;
+        string eventPath = GetEventPath(eventRef);
+        if (eventRef.IsNull && string.IsNullOrEmpty(eventPath)) return default;
 
         try
         {
             if (!RuntimeManager.IsInitialized) return default;
 
             // 1. Try StudioSystem getEvent directly using string Path
-            if (!string.IsNullOrEmpty(eventRef.Path))
+            if (!string.IsNullOrEmpty(eventPath))
             {
                 try
                 {
-                    var res = RuntimeManager.StudioSystem.getEvent(eventRef.Path, out var desc);
+                    var res = RuntimeManager.StudioSystem.getEvent(eventPath, out var desc);
                     if (res == FMOD.RESULT.OK && desc.isValid())
                     {
                         desc.createInstance(out var inst);

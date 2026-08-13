@@ -166,8 +166,9 @@ public class PlayerMovement : NetworkBehaviour
         StopFootstepAudio();
     }
 
-    private void OnDestroy()
+    public override void OnDestroy()
     {
+        base.OnDestroy();
         StopFootstepAudio();
     }
 

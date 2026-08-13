@@ -4,8 +4,13 @@ using UnityEngine.SceneManagement;
 public class MainMenuController : MonoBehaviour
 {
 
-    private void Awake()
+    private System.Collections.IEnumerator Start()
     {
+        while (FMODEvents.instance == null || !FMODUnity.RuntimeManager.IsInitialized)
+        {
+            yield return null;
+        }
+
         Audio.playSFX(FMODEvents.instance.welcomeSequence, Vector3.zero);
     }
 

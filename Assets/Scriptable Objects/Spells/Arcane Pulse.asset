@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ProjectileSpell
   _name: Arcane Pulse
   _description: Charge up a powerful blast
-  _manaCost: 3
+  _manaCost: 10
   damage: 40
   cooldown: 1
   isChargeSpell: 0

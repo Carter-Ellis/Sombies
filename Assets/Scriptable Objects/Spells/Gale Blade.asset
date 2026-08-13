@@ -16,7 +16,7 @@ MonoBehaviour:
   _description: Fire a sharp, loyal gust of wind
   _manaCost: 3
   damage: 20
-  cooldown: 0.1
+  cooldown: 0.2
   isChargeSpell: 0
   sprite: {fileID: -2413806693520163455, guid: d0d74d53d768e1741918c95e7bd8ff1c, type: 3}
   spellID: 5

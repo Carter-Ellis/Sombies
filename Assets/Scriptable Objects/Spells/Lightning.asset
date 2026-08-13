@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ProjectileSpell
   _name: Lightning
   _description: Electrocute a chain of enemies.
-  _manaCost: 15
+  _manaCost: 10
   damage: 80
   cooldown: 2
   isChargeSpell: 0

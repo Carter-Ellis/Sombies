@@ -200,12 +200,22 @@ public abstract class Enemy : Entity
     {
         Health -= amount;
         FlashRedRpc();
+
+        if (FMODEvents.instance != null)
+        {
+            Audio.PlayNetworkedSFX(FMODEvents.instance.enemyHurt, transform.position);
+        }
     }
 
     public void TakeDamage(int amount, PlayerStats playerStats)
     {
         Health -= amount;
         FlashRedRpc();
+
+        if (FMODEvents.instance != null)
+        {
+            Audio.PlayNetworkedSFX(FMODEvents.instance.enemyHurt, transform.position);
+        }
 
         if (Health <= 0)
         {

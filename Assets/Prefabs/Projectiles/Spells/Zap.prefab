@@ -202,9 +202,12 @@ MonoBehaviour:
   appliesBuff: 1
   buffType: 4
   buffAmount: 0
-  buffDuration: 1
+  buffDuration: 2
   maxChainTargets: 0
   chainRadius: 0
+  beamColorStart: {r: 0.2, g: 0.8, b: 1, a: 1}
+  beamColorEnd: {r: 1, g: 1, b: 1, a: 1}
+  beamDuration: 0.2
 --- !u!114 &-5381304032835263680
 MonoBehaviour:
   m_ObjectHideFlags: 0

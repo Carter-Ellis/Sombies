@@ -687,7 +687,7 @@ MonoBehaviour:
   _baseSprintSpeed: 7
   initialMana: 100
   initialHealth: 100
-  initialCoins: 10000
+  initialCoins: 0
   _netCoins:
     UpdateTraits:
       MinSecondsBetweenUpdates: 0

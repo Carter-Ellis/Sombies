@@ -149,6 +149,13 @@ MonoBehaviour:
       Data3: -1252962374
       Data4: 1065285795
     Path: event:/SFX/Player/Walk/Wood/WalkWood
+  <enemyHurt>k__BackingField:
+    Guid:
+      Data1: 1335438017
+      Data2: 1274950791
+      Data3: 1223634353
+      Data4: 1421655832
+    Path: event:/SFX/Enemy/EnemyHurt
 --- !u!1 &7597115827806844496
 GameObject:
   m_ObjectHideFlags: 0

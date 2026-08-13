@@ -176,51 +176,6 @@ MonoBehaviour:
   AutoObjectParentSync: 1
   SyncOwnerTransformWhenParented: 1
   AllowOwnerToParent: 0
---- !u!1 &32608603
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 32608605}
-  - component: {fileID: 32608604}
-  m_Layer: 0
-  m_Name: AudioManager
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &32608604
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 32608603}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3474344d4c5ca65469b4ceab542d3bfb, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::AudioManager
---- !u!4 &32608605
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 32608603}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 819198978}
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &48640586
 GameObject:
   m_ObjectHideFlags: 0
@@ -1556,113 +1511,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.RectMask2D
   m_Padding: {x: -8, y: -5, z: -8, w: -5}
   m_Softness: {x: 0, y: 0}
---- !u!1 &819198977
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 819198978}
-  - component: {fileID: 819198979}
-  m_Layer: 0
-  m_Name: FMODEvents
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &819198978
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 819198977}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 32608605}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &819198979
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 819198977}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b3566d96c3fa0c94a8d7ac1a754e323a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::FMODEvents
-  <welcomeSequence>k__BackingField:
-    Guid:
-      Data1: -1835472300
-      Data2: 1114025124
-      Data3: 1499319462
-      Data4: 504645293
-    Path: event:/SFX/Sequences/Welcome
-  <mysteryBoxOpen>k__BackingField:
-    Guid:
-      Data1: 1202756324
-      Data2: 1163163459
-      Data3: -1453589357
-      Data4: 444639229
-    Path: event:/SFX/MysteryBox/MysteryBoxPurchase
-  <meleeAttack>k__BackingField:
-    Guid:
-      Data1: -908226443
-      Data2: 1139234190
-      Data3: 2142240685
-      Data4: 673343403
-    Path: event:/SFX/Melee/MeleeAttack
-  <downed>k__BackingField:
-    Guid:
-      Data1: -521491720
-      Data2: 1176068445
-      Data3: 1766234500
-      Data4: 175730520
-    Path: event:/SFX/Revive/Downed
-  <reviveSequence>k__BackingField:
-    Guid:
-      Data1: -271032924
-      Data2: 1243261327
-      Data3: -2118420292
-      Data4: -345975275
-    Path: event:/SFX/Revive/Revive Sequence
-  <playerHurt>k__BackingField:
-    Guid:
-      Data1: 207297317
-      Data2: 1212574046
-      Data3: 1885169042
-      Data4: 361911981
-    Path: event:/SFX/Player/PlayerHurt
-  <swig>k__BackingField:
-    Guid:
-      Data1: -469306965
-      Data2: 1261349721
-      Data3: 2095054774
-      Data4: 1683501689
-    Path: event:/SFX/Potion/Swig
-  <sombieStyle>k__BackingField:
-    Guid:
-      Data1: 1525285947
-      Data2: 1266979158
-      Data3: -725782639
-      Data4: 56313053
-    Path: event:/Music/SombieStyle
-  <fireCrackling>k__BackingField:
-    Guid:
-      Data1: -1591047401
-      Data2: 1246040458
-      Data3: -988246600
-      Data4: 630777841
-    Path: event:/SFX/Fire/FireCrackling
 --- !u!1 &826516831
 GameObject:
   m_ObjectHideFlags: 0
@@ -2154,6 +2002,71 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 994867123}
   m_CullTransparentMesh: 1
+--- !u!1001 &1041441238
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 11681977715134945, guid: 0012e7f287be17148be2043a75eea630, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -15.16742
+      objectReference: {fileID: 0}
+    - target: {fileID: 11681977715134945, guid: 0012e7f287be17148be2043a75eea630, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -3.35704
+      objectReference: {fileID: 0}
+    - target: {fileID: 11681977715134945, guid: 0012e7f287be17148be2043a75eea630, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 11681977715134945, guid: 0012e7f287be17148be2043a75eea630, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 11681977715134945, guid: 0012e7f287be17148be2043a75eea630, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 11681977715134945, guid: 0012e7f287be17148be2043a75eea630, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 11681977715134945, guid: 0012e7f287be17148be2043a75eea630, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 11681977715134945, guid: 0012e7f287be17148be2043a75eea630, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 11681977715134945, guid: 0012e7f287be17148be2043a75eea630, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 11681977715134945, guid: 0012e7f287be17148be2043a75eea630, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7597115827806844496, guid: 0012e7f287be17148be2043a75eea630, type: 3}
+      propertyPath: m_Name
+      value: AudioManager
+      objectReference: {fileID: 0}
+    - target: {fileID: 8722583688508776673, guid: 0012e7f287be17148be2043a75eea630, type: 3}
+      propertyPath: GlobalObjectIdHash
+      value: 1592612831
+      objectReference: {fileID: 0}
+    - target: {fileID: 8722583688508776673, guid: 0012e7f287be17148be2043a75eea630, type: 3}
+      propertyPath: InScenePlacedSourceGlobalObjectIdHash
+      value: 4039978163
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 0012e7f287be17148be2043a75eea630, type: 3}
 --- !u!1 &1054997423
 GameObject:
   m_ObjectHideFlags: 0
@@ -2241,7 +2154,7 @@ MonoBehaviour:
   useRelay: 1
   sceneToLoad: SampleScene
   playerPrefab: {fileID: 4411116556212734287, guid: 49ea537fa833bcd44a89191b7d2683ba, type: 3}
-  spawnpointsParent: {fileID: 0}
+  audioManagerPrefab: {fileID: 0}
 --- !u!114 &1134226647
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3550,7 +3463,7 @@ SceneRoots:
   - {fileID: 1704100495}
   - {fileID: 194513741}
   - {fileID: 972437591}
-  - {fileID: 32608605}
+  - {fileID: 1041441238}
   - {fileID: 2035080657}
   - {fileID: 1864915760}
   - {fileID: 1929090403}

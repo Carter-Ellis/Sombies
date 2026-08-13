@@ -44,6 +44,9 @@ public class FMODEvents : MonoBehaviour
     [field: Header("Player Walk")]
     [field: SerializeField] public EventReference walkWood { get; set; }
 
+    [field: Header("Enemy")]
+    [field: SerializeField] public EventReference enemyHurt { get; set; }
+
     public static FMODEvents instance { get; private set; }
 
     private void Awake()
