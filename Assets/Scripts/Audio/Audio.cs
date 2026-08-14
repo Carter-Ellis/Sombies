@@ -138,7 +138,7 @@ public class Audio : MonoBehaviour
         }
     }
 
-    public static void PlayNetworkedSFX(EventReference eventRef, Vector3 pos)
+    public static void PlayNetworkedSFX(EventReference eventRef, Vector3 pos, float volume = 1f)
     {
         if (eventRef.IsNull) return;
 
@@ -146,17 +146,17 @@ public class Audio : MonoBehaviour
 
         if (NetworkManager.Singleton == null || !NetworkManager.Singleton.IsListening || NetworkManager.Singleton.CustomMessagingManager == null)
         {
-            playSFXInternal(eventRef, pos);
+            playSFXInternal(eventRef, pos, volume);
             return;
         }
 
         if (NetworkManager.Singleton.IsServer)
         {
-            BroadcastSFXToClients(eventRef, pos);
+            BroadcastSFXToClients(eventRef, pos, volume);
         }
         else
         {
-            SendSFXToServer(eventRef, pos);
+            SendSFXToServer(eventRef, pos, volume);
         }
     }
 
@@ -178,7 +178,7 @@ public class Audio : MonoBehaviour
 #endif
     }
 
-    private static void BroadcastSFXToClients(EventReference eventRef, Vector3 pos)
+    private static void BroadcastSFXToClients(EventReference eventRef, Vector3 pos, float volume = 1f)
     {
         if (NetworkManager.Singleton == null || NetworkManager.Singleton.CustomMessagingManager == null) return;
 
@@ -205,14 +205,15 @@ public class Audio : MonoBehaviour
         writer.WriteValueSafe(guid.Data4);
         writer.WriteValueSafe(path);
         writer.WriteValueSafe(pos);
+        writer.WriteValueSafe(volume);
 
         NetworkManager.Singleton.CustomMessagingManager.SendNamedMessageToAll(MSG_SERVER_TO_CLIENT_SFX, writer);
 
         // Always play locally on server/host
-        playSFXInternal(eventRef, pos);
+        playSFXInternal(eventRef, pos, volume);
     }
 
-    private static void SendSFXToServer(EventReference eventRef, Vector3 pos)
+    private static void SendSFXToServer(EventReference eventRef, Vector3 pos, float volume = 1f)
     {
         if (NetworkManager.Singleton == null || NetworkManager.Singleton.CustomMessagingManager == null) return;
 
@@ -239,6 +240,7 @@ public class Audio : MonoBehaviour
         writer.WriteValueSafe(guid.Data4);
         writer.WriteValueSafe(path);
         writer.WriteValueSafe(pos);
+        writer.WriteValueSafe(volume);
 
         NetworkManager.Singleton.CustomMessagingManager.SendNamedMessage(MSG_CLIENT_TO_SERVER_SFX, NetworkManager.ServerClientId, writer);
     }
@@ -251,6 +253,7 @@ public class Audio : MonoBehaviour
         reader.ReadValueSafe(out int d4);
         reader.ReadValueSafe(out string path);
         reader.ReadValueSafe(out Vector3 pos);
+        reader.ReadValueSafe(out float volume);
 
         FMOD.GUID guid = new FMOD.GUID { Data1 = d1, Data2 = d2, Data3 = d3, Data4 = d4 };
         
@@ -267,7 +270,7 @@ public class Audio : MonoBehaviour
         // Client (non-host) plays sound locally upon receiving broadcast
         if (NetworkManager.Singleton != null && !NetworkManager.Singleton.IsServer)
         {
-            playSFXInternal(eventRef, pos);
+            playSFXInternal(eventRef, pos, volume);
         }
     }
 
@@ -279,6 +282,7 @@ public class Audio : MonoBehaviour
         reader.ReadValueSafe(out int d4);
         reader.ReadValueSafe(out string path);
         reader.ReadValueSafe(out Vector3 pos);
+        reader.ReadValueSafe(out float volume);
 
         FMOD.GUID guid = new FMOD.GUID { Data1 = d1, Data2 = d2, Data3 = d3, Data4 = d4 };
         
@@ -293,10 +297,10 @@ public class Audio : MonoBehaviour
         }
 
         // Server broadcasts to all clients (including local playback on host)
-        BroadcastSFXToClients(eventRef, pos);
+        BroadcastSFXToClients(eventRef, pos, volume);
     }
 
-    private static void playSFXInternal(EventReference eventRef, Vector3 pos)
+    private static void playSFXInternal(EventReference eventRef, Vector3 pos, float volume = 1f)
     {
         string eventPath = GetEventPath(eventRef);
         if (eventRef.IsNull && string.IsNullOrEmpty(eventPath)) return;
@@ -317,6 +321,7 @@ public class Audio : MonoBehaviour
                         if (inst.isValid())
                         {
                             inst.set3DAttributes(RuntimeUtils.To3DAttributes(pos));
+                            inst.setVolume(volume);
                             inst.start();
                             inst.release();
                             return;
@@ -338,6 +343,7 @@ public class Audio : MonoBehaviour
                         if (inst.isValid())
                         {
                             inst.set3DAttributes(RuntimeUtils.To3DAttributes(pos));
+                            inst.setVolume(volume);
                             inst.start();
                             inst.release();
                             return;
@@ -437,14 +443,14 @@ public class Audio : MonoBehaviour
         return value;
     }
 
-    private static void play(TYPE type, EventReference eventRef, Vector3 pos = default)
+    private static void play(TYPE type, EventReference eventRef, Vector3 pos = default, float volume = 1f)
     {
         string eventPath = GetEventPath(eventRef);
         if (eventRef.IsNull && string.IsNullOrEmpty(eventPath)) return;
 
         if (type == TYPE.SFX)
         {
-            playSFXInternal(eventRef, pos);
+            playSFXInternal(eventRef, pos, volume);
             return;
         }
         if (currentRef[(int)type].Guid == eventRef.Guid && !currentRef[(int)type].Guid.IsNull)
@@ -457,15 +463,16 @@ public class Audio : MonoBehaviour
         if (eventInst.isValid())
         {
             eventInst.set3DAttributes(RuntimeUtils.To3DAttributes(pos));
+            eventInst.setVolume(volume);
             eventInst.start();
             events[(int)type] = eventInst;
             currentRef[(int)type] = eventRef;
         }
     }
 
-    public static void playSFX(EventReference eventRef, Vector3 pos = default)
+    public static void playSFX(EventReference eventRef, Vector3 pos = default, float volume = 1f)
     {
-        play(TYPE.SFX, eventRef, pos);
+        play(TYPE.SFX, eventRef, pos, volume);
     }
 
     public static EventInstance CreateSFXInstance(EventReference eventRef)

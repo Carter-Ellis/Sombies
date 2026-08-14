@@ -81,6 +81,12 @@ public abstract class Item : NetworkBehaviour
         
     }
 
+    [Header("Audio Settings")]
+    [SerializeField] private float minBounceSpeed = 0.5f;
+    [SerializeField] private float maxBounceSpeed = 8f;
+    [SerializeField] private float minBounceVolume = 0.15f;
+    [SerializeField] private float maxBounceVolume = 1f;
+
     private float lastBounceSoundTime = -1f;
 
     protected virtual void OnCollisionEnter2D(Collision2D collision)
@@ -94,7 +100,11 @@ public abstract class Item : NetworkBehaviour
                 lastBounceSoundTime = Time.time;
                 if (FMODEvents.instance != null)
                 {
-                    Audio.PlayNetworkedSFX(FMODEvents.instance.potionBounce, transform.position);
+                    float speed = collision.relativeVelocity.magnitude;
+                    float t = Mathf.InverseLerp(minBounceSpeed, maxBounceSpeed, speed);
+                    float volume = Mathf.Lerp(minBounceVolume, maxBounceVolume, t);
+
+                    Audio.PlayNetworkedSFX(FMODEvents.instance.potionBounce, transform.position, volume);
                 }
             }
         }
