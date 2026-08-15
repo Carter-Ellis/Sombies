@@ -85,7 +85,7 @@ SpriteRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 10
   m_MaskInteraction: 0
   m_Sprite: {fileID: -2413806693520163455, guid: a86470a33a6bf42c4b3595704624658b, type: 3}
   m_Color: {r: 0.18396226, g: 0.735849, b: 0.1915039, a: 1}
@@ -260,3 +260,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 69275dbd2290e904ea09c06eb4b91e58, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ThornProj
+  ShowTopMostFoldoutHeaderGroup: 1
+  lifetime: 3
+  appliesBuff: 0
+  buffType: 0
+  buffAmount: 0
+  buffDuration: 0
+  projectileCount: 12
+  isBurstMaster: 1

@@ -26,9 +26,9 @@ public class Audio : MonoBehaviour
     private static string[] busPaths =
     {
         "bus:/",
-        //"bus:/Music",
-        //"bus:/SFX",
-        //"bus:/Ambience",
+        "bus:/",
+        "bus:/",
+        "bus:/"
     };
     private static bool isBusSet = false;
 
@@ -108,6 +108,7 @@ public class Audio : MonoBehaviour
         if (scene.name == "MainMenu" || scene.name == "Main Menu")
         {
             stop(TYPE.MUSIC);
+            stop(TYPE.AMBIENCE);
         }
         else if (scene.name == "SampleScene")
         {
@@ -423,6 +424,12 @@ public class Audio : MonoBehaviour
         if (!sound.IsNull)
         {
             play(TYPE.MUSIC, sound);
+        }
+
+        EventReference storm = fmodEvents.stormAmbience;
+        if (!storm.IsNull)
+        {
+            play(TYPE.AMBIENCE, storm);
         }
     }
 

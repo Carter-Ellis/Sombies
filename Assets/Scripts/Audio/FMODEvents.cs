@@ -49,6 +49,9 @@ public class FMODEvents : MonoBehaviour
 
     [field: Header("Cauldron")]
     [field: SerializeField] public EventReference bubbling { get; set; }
+
+    [field: Header("Ambience")]
+    [field: SerializeField] public EventReference stormAmbience { get; set; }
     public static FMODEvents instance { get; private set; }
 
     private void Awake()

@@ -163,6 +163,13 @@ MonoBehaviour:
       Data3: 695548604
       Data4: 818045274
     Path: event:/SFX/Cauldron/Bubbling
+  <stormAmbience>k__BackingField:
+    Guid:
+      Data1: -1647977355
+      Data2: 1315308775
+      Data3: 1308400019
+      Data4: -1234205964
+    Path: event:/Ambience/Storm
 --- !u!1 &7597115827806844496
 GameObject:
   m_ObjectHideFlags: 0
