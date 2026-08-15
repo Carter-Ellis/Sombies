@@ -10,12 +10,61 @@ public class MysteryBox : PurchaseSystem
     [SerializeField] private Transform spawnPoint;
     [SerializeField] private float displayDuration = 7.5f;
 
+    [Header("Chest Sprites")]
+    [SerializeField] private SpriteRenderer spriteRenderer;
+    [SerializeField] private Sprite closedChestSprite;
+    [SerializeField] private Sprite openChestSprite;
+
     private void Awake()
     {
         disableOnPurchase = false;
         priceTxt = GetComponentInChildren<TextMeshPro>();
-        priceTxt.gameObject.SetActive(false);
+        if (priceTxt != null)
+        {
+            priceTxt.gameObject.SetActive(false);
+        }
         UpdatePriceText();
+
+        if (spriteRenderer == null)
+        {
+            spriteRenderer = GetComponent<SpriteRenderer>();
+            if (spriteRenderer == null)
+            {
+                spriteRenderer = GetComponentInChildren<SpriteRenderer>();
+            }
+        }
+    }
+
+    public override void OnNetworkSpawn()
+    {
+        base.OnNetworkSpawn();
+        UpdateChestSprite(_hasBeenPurchased.Value);
+    }
+
+    protected override void OnPurchasedStateChanged(bool previousValue, bool newValue)
+    {
+        base.OnPurchasedStateChanged(previousValue, newValue);
+        UpdateChestSprite(newValue);
+    }
+
+    private void UpdateChestSprite(bool isOpen)
+    {
+        if (spriteRenderer == null) return;
+
+        if (isOpen)
+        {
+            if (openChestSprite != null)
+            {
+                spriteRenderer.sprite = openChestSprite;
+            }
+        }
+        else
+        {
+            if (closedChestSprite != null)
+            {
+                spriteRenderer.sprite = closedChestSprite;
+            }
+        }
     }
 
     protected override void GrantPurchase(Entity buyer)

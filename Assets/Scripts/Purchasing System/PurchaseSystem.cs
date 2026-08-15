@@ -83,7 +83,7 @@ public abstract class PurchaseSystem : NetworkBehaviour
         UpdatePriceText();
     }
 
-    private void OnPurchasedStateChanged(bool previousValue, bool newValue)
+    protected virtual void OnPurchasedStateChanged(bool previousValue, bool newValue)
     {
         if (newValue && disableOnPurchase)
         {

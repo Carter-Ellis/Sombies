@@ -266,7 +266,7 @@ SpriteRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 1
+  m_SortingOrder: 5
   m_MaskInteraction: 0
   m_Sprite: {fileID: -4050569780667021115, guid: c2c194bd4f4e8fc4fbcae3141cf48e81, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -320,6 +320,9 @@ MonoBehaviour:
   spell: {fileID: 11400000, guid: bc29f01417f159b40a70b6d6ef33893f, type: 2}
   disableOnPurchase: 1
   type: 0
+  enableFloating: 1
+  floatDistance: 0.05
+  floatSpeed: 2
 --- !u!61 &404648281334506118
 BoxCollider2D:
   m_ObjectHideFlags: 0
