@@ -271,8 +271,11 @@ public class Player : NetworkBehaviour
             {
                 UIManager.Instance.InitializeInventoryUI(maxInventorySlots);
                 UIManager.Instance.RefreshInventory(inventory, selectedItemIndex);
+                UIManager.Instance.InitializeSpellUI(maxSpellSlots);
+                UIManager.Instance.RefreshSpells(spells, ActiveSpellIndex);
             }
             UpdateInventoryUI();
+            UpdateHUDWithActiveSpell();
         }
 
         if (!IsOwner)
@@ -751,7 +754,10 @@ public class Player : NetworkBehaviour
 
     private void UpdateHUDWithActiveSpell()
     {
-        return;
+        if (IsOwner && UIManager.Instance != null)
+        {
+            UIManager.Instance.RefreshSpells(spells, ActiveSpellIndex);
+        }
     }
 
     public void OnMelee(InputAction.CallbackContext context)

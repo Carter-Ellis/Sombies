@@ -18,7 +18,7 @@ MonoBehaviour:
   damage: 20
   cooldown: 0.2
   isChargeSpell: 0
-  sprite: {fileID: -2413806693520163455, guid: d0d74d53d768e1741918c95e7bd8ff1c, type: 3}
+  sprite: {fileID: 3790973393633261844, guid: c2c194bd4f4e8fc4fbcae3141cf48e81, type: 3}
   spellID: 5
   projectilePrefab: {fileID: 2797691783092432233, guid: a1d3786313d962542b9b02859614ae8d, type: 3}
   launchForce: 10

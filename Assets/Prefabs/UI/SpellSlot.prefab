@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 4633491640128202095}
   - component: {fileID: 1808112898627758275}
   m_Layer: 5
-  m_Name: InventorySlot
+  m_Name: SpellSlot
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -37,7 +37,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -910, y: -490}
+  m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &2088915128723578454
@@ -61,7 +61,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
-  m_Color: {r: 0.764151, g: 0.764151, b: 0.764151, a: 0.4117647}
+  m_Color: {r: 0.764151, g: 0.764151, b: 0.764151, a: 0}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -93,14 +93,14 @@ MonoBehaviour:
   iconImage: {fileID: 6325679710240176247}
   frameImage: {fileID: 4633491640128202095}
   keyLabelText: {fileID: 733999991102377682}
-  slotColor: {r: 0.8867924, g: 0.8867924, b: 0.8867924, a: 0.4117647}
+  slotColor: {r: 0.8867924, g: 0.8867924, b: 0.8867924, a: 0}
   selectedIconColor: {r: 1, g: 1, b: 1, a: 1}
-  unselectedIconColor: {r: 0.45, g: 0.45, b: 0.45, a: 0.6}
-  selectedFrameColor: {r: 0.6792453, g: 0.6792453, b: 0.6792453, a: 0.8509804}
-  unselectedFrameColor: {r: 0.3, g: 0.3, b: 0.3, a: 0.5}
-  selectedScale: 0.85
-  unselectedScale: 0.7
-  transitionSpeed: 12
+  unselectedIconColor: {r: 0.45, g: 0.45, b: 0.45, a: 0.7294118}
+  selectedFrameColor: {r: 1, g: 1, b: 1, a: 0}
+  unselectedFrameColor: {r: 0.3, g: 0.3, b: 0.3, a: 0}
+  selectedScale: 1.15
+  unselectedScale: 0.9
+  transitionSpeed: 8
 --- !u!1 &6315246189249751925
 GameObject:
   m_ObjectHideFlags: 0
@@ -128,7 +128,7 @@ RectTransform:
   m_GameObject: {fileID: 6315246189249751925}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.5, y: 0.5, z: 1}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 9144948803930133132}
@@ -210,7 +210,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -0.00079441, y: 69.51926}
+  m_AnchoredPosition: {x: 0.0009985, y: -85.7}
   m_SizeDelta: {x: 99.998, y: 39.0385}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &5360501015787957313
