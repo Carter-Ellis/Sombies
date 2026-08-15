@@ -156,6 +156,13 @@ MonoBehaviour:
       Data3: 1223634353
       Data4: 1421655832
     Path: event:/SFX/Enemy/EnemyHurt
+  <bubbling>k__BackingField:
+    Guid:
+      Data1: 2018956360
+      Data2: 1249752685
+      Data3: 695548604
+      Data4: 818045274
+    Path: event:/SFX/Cauldron/Bubbling
 --- !u!1 &7597115827806844496
 GameObject:
   m_ObjectHideFlags: 0

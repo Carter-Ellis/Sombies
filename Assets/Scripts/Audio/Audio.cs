@@ -477,13 +477,20 @@ public class Audio : MonoBehaviour
 
     public static EventInstance CreateSFXInstance(EventReference eventRef)
     {
-        string eventPath = GetEventPath(eventRef);
-        if (eventRef.IsNull && string.IsNullOrEmpty(eventPath)) return default;
+        if (eventRef.IsNull) return default;
 
         try
         {
             if (!RuntimeManager.IsInitialized) return default;
 
+            try
+            {
+                EventInstance inst = RuntimeManager.CreateInstance(eventRef);
+                if (inst.isValid()) return inst;
+            }
+            catch { }
+
+            string eventPath = GetEventPath(eventRef);
             // 1. Try StudioSystem getEvent directly using string Path
             if (!string.IsNullOrEmpty(eventPath))
             {
@@ -493,7 +500,7 @@ public class Audio : MonoBehaviour
                     if (res == FMOD.RESULT.OK && desc.isValid())
                     {
                         desc.createInstance(out var inst);
-                        return inst;
+                        if (inst.isValid()) return inst;
                     }
                 }
                 catch { }
@@ -508,7 +515,7 @@ public class Audio : MonoBehaviour
                     if (res == FMOD.RESULT.OK && desc.isValid())
                     {
                         desc.createInstance(out var inst);
-                        return inst;
+                        if (inst.isValid()) return inst;
                     }
                 }
                 catch { }

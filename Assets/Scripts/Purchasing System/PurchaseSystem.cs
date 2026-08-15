@@ -2,16 +2,18 @@ using TMPro;
 using Unity.Netcode;
 using UnityEngine;
 
-enum PurchaseType
-{
-    SPELL,
-    MYSTERY_BOX,
-    DOOR,
-    VENDOR,
-}   
+
 
 public abstract class PurchaseSystem : NetworkBehaviour
 {
+    protected enum PurchaseType
+    {
+        SPELL,
+        MYSTERY_BOX,
+        DOOR,
+        VENDOR,
+        CAULDRON,
+    }
 
     [SerializeField] protected int price;
     [SerializeField] protected Spell spell;
@@ -31,7 +33,7 @@ public abstract class PurchaseSystem : NetworkBehaviour
 
     protected TextMeshPro priceTxt;
 
-    [SerializeField] PurchaseType type;
+    [SerializeField] protected PurchaseType type;
 
     private void Awake()
     {
@@ -162,6 +164,9 @@ public abstract class PurchaseSystem : NetworkBehaviour
                 break;
             case PurchaseType.VENDOR:
                 priceTxt.text = "E to buy from vendor [Cost: " + price.ToString() + "]";
+                break;
+            case PurchaseType.CAULDRON:
+                priceTxt.text = "E to ladle the brew [Cost: " + price.ToString() + "]";
                 break;
             default:
                 Debug.LogError("Unknown purchase type!");

@@ -47,6 +47,8 @@ public class FMODEvents : MonoBehaviour
     [field: Header("Enemy")]
     [field: SerializeField] public EventReference enemyHurt { get; set; }
 
+    [field: Header("Cauldron")]
+    [field: SerializeField] public EventReference bubbling { get; set; }
     public static FMODEvents instance { get; private set; }
 
     private void Awake()

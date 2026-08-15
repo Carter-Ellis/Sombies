@@ -1,6 +1,7 @@
 using System.Collections;
 using Unity.Netcode;
 using UnityEngine;
+using FMOD.Studio;
 
 public class Vendor : PurchaseSystem
 {
@@ -8,11 +9,70 @@ public class Vendor : PurchaseSystem
     [SerializeField] private Item[] possibleItems;
     [SerializeField] private Transform spawnPoint;
     [SerializeField] private float displayDuration = 7.5f;
+
+    private EventInstance _bubblingInstance;
+
+    private void Start()
+    {
+        if (type == PurchaseType.CAULDRON)
+        {
+            StartCoroutine(StartBubblingRoutine());
+        }
+    }
+
+    private IEnumerator StartBubblingRoutine()
+    {
+        while (!FMODUnity.RuntimeManager.IsInitialized || !FMODUnity.RuntimeManager.HaveMasterBanksLoaded)
+        {
+            yield return null;
+        }
+
+        while (FMODEvents.instance == null || FMODEvents.instance.bubbling.IsNull)
+        {
+            yield return null;
+        }
+
+        _bubblingInstance = Audio.playSFXInstance(FMODEvents.instance.bubbling, transform.position);
+        if (_bubblingInstance.isValid())
+        {
+            FMODUnity.RuntimeManager.AttachInstanceToGameObject(_bubblingInstance, gameObject);
+        }
+    }
+
+    private void OnDisable()
+    {
+        StopBubblingSFX();
+    }
+
+    private void OnDestroy()
+    {
+        StopBubblingSFX();
+    }
+
+    private void StopBubblingSFX()
+    {
+        if (_bubblingInstance.isValid())
+        {
+            _bubblingInstance.stop(STOP_MODE.ALLOWFADEOUT);
+            _bubblingInstance.release();
+            _bubblingInstance = default;
+        }
+    }
+
     protected override void GrantPurchase(Entity buyer)
     {
         if (FMODEvents.instance != null)
         {
-            Audio.PlayNetworkedSFX(FMODEvents.instance.potionBuy, transform.position);
+            switch (type)
+            {
+                case PurchaseType.VENDOR:
+                    Audio.PlayNetworkedSFX(FMODEvents.instance.potionBuy, transform.position);
+                    break;
+                case PurchaseType.CAULDRON:
+                    //Play cauldron purchase sound.
+                    break;
+            }
+            
         }
         StartCoroutine(Sequence());
     }
