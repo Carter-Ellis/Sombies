@@ -20,7 +20,15 @@ public class Player : NetworkBehaviour
     [SerializeField] private int maxInventorySlots = 3;
     [SerializeField] private int selectedItemIndex = 0;
     [SerializeField] private float itemDropOffset = 2f;
-    [SerializeField] private float throwForce = 8f;
+
+    [Header("Throw Settings")]
+    [SerializeField] private float minThrowForce = 4f;
+    [SerializeField] private float maxThrowForce = 20f;
+    [SerializeField] private float maxThrowChargeTime = 1.0f;
+    [SerializeField] private LineRenderer throwTrajectoryLine;
+
+    private bool _isChargingThrow = false;
+    private float _throwChargeStartTime = 0f;
 
     [Header("Magic")]
     public Spell activeSpell;
@@ -47,6 +55,18 @@ public class Player : NetworkBehaviour
         if (nearbyPurchaseSystems.Count > 0)
         {
             RefreshPurchaseSystemUI();
+        }
+
+        if (_isChargingThrow)
+        {
+            if (_revive != null && _revive.IsDownedSync.Value)
+            {
+                CancelThrowCharge();
+            }
+            else
+            {
+                UpdateThrowTrajectory();
+            }
         }
     }
 
@@ -206,6 +226,21 @@ public class Player : NetworkBehaviour
         for (int i = 0; i < maxSpellSlots; i++)
         {
             spells.Add(null);
+        }
+
+        if (throwTrajectoryLine == null)
+        {
+            GameObject lineObj = new GameObject("ThrowTrajectoryLine");
+            lineObj.transform.SetParent(transform);
+            lineObj.transform.localPosition = Vector3.zero;
+            throwTrajectoryLine = lineObj.AddComponent<LineRenderer>();
+            throwTrajectoryLine.startWidth = 0.08f;
+            throwTrajectoryLine.endWidth = 0.02f;
+            throwTrajectoryLine.material = new Material(Shader.Find("Sprites/Default"));
+            throwTrajectoryLine.startColor = new Color(1f, 0.85f, 0.3f, 0.8f);
+            throwTrajectoryLine.endColor = new Color(1f, 0.35f, 0.1f, 0.1f);
+            throwTrajectoryLine.sortingOrder = 10;
+            throwTrajectoryLine.enabled = false;
         }
     }
 
@@ -373,13 +408,115 @@ public class Player : NetworkBehaviour
 
     public void OnDropItem(InputAction.CallbackContext context)
     {
-        if (!context.performed || !IsOwner) return;
+        if (!IsOwner) return;
 
-        RequestDropItemRpc(selectedItemIndex, transform.position, firepoint.right);
+        if (_revive != null && _revive.IsDownedSync.Value)
+        {
+            CancelThrowCharge();
+            return;
+        }
+
+        if (context.started)
+        {
+            if (HasItemInSlot(selectedItemIndex))
+            {
+                StartThrowCharge();
+            }
+        }
+        else if (context.canceled)
+        {
+            if (_isChargingThrow)
+            {
+                ReleaseThrowCharge();
+            }
+        }
+        else if (context.performed && !_isChargingThrow && HasItemInSlot(selectedItemIndex))
+        {
+            StartThrowCharge();
+        }
+    }
+
+    private bool HasItemInSlot(int index)
+    {
+        if (index < 0 || index >= maxInventorySlots) return false;
+
+        if (_netInventory != null && index < _netInventory.Count)
+        {
+            return _netInventory[index] != -1;
+        }
+        return inventory != null && index < inventory.Count && inventory[index] != null;
+    }
+
+    private void StartThrowCharge()
+    {
+        _isChargingThrow = true;
+        _throwChargeStartTime = Time.time;
+        if (throwTrajectoryLine != null)
+        {
+            throwTrajectoryLine.enabled = true;
+        }
+    }
+
+    private void ReleaseThrowCharge()
+    {
+        if (!_isChargingThrow) return;
+
+        float chargeDuration = Time.time - _throwChargeStartTime;
+        float ratio = Mathf.Clamp01(chargeDuration / maxThrowChargeTime);
+        float calculatedForce = Mathf.Lerp(minThrowForce, maxThrowForce, ratio);
+
+        CancelThrowCharge();
+
+        Vector3 launchDir = firepoint != null ? firepoint.right : transform.right;
+        RequestDropItemRpc(selectedItemIndex, transform.position, launchDir, calculatedForce);
+    }
+
+    public void CancelThrowCharge()
+    {
+        _isChargingThrow = false;
+        if (throwTrajectoryLine != null)
+        {
+            throwTrajectoryLine.enabled = false;
+        }
+    }
+
+    private void UpdateThrowTrajectory()
+    {
+        if (!_isChargingThrow)
+        {
+            if (throwTrajectoryLine != null) throwTrajectoryLine.enabled = false;
+            return;
+        }
+
+        Transform origin = firepoint != null ? firepoint : transform;
+        float chargeDuration = Time.time - _throwChargeStartTime;
+        float ratio = Mathf.Clamp01(chargeDuration / maxThrowChargeTime);
+        float currentForce = Mathf.Lerp(minThrowForce, maxThrowForce, ratio);
+
+        if (throwTrajectoryLine != null)
+        {
+            throwTrajectoryLine.enabled = true;
+            int points = 18;
+            throwTrajectoryLine.positionCount = points;
+
+            Vector3 startPos = origin.position;
+            Vector2 direction = origin.right;
+            Vector3 currentPos = startPos;
+            Vector2 currentVel = direction * currentForce;
+            float timeStep = 0.035f;
+            float linearDrag = 2.0f;
+
+            for (int i = 0; i < points; i++)
+            {
+                throwTrajectoryLine.SetPosition(i, currentPos);
+                currentPos += (Vector3)currentVel * timeStep;
+                currentVel *= Mathf.Clamp01(1f - linearDrag * timeStep);
+            }
+        }
     }
 
     [Rpc(SendTo.Server)]
-    private void RequestDropItemRpc(int itemIndex, Vector3 clientPos, Vector3 clientDir)
+    private void RequestDropItemRpc(int itemIndex, Vector3 clientPos, Vector3 clientDir, float force)
     {
         if (itemIndex < 0 || itemIndex >= maxInventorySlots) return;
 
@@ -419,7 +556,7 @@ public class Player : NetworkBehaviour
             Rigidbody2D itemRb = droppedItem.GetComponent<Rigidbody2D>();
             if (itemRb != null)
             {
-                itemRb.AddForce(clientDir * throwForce, ForceMode2D.Impulse);
+                itemRb.AddForce(clientDir * force, ForceMode2D.Impulse);
                 PlayCastAnimationClientRpc();
                 if (FMODEvents.instance != null)
                 {
@@ -487,6 +624,7 @@ public class Player : NetworkBehaviour
 
     private void CycleSelectedItem(int direction)
     {
+        CancelThrowCharge();
         selectedItemIndex = (selectedItemIndex + direction + maxInventorySlots) % maxInventorySlots;
         UpdateInventoryUI();
     }
@@ -495,6 +633,7 @@ public class Player : NetworkBehaviour
     {
         if (newIndex >= 0 && newIndex < maxInventorySlots)
         {
+            CancelThrowCharge();
             selectedItemIndex = newIndex;
             UpdateInventoryUI();
         }

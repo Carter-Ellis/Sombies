@@ -44,8 +44,9 @@ public class Vendor : PurchaseSystem
         StopBubblingSFX();
     }
 
-    private void OnDestroy()
+    public override void OnDestroy()
     {
+        base.OnDestroy();
         StopBubblingSFX();
     }
 
