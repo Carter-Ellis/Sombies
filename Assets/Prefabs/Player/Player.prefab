@@ -687,7 +687,7 @@ MonoBehaviour:
   _baseSprintSpeed: 7
   initialMana: 100
   initialHealth: 100
-  initialCoins: 5000
+  initialCoins: 10000
   _netCoins:
     UpdateTraits:
       MinSecondsBetweenUpdates: 0
@@ -773,7 +773,10 @@ MonoBehaviour:
   maxInventorySlots: 3
   selectedItemIndex: 0
   itemDropOffset: 1.3
-  throwForce: 16
+  minThrowForce: 4
+  maxThrowForce: 20
+  maxThrowChargeTime: 1
+  throwTrajectoryLine: {fileID: 0}
   activeSpell: {fileID: 0}
   firepoint: {fileID: 7199531929347405292}
   spells: []

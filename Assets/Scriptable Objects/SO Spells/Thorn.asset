@@ -14,9 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ProjectileSpell
   _name: Thorn
   _description: Shoot thorns in all directions
-  _manaCost: 4
-  damage: 15
-  cooldown: 0.6
+  _manaCost: 10
+  damage: 6
+  cooldown: 0.7
   isChargeSpell: 0
   sprite: {fileID: 5053836631764145528, guid: c2c194bd4f4e8fc4fbcae3141cf48e81, type: 3}
   spellID: 4
