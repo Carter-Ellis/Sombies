@@ -167,7 +167,7 @@ MonoBehaviour:
   maxDamage: 40
   _knockbackForce: 8
   _knockbackDuration: 0.08
-  manaReward: 20
+  manaReward: 15
   attackCooldown: 0.5
   speed: 1.5
   speedIncreasePerRound: 0.2
@@ -238,7 +238,7 @@ Rigidbody2D:
   m_LinearDamping: 1
   m_AngularDamping: 0.05
   m_GravityScale: 0
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 6200000, guid: 9868549ccbe383148a66ddd95a5a872a, type: 2}
   m_IncludeLayers:
     serializedVersion: 2
     m_Bits: 0

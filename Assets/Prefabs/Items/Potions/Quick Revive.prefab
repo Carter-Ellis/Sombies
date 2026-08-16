@@ -184,7 +184,11 @@ MonoBehaviour:
     m_InternalValue: 18446744073709551615
   _itemName: 
   _itemDescription: 
-  duration: 10
+  duration: 20
+  minBounceSpeed: 0.5
+  maxBounceSpeed: 8
+  minBounceVolume: 0.15
+  maxBounceVolume: 1
   buffToApply: 5
   buffAmount: 2
 --- !u!50 &-6471155829034557297

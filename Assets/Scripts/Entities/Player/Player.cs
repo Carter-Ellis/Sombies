@@ -702,16 +702,19 @@ public class Player : NetworkBehaviour
         if (context.performed)
         {
             float value = context.ReadValue<float>();
+            int index = Mathf.RoundToInt(value);
+            ChangeSelectedSpell(index);
+        }
+    }
 
-            if (value == 1f || value == -1f)
-            {
-                CycleSelectedSpell((int)value);
-            }
-            else
-            {
-                int index = Mathf.RoundToInt(value);
-                ChangeSelectedSpell(index);
-            }
+    public void CycleSpellInput(InputAction.CallbackContext context)
+    {
+        if (_revive != null && _revive.IsDownedSync.Value) return;
+
+        if (context.performed)
+        {
+            float value = context.ReadValue<float>();
+            CycleSelectedSpell((int)value);
         }
     }
 

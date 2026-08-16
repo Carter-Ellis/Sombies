@@ -79,6 +79,15 @@
                     "initialStateCheck": true
                 },
                 {
+                    "name": "CycleSpell",
+                    "type": "Value",
+                    "id": "b3e94582-7d19-482a-a912-e8f001129999",
+                    "expectedControlType": "Axis",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
                     "name": "Interact",
                     "type": "Button",
                     "id": "f02e0f2e-a74c-4f3f-83e4-c8a734bd2693",
@@ -319,7 +328,7 @@
                     "id": "b69ef8c1-fe9c-480a-b21e-db32ad97394a",
                     "path": "<Keyboard>/2",
                     "interactions": "",
-                    "processors": "Scale",
+                    "processors": "Scale(factor=1)",
                     "groups": "",
                     "action": "Switch Spell",
                     "isComposite": false,
@@ -343,7 +352,7 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "Switch Spell",
+                    "action": "CycleSpell",
                     "isComposite": true,
                     "isPartOfComposite": false
                 },
@@ -354,7 +363,7 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "Switch Spell",
+                    "action": "CycleSpell",
                     "isComposite": false,
                     "isPartOfComposite": true
                 },
@@ -365,7 +374,7 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "Switch Spell",
+                    "action": "CycleSpell",
                     "isComposite": false,
                     "isPartOfComposite": true
                 },
