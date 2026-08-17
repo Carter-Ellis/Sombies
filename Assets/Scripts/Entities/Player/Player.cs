@@ -59,14 +59,7 @@ public class Player : NetworkBehaviour
 
         if (_isChargingThrow)
         {
-            if (_revive != null && _revive.IsDownedSync.Value)
-            {
-                CancelThrowCharge();
-            }
-            else
-            {
-                UpdateThrowTrajectory();
-            }
+            UpdateThrowTrajectory();
         }
     }
 
@@ -412,12 +405,6 @@ public class Player : NetworkBehaviour
     public void OnDropItem(InputAction.CallbackContext context)
     {
         if (!IsOwner) return;
-
-        if (_revive != null && _revive.IsDownedSync.Value)
-        {
-            CancelThrowCharge();
-            return;
-        }
 
         if (context.started)
         {
