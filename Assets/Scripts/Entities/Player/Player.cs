@@ -752,7 +752,7 @@ public class Player : NetworkBehaviour
 
     public void OnMelee(InputAction.CallbackContext context)
     {
-        if (_revive.IsDownedSync.Value || !IsOwner) return;
+        if (!IsOwner) return;
 
         if (context.performed && Time.time >= lastMeleeTime + meleeCooldown)
         {

@@ -1097,7 +1097,7 @@ MonoBehaviour:
       MinSecondsBetweenUpdates: 0
       MaxSecondsBetweenUpdates: 0
     m_InternalValue: 0
-  downedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
+  downedColor: {r: 0.4245283, g: 0.4245283, b: 0.4245283, a: 1}
   defaultLayerName: Player
   downedLayerName: DownedPlayer
   _netReviveDuration:

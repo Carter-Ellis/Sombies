@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.UI;
@@ -9,9 +10,9 @@ public class ReviveController : NetworkBehaviour
     public NetworkVariable<bool> IsDownedSync = new NetworkVariable<bool>(false, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 
     [Header("Visual Customization")]
-    private SpriteRenderer playerSr;
-    [SerializeField] private Color downedColor = new Color(0.3f, 0.3f, 0.3f, 1f);
-    private Color originalColor = Color.white;
+    private SpriteRenderer[] playerSrs;
+    private Color[] originalColors;
+    [SerializeField] private Color downedColor = new Color(0.5f, 0.5f, 0.5f, 1f);
 
     [Header("Physics")]
     [SerializeField] private string defaultLayerName = "Player";
@@ -57,7 +58,16 @@ public class ReviveController : NetworkBehaviour
     {
         _playerStats = GetComponent<PlayerStats>();
         _rb = GetComponent<Rigidbody2D>();
-        playerSr = GetComponent<SpriteRenderer>();
+        playerSrs = GetPlayerSpriteRenderers();
+
+        if (playerSrs != null && playerSrs.Length > 0)
+        {
+            originalColors = new Color[playerSrs.Length];
+            for (int i = 0; i < playerSrs.Length; i++)
+            {
+                originalColors[i] = playerSrs[i].color;
+            }
+        }
 
         // Hide the revive progress slider on awake
         if (reviveProgressSlider != null)
@@ -65,6 +75,26 @@ public class ReviveController : NetworkBehaviour
             reviveProgressSlider.gameObject.SetActive(false);
         }
 
+    }
+
+    private SpriteRenderer[] GetPlayerSpriteRenderers()
+    {
+        Player player = GetComponent<Player>();
+        List<SpriteRenderer> renderers = new List<SpriteRenderer>();
+
+        Transform searchRoot = (player != null && player.SpriteTransform != null) ? player.SpriteTransform : transform;
+        SpriteRenderer[] found = searchRoot.GetComponentsInChildren<SpriteRenderer>(true);
+
+        foreach (var sr in found)
+        {
+            if (sr == null) continue;
+            string nameLower = sr.gameObject.name.ToLower();
+            if (nameLower.Contains("melee")) continue;
+
+            renderers.Add(sr);
+        }
+
+        return renderers.ToArray();
     }
 
     public override void OnNetworkSpawn()
@@ -91,9 +121,15 @@ public class ReviveController : NetworkBehaviour
 
     private void UpdatePlayerColor(bool isDowned)
     {
-        if (playerSr != null)
+        if (playerSrs != null)
         {
-            playerSr.color = isDowned ? downedColor : originalColor;
+            for (int i = 0; i < playerSrs.Length; i++)
+            {
+                if (playerSrs[i] != null)
+                {
+                    playerSrs[i].color = isDowned ? downedColor : (originalColors != null && i < originalColors.Length ? originalColors[i] : Color.white);
+                }
+            }
         }
     }
 
