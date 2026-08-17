@@ -58,6 +58,18 @@ public abstract class Enemy : Entity
     private float targetUpdateTimer;
     private Transform currentTarget;
 
+    [Header("Wander Settings")]
+    [SerializeField] protected float wanderRadius = 6f;
+    [SerializeField] protected float wanderWaitTimeMin = 1f;
+    [SerializeField] protected float wanderWaitTimeMax = 3f;
+    [SerializeField] protected float wanderStuckTimeout = 4f;
+
+    private bool _isWanderWaiting = false;
+    private float _wanderWaitTimer = 0f;
+    private float _wanderMoveTimer = 0f;
+    private Vector3 _wanderTarget;
+    private bool _wasChasingLastFrame = false;
+
     protected Transform playerTransform;
     protected NavMeshAgent agent;
 
@@ -137,6 +149,7 @@ public abstract class Enemy : Entity
         {
             if (currentTarget != null)
             {
+                _wasChasingLastFrame = true;
                 if (agent.isOnNavMesh)
                 {
                     agent.SetDestination(currentTarget.position);
@@ -146,12 +159,7 @@ public abstract class Enemy : Entity
             }
             else
             {
-                rb.linearVelocity = Vector2.zero;
-
-                if (agent.isOnNavMesh && agent.hasPath)
-                {
-                    agent.ResetPath();
-                }
+                UpdateWanderLogic();
             }
         }
         else
@@ -160,6 +168,81 @@ public abstract class Enemy : Entity
             {
                 agent.nextPosition = transform.position;
             }
+        }
+    }
+
+    private void UpdateWanderLogic()
+    {
+        if (!agent.isOnNavMesh)
+        {
+            rb.linearVelocity = Vector2.zero;
+            return;
+        }
+
+        if (_wasChasingLastFrame)
+        {
+            _wasChasingLastFrame = false;
+            _isWanderWaiting = false;
+            PickNewWanderTarget();
+            return;
+        }
+
+        if (_isWanderWaiting)
+        {
+            rb.linearVelocity = Vector2.zero;
+            agent.nextPosition = transform.position;
+            _wanderWaitTimer -= Time.deltaTime;
+
+            if (_wanderWaitTimer <= 0f)
+            {
+                _isWanderWaiting = false;
+                PickNewWanderTarget();
+            }
+        }
+        else
+        {
+            _wanderMoveTimer += Time.deltaTime;
+
+            bool reachedDestination = !agent.hasPath || agent.remainingDistance <= stoppingDistance || agent.pathStatus == NavMeshPathStatus.PathInvalid;
+            bool isStuck = _wanderMoveTimer >= wanderStuckTimeout;
+
+            if (reachedDestination || isStuck)
+            {
+                _isWanderWaiting = true;
+                _wanderWaitTimer = Random.Range(wanderWaitTimeMin, wanderWaitTimeMax);
+                rb.linearVelocity = Vector2.zero;
+                if (agent.hasPath)
+                {
+                    agent.ResetPath();
+                }
+            }
+            else
+            {
+                agent.SetDestination(_wanderTarget);
+                rb.linearVelocity = agent.desiredVelocity;
+                agent.nextPosition = transform.position;
+            }
+        }
+    }
+
+    private void PickNewWanderTarget()
+    {
+        _wanderMoveTimer = 0f;
+        Vector3 randomDirection = Random.insideUnitCircle * wanderRadius;
+        Vector3 searchPos = transform.position + randomDirection;
+
+        if (NavMesh.SamplePosition(searchPos, out NavMeshHit hit, wanderRadius, NavMesh.AllAreas))
+        {
+            _wanderTarget = hit.position;
+        }
+        else
+        {
+            _wanderTarget = transform.position;
+        }
+
+        if (agent.isOnNavMesh)
+        {
+            agent.SetDestination(_wanderTarget);
         }
     }
 
