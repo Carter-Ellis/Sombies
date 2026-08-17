@@ -313,14 +313,18 @@ public class Player : NetworkBehaviour
         if (!IsServer) return;
 
         int openSlot = FindOpenSpellSlot();
-        int slotIndex = openSlot != -1 ? openSlot : ActiveSpellIndex;
+        int slotIndex = (openSlot != -1) ? openSlot : Mathf.Clamp(ActiveSpellIndex, 0, maxSpellSlots - 1);
+
+        while (spells.Count <= slotIndex)
+        {
+            spells.Add(null);
+        }
 
         spells[slotIndex] = spell;
-
         activeSpell = spells[slotIndex];
         ActiveSpellIndex = slotIndex;
 
-        _netActiveSpellID.Value = activeSpell.spellID;
+        _netActiveSpellID.Value = activeSpell != null ? activeSpell.spellID : -1;
 
         GrantSpellClientRpc(spell.spellID, slotIndex);
     }
@@ -334,24 +338,33 @@ public class Player : NetworkBehaviour
 
         if (unlockedSpell != null)
         {
-            spells[slotIndex] = unlockedSpell;
-            activeSpell = spells[slotIndex];
-            ActiveSpellIndex = slotIndex;
-            UpdateHUDWithActiveSpell();
+            if (slotIndex >= 0 && slotIndex < maxSpellSlots)
+            {
+                while (spells.Count <= slotIndex)
+                {
+                    spells.Add(null);
+                }
+                spells[slotIndex] = unlockedSpell;
+                activeSpell = spells[slotIndex];
+                ActiveSpellIndex = slotIndex;
+                UpdateHUDWithActiveSpell();
+            }
         }
     }
 
     private int FindOpenSpellSlot()
     {
-        for (int i = 0; i < spells.Count; i++)
+        for (int i = 0; i < maxSpellSlots; i++)
         {
-            if (spells[i] == null)
+            if (i >= spells.Count || spells[i] == null)
             {
                 return i;
             }
         }
         return -1;
     }
+
+
 
     [Rpc(SendTo.Server)]
     private void RequestPickupServerRpc(ulong itemNetId)
@@ -646,19 +659,27 @@ public class Player : NetworkBehaviour
                 PurchaseSystem activeTarget = GetActivePurchaseTarget();
                 if (activeTarget != null)
                 {
-                    RequestPurchaseServerRpc(activeTarget.NetworkObjectId);
+                    RequestPurchaseServerRpc(activeTarget.NetworkObjectId, ActiveSpellIndex);
                 }
             }
         }
     }
 
     [Rpc(SendTo.Server)]
-    public void RequestPurchaseServerRpc(ulong purchaseSystemId, RpcParams rpcParams = default)
+    public void RequestPurchaseServerRpc(ulong purchaseSystemId, int selectedSpellSlot = -1, RpcParams rpcParams = default)
     {
         ulong clientId = rpcParams.Receive.SenderClientId;
 
         if (NetworkManager.Singleton.ConnectedClients.TryGetValue(clientId, out var client))
         {
+            Player buyerPlayer = client.PlayerObject.GetComponent<Player>();
+
+            if (buyerPlayer != null && selectedSpellSlot >= 0 && selectedSpellSlot < maxSpellSlots)
+            {
+                buyerPlayer.ActiveSpellIndex = selectedSpellSlot;
+                buyerPlayer.activeSpell = (selectedSpellSlot < buyerPlayer.spells.Count) ? buyerPlayer.spells[selectedSpellSlot] : null;
+            }
+
             Entity buyer = client.PlayerObject.GetComponent<Entity>();
 
             if (NetworkManager.Singleton.SpawnManager.SpawnedObjects.TryGetValue(purchaseSystemId, out NetworkObject netObj))
@@ -707,38 +728,33 @@ public class Player : NetworkBehaviour
 
     private void CycleSelectedSpell(int direction)
     {
-        int nextIndex = ActiveSpellIndex;
-
-        for (int i = 0; i < maxSpellSlots; i++)
-        {
-            nextIndex = (nextIndex + direction + maxSpellSlots) % maxSpellSlots;
-
-            if (spells[nextIndex] != null)
-            {
-                ChangeSelectedSpell(nextIndex);
-                break;
-            }
-        }
+        int nextIndex = (ActiveSpellIndex + direction + maxSpellSlots) % maxSpellSlots;
+        ChangeSelectedSpell(nextIndex);
     }
 
     private void ChangeSelectedSpell(int newIndex)
     {
         if (newIndex >= 0 && newIndex < maxSpellSlots)
         {
-            if (spells[newIndex] == null)
-            {
-                return;
-            }
-
             ActiveSpellIndex = newIndex;
-            activeSpell = spells[ActiveSpellIndex];
+            activeSpell = (newIndex < spells.Count) ? spells[newIndex] : null;
 
             if (IsOwner)
             {
                 UpdateHUDWithActiveSpell();
+                UpdateSelectedSpellSlotServerRpc(newIndex);
             }
+        }
+    }
 
-            UpdateSelectedSpellServerRpc(activeSpell.spellID);
+    [Rpc(SendTo.Server)]
+    public void UpdateSelectedSpellSlotServerRpc(int slotIndex)
+    {
+        if (slotIndex >= 0 && slotIndex < maxSpellSlots)
+        {
+            ActiveSpellIndex = slotIndex;
+            activeSpell = (spells != null && slotIndex < spells.Count) ? spells[slotIndex] : null;
+            _netActiveSpellID.Value = activeSpell != null ? activeSpell.spellID : -1;
         }
     }
 
