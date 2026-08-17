@@ -16,9 +16,9 @@ MonoBehaviour:
   _description: Electrocute a chain of enemies.
   _manaCost: 10
   damage: 80
-  cooldown: 2
+  cooldown: 1
   isChargeSpell: 0
   sprite: {fileID: 7985499447470853915, guid: c2c194bd4f4e8fc4fbcae3141cf48e81, type: 3}
   spellID: 3
   projectilePrefab: {fileID: 2797691783092432233, guid: 68fd669267aca6a47b76ce4ace26e14b, type: 3}
-  launchForce: 25
+  launchForce: 30

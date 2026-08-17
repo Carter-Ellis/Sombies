@@ -202,7 +202,7 @@ MonoBehaviour:
   appliesBuff: 1
   buffType: 4
   buffAmount: 0
-  buffDuration: 2
+  buffDuration: 2.5
   maxChainTargets: 0
   chainRadius: 0
   beamColorStart: {r: 0.2, g: 0.8, b: 1, a: 1}
