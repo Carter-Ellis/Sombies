@@ -23,6 +23,9 @@ public class Audio : MonoBehaviour
     private static EventInstance[] events = new EventInstance[(int)TYPE.MAX];
     private static EventReference[] currentRef = new EventReference[(int)TYPE.MAX];
 
+    private static System.Collections.Generic.List<EventInstance> activeAmbienceInstances = new System.Collections.Generic.List<EventInstance>();
+    private static System.Collections.Generic.List<EventReference> activeAmbienceRefs = new System.Collections.Generic.List<EventReference>();
+
     private static string[] busPaths =
     {
         "bus:/",
@@ -398,6 +401,7 @@ public class Audio : MonoBehaviour
             events[i] = default;
             currentRef[i] = default;
         }
+        stopAmbience();
     }
 
     private static void setBuses()
@@ -429,8 +433,51 @@ public class Audio : MonoBehaviour
         EventReference storm = fmodEvents.stormAmbience;
         if (!storm.IsNull)
         {
-            play(TYPE.AMBIENCE, storm);
+            playAmbience(storm);
         }
+
+        EventReference fire = fmodEvents.fireCrackling;
+        if (!fire.IsNull)
+        {
+            playAmbience(fire);
+        }
+    }
+
+    public static void playAmbience(EventReference eventRef, Vector3 pos = default, float volume = 1f)
+    {
+        if (eventRef.IsNull) return;
+
+        for (int i = 0; i < activeAmbienceRefs.Count; i++)
+        {
+            if (activeAmbienceRefs[i].Guid == eventRef.Guid && !eventRef.Guid.IsNull)
+            {
+                return; // Already playing
+            }
+        }
+
+        EventInstance eventInst = CreateSFXInstance(eventRef);
+        if (eventInst.isValid())
+        {
+            eventInst.set3DAttributes(RuntimeUtils.To3DAttributes(pos));
+            eventInst.setVolume(volume);
+            eventInst.start();
+            activeAmbienceInstances.Add(eventInst);
+            activeAmbienceRefs.Add(eventRef);
+        }
+    }
+
+    public static void stopAmbience()
+    {
+        for (int i = 0; i < activeAmbienceInstances.Count; i++)
+        {
+            if (activeAmbienceInstances[i].isValid())
+            {
+                activeAmbienceInstances[i].stop(FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
+                activeAmbienceInstances[i].release();
+            }
+        }
+        activeAmbienceInstances.Clear();
+        activeAmbienceRefs.Clear();
     }
 
     public static void playTimelineSFX(EventReference eventReference, Vector3 pos = default)
@@ -460,9 +507,16 @@ public class Audio : MonoBehaviour
             playSFXInternal(eventRef, pos, volume);
             return;
         }
+
+        if (type == TYPE.AMBIENCE)
+        {
+            playAmbience(eventRef, pos, volume);
+            return;
+        }
+
         if (currentRef[(int)type].Guid == eventRef.Guid && !currentRef[(int)type].Guid.IsNull)
         {
-            return; // Don't restart music/ambience
+            return; // Don't restart music
         }
         stop(type);
 
@@ -546,6 +600,12 @@ public class Audio : MonoBehaviour
 
     private static void stop(TYPE type)
     {
+        if (type == TYPE.AMBIENCE)
+        {
+            stopAmbience();
+            return;
+        }
+
         EventInstance eventInst = events[(int)type];
         if (!eventInst.isValid()) { return; }
 

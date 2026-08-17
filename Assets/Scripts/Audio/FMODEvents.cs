@@ -26,7 +26,8 @@ public class FMODEvents : MonoBehaviour
     [field: Header("Music")]
     [field: SerializeField] public EventReference sombieStyle { get; set; }
 
-    [field: Header("Fire Crackling")]
+    [field: Header("Ambience")]
+    [field: SerializeField] public EventReference stormAmbience { get; set; }
     [field: SerializeField] public EventReference fireCrackling { get; set; }
 
     [field: Header("Door")]
@@ -50,8 +51,7 @@ public class FMODEvents : MonoBehaviour
     [field: Header("Cauldron")]
     [field: SerializeField] public EventReference bubbling { get; set; }
 
-    [field: Header("Ambience")]
-    [field: SerializeField] public EventReference stormAmbience { get; set; }
+
     public static FMODEvents instance { get; private set; }
 
     private void Awake()

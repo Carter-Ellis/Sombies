@@ -5,10 +5,10 @@
 			<value>FireCrackling</value>
 		</property>
 		<property name="outputFormat">
-			<value>2</value>
+			<value>1</value>
 		</property>
 		<relationship name="folder">
-			<destination>{03aaac15-5968-4132-8916-665ee3e34b8b}</destination>
+			<destination>{3d8cd704-3c4c-4ffb-9d56-60a5f4660b04}</destination>
 		</relationship>
 		<relationship name="mixer">
 			<destination>{8187f1af-9141-4f7e-89d8-3b3fce475c5e}</destination>
@@ -32,7 +32,7 @@
 			<destination>{a7ab7299-8599-4008-9fae-25bd0b70047e}</destination>
 		</relationship>
 		<relationship name="banks">
-			<destination>{588301c3-1890-4ac1-a546-8d2d9d7783fc}</destination>
+			<destination>{dfc4b58c-4065-41ea-aee3-0e2d712e1bb5}</destination>
 		</relationship>
 	</object>
 	<object class="EventMixer" id="{8187f1af-9141-4f7e-89d8-3b3fce475c5e}">
@@ -76,7 +76,7 @@
 	</object>
 	<object class="EventMixerMaster" id="{94bbfe5e-ed12-419e-8ac7-5807086988c8}">
 		<property name="volume">
-			<value>-9</value>
+			<value>-32</value>
 		</property>
 		<relationship name="effectChain">
 			<destination>{7323e81b-cad9-4d47-aaf6-babc854eebeb}</destination>
@@ -142,7 +142,6 @@
 	<object class="MixerBusEffectChain" id="{7323e81b-cad9-4d47-aaf6-babc854eebeb}">
 		<relationship name="effects">
 			<destination>{97b0c90d-aaae-4a42-b26a-01b83b890ea9}</destination>
-			<destination>{c23ef842-c01e-49b5-8d81-215b0693dc7e}</destination>
 		</relationship>
 	</object>
 	<object class="MixerBusPanner" id="{daf1efb8-318b-4997-8d80-a3b8731ad5d1}" />
@@ -162,7 +161,6 @@
 	</object>
 	<object class="MixerBusPanner" id="{2781bd1e-0e0b-4aef-9e1f-508f95a4b423}" />
 	<object class="MixerBusFader" id="{97b0c90d-aaae-4a42-b26a-01b83b890ea9}" />
-	<object class="SpatialiserEffect" id="{c23ef842-c01e-49b5-8d81-215b0693dc7e}" />
 	<object class="AutomationPoint" id="{c9564397-368d-4ab4-a619-148633803511}">
 		<property name="position">
 			<value>0</value>

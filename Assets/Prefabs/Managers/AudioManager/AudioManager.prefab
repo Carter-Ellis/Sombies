@@ -107,13 +107,20 @@ MonoBehaviour:
       Data3: -725782639
       Data4: 56313053
     Path: event:/Music/SombieStyle
+  <stormAmbience>k__BackingField:
+    Guid:
+      Data1: -1647977355
+      Data2: 1315308775
+      Data3: 1308400019
+      Data4: -1234205964
+    Path: event:/Ambience/Storm
   <fireCrackling>k__BackingField:
     Guid:
       Data1: -1591047401
       Data2: 1246040458
       Data3: -988246600
       Data4: 630777841
-    Path: event:/SFX/Fire/FireCrackling
+    Path: event:/Ambience/FireCrackling
   <doorOpen>k__BackingField:
     Guid:
       Data1: 1051446028
@@ -163,13 +170,6 @@ MonoBehaviour:
       Data3: 695548604
       Data4: 818045274
     Path: event:/SFX/Cauldron/Bubbling
-  <stormAmbience>k__BackingField:
-    Guid:
-      Data1: -1647977355
-      Data2: 1315308775
-      Data3: 1308400019
-      Data4: -1234205964
-    Path: event:/Ambience/Storm
 --- !u!1 &7597115827806844496
 GameObject:
   m_ObjectHideFlags: 0

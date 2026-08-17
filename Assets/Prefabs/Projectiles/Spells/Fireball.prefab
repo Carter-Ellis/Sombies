@@ -11,7 +11,6 @@ GameObject:
   - component: {fileID: 5325137475302290609}
   - component: {fileID: 4593884156271752968}
   - component: {fileID: 380330258807779007}
-  - component: {fileID: 5504133084431766099}
   m_Layer: 0
   m_Name: Fire Light
   m_TagString: Untagged
@@ -101,37 +100,6 @@ MonoBehaviour:
   minIntensity: 1
   maxIntensity: 3
   flickerSpeed: 10
---- !u!114 &5504133084431766099
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 138115918577256660}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9a6610d2e704f1648819acc8d7460285, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: FMODUnity::FMODUnity.StudioEventEmitter
-  CollisionTag: 
-  EventReference:
-    Guid:
-      Data1: -1591047401
-      Data2: 1246040458
-      Data3: -988246600
-      Data4: 630777841
-    Path: event:/SFX/Fire/FireCrackling
-  Event: 
-  EventPlayTrigger: 1
-  EventStopTrigger: 0
-  AllowFadeout: 1
-  TriggerOnce: 0
-  Preload: 0
-  NonRigidbodyVelocity: 0
-  Params: []
-  OverrideAttenuation: 0
-  OverrideMinDistance: 1
-  OverrideMaxDistance: 20
 --- !u!1 &2797691783092432233
 GameObject:
   m_ObjectHideFlags: 0
@@ -306,7 +274,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
-  GlobalObjectIdHash: 4285203982
+  GlobalObjectIdHash: 2506199382
   InScenePlacedSourceGlobalObjectIdHash: 2506199382
   DeferredDespawnTick: 0
   Ownership: 1
