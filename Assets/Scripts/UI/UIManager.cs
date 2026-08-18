@@ -46,6 +46,11 @@ public sealed class UIManager : MonoBehaviour
     private void InitializeUI()
     {
         SetHUDVisibility(false);
+
+        if (hudCanvas != null && hudCanvas.GetComponent<DownedPlayerIndicatorUI>() == null)
+        {
+            hudCanvas.gameObject.AddComponent<DownedPlayerIndicatorUI>();
+        }
     }
 
     public void SetHUDVisibility(bool visible)
