@@ -26,6 +26,26 @@ public class Audio : MonoBehaviour
     private static System.Collections.Generic.List<EventInstance> activeAmbienceInstances = new System.Collections.Generic.List<EventInstance>();
     private static System.Collections.Generic.List<EventReference> activeAmbienceRefs = new System.Collections.Generic.List<EventReference>();
 
+    private static System.Collections.Generic.Dictionary<string, float> sfxCooldowns = new System.Collections.Generic.Dictionary<string, float>();
+    private const float SFX_MIN_INTERVAL = 0.04f;
+
+    private static bool IsSFXRateLimited(EventReference eventRef)
+    {
+        string key = !eventRef.Guid.IsNull ? eventRef.Guid.ToString() : GetEventPath(eventRef);
+        if (!string.IsNullOrEmpty(key))
+        {
+            if (sfxCooldowns.TryGetValue(key, out float lastTime))
+            {
+                if (Time.time - lastTime < SFX_MIN_INTERVAL)
+                {
+                    return true;
+                }
+            }
+            sfxCooldowns[key] = Time.time;
+        }
+        return false;
+    }
+
     private static string[] busPaths =
     {
         "bus:/",
@@ -145,6 +165,7 @@ public class Audio : MonoBehaviour
     public static void PlayNetworkedSFX(EventReference eventRef, Vector3 pos, float volume = 1f)
     {
         if (eventRef.IsNull) return;
+        if (IsSFXRateLimited(eventRef)) return;
 
         EnsureMessagingRegistered();
 
@@ -306,55 +327,19 @@ public class Audio : MonoBehaviour
 
     private static void playSFXInternal(EventReference eventRef, Vector3 pos, float volume = 1f)
     {
-        string eventPath = GetEventPath(eventRef);
-        if (eventRef.IsNull && string.IsNullOrEmpty(eventPath)) return;
+        if (eventRef.IsNull) return;
 
         try
         {
             if (!RuntimeManager.IsInitialized) return;
 
-            // 1. Try StudioSystem getEvent directly using string Path (works on virtual clients)
-            if (!string.IsNullOrEmpty(eventPath))
+            EventInstance inst = CreateSFXInstance(eventRef);
+            if (inst.isValid())
             {
-                try
-                {
-                    var res = RuntimeManager.StudioSystem.getEvent(eventPath, out var desc);
-                    if (res == FMOD.RESULT.OK && desc.isValid())
-                    {
-                        desc.createInstance(out var inst);
-                        if (inst.isValid())
-                        {
-                            inst.set3DAttributes(RuntimeUtils.To3DAttributes(pos));
-                            inst.setVolume(volume);
-                            inst.start();
-                            inst.release();
-                            return;
-                        }
-                    }
-                }
-                catch { }
-            }
-
-            // 2. Try StudioSystem getEventByID directly using GUID
-            if (!eventRef.Guid.IsNull)
-            {
-                try
-                {
-                    var res = RuntimeManager.StudioSystem.getEventByID(eventRef.Guid, out var desc);
-                    if (res == FMOD.RESULT.OK && desc.isValid())
-                    {
-                        desc.createInstance(out var inst);
-                        if (inst.isValid())
-                        {
-                            inst.set3DAttributes(RuntimeUtils.To3DAttributes(pos));
-                            inst.setVolume(volume);
-                            inst.start();
-                            inst.release();
-                            return;
-                        }
-                    }
-                }
-                catch { }
+                inst.set3DAttributes(RuntimeUtils.To3DAttributes(pos));
+                inst.setVolume(volume);
+                inst.start();
+                inst.release();
             }
         }
         catch { }
@@ -514,10 +499,18 @@ public class Audio : MonoBehaviour
             return;
         }
 
-        if (currentRef[(int)type].Guid == eventRef.Guid && !currentRef[(int)type].Guid.IsNull)
+        if (type == TYPE.MUSIC && events[(int)TYPE.MUSIC].isValid())
         {
-            return; // Don't restart music
+            events[(int)TYPE.MUSIC].getPlaybackState(out PLAYBACK_STATE state);
+            if (state == PLAYBACK_STATE.PLAYING || state == PLAYBACK_STATE.STARTING)
+            {
+                if (currentRef[(int)type].Guid == eventRef.Guid && !currentRef[(int)type].Guid.IsNull)
+                {
+                    return; // Don't restart music if currently playing
+                }
+            }
         }
+
         stop(type);
 
         EventInstance eventInst = CreateSFXInstance(eventRef);
@@ -596,6 +589,37 @@ public class Audio : MonoBehaviour
             eventInst.start();
         }
         return eventInst;
+    }
+
+    private void Update()
+    {
+        // Monitor background music state and auto-recover if stolen by FMOD channel limit
+        if (events[(int)TYPE.MUSIC].isValid())
+        {
+            events[(int)TYPE.MUSIC].getPlaybackState(out PLAYBACK_STATE state);
+            if (state == PLAYBACK_STATE.STOPPED)
+            {
+                events[(int)TYPE.MUSIC].release();
+                events[(int)TYPE.MUSIC] = default;
+                currentRef[(int)TYPE.MUSIC] = default;
+
+                string currentScene = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
+                if (currentScene != "MainMenu" && currentScene != "Main Menu")
+                {
+                    playGameMusic();
+                }
+            }
+        }
+
+        // Clean up stopped ambience instances
+        for (int i = activeAmbienceInstances.Count - 1; i >= 0; i--)
+        {
+            if (!activeAmbienceInstances[i].isValid())
+            {
+                activeAmbienceInstances.RemoveAt(i);
+                if (i < activeAmbienceRefs.Count) activeAmbienceRefs.RemoveAt(i);
+            }
+        }
     }
 
     private static void stop(TYPE type)
