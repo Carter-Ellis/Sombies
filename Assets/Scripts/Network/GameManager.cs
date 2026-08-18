@@ -416,25 +416,61 @@ public class GameManager : NetworkBehaviour
     }
     // --------------------------------
 
-    private void OnSceneLoaded(string sceneName, UnityEngine.SceneManagement.LoadSceneMode loadMode, List<ulong> clientsCompleted, List<ulong> clientsTimedOut)
+    private void OnSceneLoaded(string sceneName, UnityEngine.SceneManagement.LoadSceneMode loadSceneMode, List<ulong> clientsCompleted, List<ulong> clientsTimedOut)
     {
         if (!IsServer || sceneName != sceneToLoad) return;
 
+        List<Vector3> availableSpawns = new List<Vector3>();
+
+        if (RoundManager.Instance != null)
+        {
+            availableSpawns = RoundManager.Instance.GetSpawnPositionsFromParent();
+        }
+        else
+        {
+            GameObject findParent = GameObject.Find("Player Spawnpoints");
+            if (findParent == null) findParent = GameObject.Find("PlayerSpawnPoints");
+            if (findParent == null) findParent = GameObject.Find("playerspawnpoints");
+            if (findParent != null)
+            {
+                for (int i = 0; i < findParent.transform.childCount; i++)
+                {
+                    Transform child = findParent.transform.GetChild(i);
+                    if (child != null) availableSpawns.Add(child.position);
+                }
+            }
+        }
+
+        // Shuffle available spawn positions
+        for (int i = 0; i < availableSpawns.Count; i++)
+        {
+            int randomIndex = UnityEngine.Random.Range(i, availableSpawns.Count);
+            Vector3 temp = availableSpawns[i];
+            availableSpawns[i] = availableSpawns[randomIndex];
+            availableSpawns[randomIndex] = temp;
+        }
+
+        int spawnIndex = 0;
+
         foreach (ulong clientId in clientsCompleted)
         {
-            // 1. Find the current version of this player (Lobby OR previous round)
             if (NetworkManager.Singleton.ConnectedClients.TryGetValue(clientId, out var networkClient))
             {
                 var oldPlayerObject = networkClient.PlayerObject;
                 if (oldPlayerObject != null)
                 {
-                    // Despawn the old object (it will disappear for everyone)
                     oldPlayerObject.Despawn(true);
                 }
             }
 
-            // 2. Instantiate the "Actual Gameplay" version (your existing code)
-            GameObject playerInstance = Instantiate(playerPrefab);
+            Vector3 spawnPos = Vector3.zero;
+            if (availableSpawns.Count > 0)
+            {
+                spawnPos = availableSpawns[spawnIndex % availableSpawns.Count];
+                spawnIndex++;
+            }
+
+            GameObject playerInstance = Instantiate(playerPrefab, spawnPos, Quaternion.identity);
             var playerScript = playerInstance.GetComponent<Player>();
 
             if (playerScript != null && clientNames.TryGetValue(clientId, out string savedName))
@@ -442,7 +478,6 @@ public class GameManager : NetworkBehaviour
                 playerScript.playerName.Value = savedName;
             }
 
-            // 3. Re-assign this as the official PlayerObject for this client
             playerInstance.GetComponent<NetworkObject>().SpawnAsPlayerObject(clientId, true);
         }
     }

@@ -24,6 +24,9 @@ public class RoundManager : NetworkBehaviour
 
     [SerializeField] private int maxActiveEnemies = 3;
 
+    [Header("Player Respawn Settings")]
+    [SerializeField] private Transform playerSpawnPointsParent;
+
     private List<Enemy> activeEnemies = new List<Enemy>();
     private EnemySpawnPoint[] spawnPoints;
 
@@ -200,7 +203,87 @@ public class RoundManager : NetworkBehaviour
         _netRound.Value++;
         currentTimeBetweenSpawns = Mathf.Max(timeBetweenSpawnsMinimum, currentTimeBetweenSpawns - 0.5f);
 
+        RespawnDeadPlayersServer();
+
         StartCoroutine(SpawnRoundRoutine());
+    }
+
+    public List<Vector3> GetSpawnPositionsFromParent()
+    {
+        List<Vector3> positions = new List<Vector3>();
+
+        if (playerSpawnPointsParent == null)
+        {
+            GameObject findParent = GameObject.Find("Player Spawnpoints");
+            if (findParent == null) findParent = GameObject.Find("PlayerSpawnPoints");
+            if (findParent == null) findParent = GameObject.Find("playerspawnpoints");
+            if (findParent != null) playerSpawnPointsParent = findParent.transform;
+        }
+
+        if (playerSpawnPointsParent != null)
+        {
+            for (int i = 0; i < playerSpawnPointsParent.childCount; i++)
+            {
+                Transform child = playerSpawnPointsParent.GetChild(i);
+                if (child != null && child != playerSpawnPointsParent)
+                {
+                    positions.Add(child.position);
+                }
+            }
+        }
+
+        return positions;
+    }
+
+    public Vector3 GetRandomPlayerSpawnPosition()
+    {
+        List<Vector3> list = GetSpawnPositionsFromParent();
+        if (list.Count > 0)
+        {
+            return list[Random.Range(0, list.Count)];
+        }
+        return Vector3.zero;
+    }
+
+    private void RespawnDeadPlayersServer()
+    {
+        if (!IsServer) return;
+
+        List<Vector3> availableSpawnPositions = GetSpawnPositionsFromParent();
+
+        // Shuffle spawn positions so spawning is randomized but distinct for each player
+        for (int i = 0; i < availableSpawnPositions.Count; i++)
+        {
+            int randomIndex = Random.Range(i, availableSpawnPositions.Count);
+            Vector3 temp = availableSpawnPositions[i];
+            availableSpawnPositions[i] = availableSpawnPositions[randomIndex];
+            availableSpawnPositions[randomIndex] = temp;
+        }
+
+        int spawnIndex = 0;
+
+        foreach (var client in NetworkManager.Singleton.ConnectedClients.Values)
+        {
+            if (client.PlayerObject != null && client.PlayerObject.TryGetComponent<Player>(out var player))
+            {
+                ReviveController rc = client.PlayerObject.GetComponent<ReviveController>();
+                if (rc != null && (rc.IsDeadSync.Value || rc.IsDownedSync.Value))
+                {
+                    Vector3 spawnPos = Vector3.zero;
+                    if (availableSpawnPositions.Count > 0)
+                    {
+                        spawnPos = availableSpawnPositions[spawnIndex % availableSpawnPositions.Count];
+                        spawnIndex++;
+                    }
+                    else
+                    {
+                        spawnPos = client.PlayerObject.transform.position;
+                    }
+
+                    player.RespawnForNextRoundServer(spawnPos);
+                }
+            }
+        }
     }
 
     private IEnumerator SpawnRoundRoutine()

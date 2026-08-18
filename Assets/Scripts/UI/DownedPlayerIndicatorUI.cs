@@ -13,8 +13,8 @@ public class DownedPlayerIndicatorUI : MonoBehaviour
     [SerializeField] private float pulseSpeed = 6f;
     [SerializeField] private float minPulseScale = 0.88f;
     [SerializeField] private float maxPulseScale = 1.18f;
-    [SerializeField] private bool hideWhenOnScreen = false;
-    [SerializeField] private float hideDistance = 2.5f;
+    [SerializeField] private bool hideWhenOnScreen = true;
+    [SerializeField] private float hideDistance = 3.5f;
 
     [Header("Visual Customization")]
     [SerializeField] private Sprite customArrowSprite;
@@ -165,10 +165,11 @@ public class DownedPlayerIndicatorUI : MonoBehaviour
             ind.arrowRect.localRotation = Quaternion.Euler(0, 0, angle);
             ind.arrowRect.localScale = Vector3.one * pulse;
 
-            // Distance display
+            // Distance & timer display
             if (ind.distanceText != null)
             {
-                ind.distanceText.text = $"{Mathf.RoundToInt(dist)}m";
+                int timerSecs = Mathf.CeilToInt(ind.targetRevive.NetDownedTimer.Value);
+                ind.distanceText.text = $"{Mathf.RoundToInt(dist)}m ({timerSecs}s)";
             }
         }
     }

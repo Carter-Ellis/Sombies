@@ -48,9 +48,15 @@ public class Player : NetworkBehaviour
     private System.Collections.Generic.List<PurchaseSystem> nearbyPurchaseSystems = new System.Collections.Generic.List<PurchaseSystem>();
     private PurchaseSystem lastActivePurchaseTarget = null;
 
+    private List<Player> _spectateTargets = new List<Player>();
+    private int _spectateIndex = 0;
+    private bool _isSpectatingHUDActive = false;
+
     private void Update()
     {
         if (!IsOwner) return;
+
+        UpdateSpectatorMode();
 
         if (nearbyPurchaseSystems.Count > 0)
         {
@@ -60,6 +66,76 @@ public class Player : NetworkBehaviour
         if (_isChargingThrow)
         {
             UpdateThrowTrajectory();
+        }
+    }
+
+    private void UpdateSpectatorMode()
+    {
+        if (!IsOwner) return;
+
+        if (_revive == null || !_revive.IsDeadSync.Value)
+        {
+            if (_isSpectatingHUDActive)
+            {
+                _isSpectatingHUDActive = false;
+                if (UIManager.Instance != null) UIManager.Instance.SetSpectatorUI(false);
+
+                var vcam = Object.FindAnyObjectByType<Unity.Cinemachine.CinemachineCamera>();
+                if (vcam != null)
+                {
+                    vcam.Follow = transform;
+                    vcam.LookAt = transform;
+                }
+            }
+            return;
+        }
+
+        _isSpectatingHUDActive = true;
+
+        Player[] allPlayers = Object.FindObjectsByType<Player>(FindObjectsInactive.Exclude);
+        _spectateTargets.Clear();
+
+        foreach (var p in allPlayers)
+        {
+            if (p != null && p.gameObject != gameObject)
+            {
+                ReviveController rc = p.GetComponent<ReviveController>();
+                if (rc != null && !rc.IsDeadSync.Value && !rc.IsDownedSync.Value)
+                {
+                    _spectateTargets.Add(p);
+                }
+            }
+        }
+
+        if (_spectateTargets.Count > 0)
+        {
+            if (_spectateIndex >= _spectateTargets.Count) _spectateIndex = 0;
+            Player spectatedPlayer = _spectateTargets[_spectateIndex];
+
+            var vcam = Object.FindAnyObjectByType<Unity.Cinemachine.CinemachineCamera>();
+            if (vcam != null && spectatedPlayer != null)
+            {
+                vcam.Follow = spectatedPlayer.transform;
+                vcam.LookAt = spectatedPlayer.transform;
+            }
+
+            if (UIManager.Instance != null)
+            {
+                string targetName = spectatedPlayer != null ? spectatedPlayer.GetPlayerDisplayName() : "Teammate";
+                UIManager.Instance.SetSpectatorUI(true, targetName);
+            }
+
+            if (Mouse.current != null && Mouse.current.leftButton.wasPressedThisFrame)
+            {
+                _spectateIndex = (_spectateIndex + 1) % _spectateTargets.Count;
+            }
+        }
+        else
+        {
+            if (UIManager.Instance != null)
+            {
+                UIManager.Instance.SetSpectatorUI(true, "No Alive Teammates");
+            }
         }
     }
 
@@ -294,6 +370,19 @@ public class Player : NetworkBehaviour
         }
     }
 
+    public string GetPlayerDisplayName()
+    {
+        string netName = playerName.Value.ToString();
+        if (!string.IsNullOrEmpty(netName)) return netName;
+
+        if (nameTagText != null && !string.IsNullOrEmpty(nameTagText.text))
+        {
+            return nameTagText.text;
+        }
+
+        return $"Player {OwnerClientId + 1}";
+    }
+
     public void OnDeathTriggered()
     {
         if (!IsServer) return;
@@ -349,6 +438,49 @@ public class Player : NetworkBehaviour
                 ActiveSpellIndex = slotIndex;
                 UpdateHUDWithActiveSpell();
             }
+        }
+    }
+
+    public void ClearAllSpells()
+    {
+        if (!IsServer) return;
+
+        spells.Clear();
+        activeSpell = null;
+        ActiveSpellIndex = 0;
+        _netActiveSpellID.Value = -1;
+
+        ClearSpellsClientRpc();
+    }
+
+    [Rpc(SendTo.Owner, InvokePermission = RpcInvokePermission.Server)]
+    public void ClearSpellsClientRpc()
+    {
+        spells.Clear();
+        activeSpell = null;
+        ActiveSpellIndex = 0;
+        if (IsOwner && UIManager.Instance != null)
+        {
+            UIManager.Instance.RefreshSpells(spells, ActiveSpellIndex);
+        }
+    }
+
+    public void RespawnForNextRoundServer(Vector3 spawnPosition)
+    {
+        if (!IsServer) return;
+
+        if (_revive != null && (_revive.IsDeadSync.Value || _revive.IsDownedSync.Value))
+        {
+            PlayerStats stats = GetComponent<PlayerStats>();
+            if (stats != null)
+            {
+                stats.DeductCoinsPercentage(0.25f);
+                int halfHealth = Mathf.FloorToInt(stats.MaxHealth * 0.5f);
+                stats.SetHealth(halfHealth);
+            }
+
+            ClearAllSpells();
+            _revive.RespawnFromDeathServer(spawnPosition);
         }
     }
 
@@ -418,6 +550,7 @@ public class Player : NetworkBehaviour
     public void OnDropItem(InputAction.CallbackContext context)
     {
         if (!IsOwner) return;
+        if (_revive != null && _revive.IsDeadSync.Value) return;
 
         if (context.started)
         {
@@ -521,6 +654,8 @@ public class Player : NetworkBehaviour
     [Rpc(SendTo.Server)]
     private void RequestDropItemRpc(int itemIndex, Vector3 clientPos, Vector3 clientDir, float force)
     {
+        if (_revive != null && _revive.IsDeadSync.Value) return;
+
         if (itemIndex < 0 || itemIndex >= maxInventorySlots) return;
 
         int itemID = _netInventory[itemIndex];
@@ -584,7 +719,7 @@ public class Player : NetworkBehaviour
     {
         if (!context.performed || !IsOwner) return;
 
-        if (_revive.IsDownedSync.Value) return;
+        if (_revive != null && (_revive.IsDownedSync.Value || _revive.IsDeadSync.Value)) return;
 
         RequestUseItemServerRpc(selectedItemIndex);
     }
@@ -592,6 +727,8 @@ public class Player : NetworkBehaviour
     [Rpc(SendTo.Server)]
     private void RequestUseItemServerRpc(int index)
     {
+        if (_revive != null && (_revive.IsDownedSync.Value || _revive.IsDeadSync.Value)) return;
+
         if (_netInventory[index] == -1) return;
 
         Item itemToUse = ItemDatabase.Instance.GetItemByID(_netInventory[index]);
@@ -644,7 +781,7 @@ public class Player : NetworkBehaviour
 
     public void OnInteract(InputAction.CallbackContext context)
     {
-        if (_revive.IsDownedSync.Value) return;
+        if (_revive != null && (_revive.IsDownedSync.Value || _revive.IsDeadSync.Value)) return;
 
         if (context.started)
         {
@@ -705,7 +842,7 @@ public class Player : NetworkBehaviour
 
     public void SwitchSpell(InputAction.CallbackContext context)
     {
-        if (_revive != null && _revive.IsDownedSync.Value) return;
+        if (_revive != null && (_revive.IsDownedSync.Value || _revive.IsDeadSync.Value)) return;
 
         if (context.performed)
         {
@@ -717,7 +854,7 @@ public class Player : NetworkBehaviour
 
     public void CycleSpellInput(InputAction.CallbackContext context)
     {
-        if (_revive != null && _revive.IsDownedSync.Value) return;
+        if (_revive != null && (_revive.IsDownedSync.Value || _revive.IsDeadSync.Value)) return;
 
         if (context.performed)
         {
@@ -769,6 +906,7 @@ public class Player : NetworkBehaviour
     public void OnMelee(InputAction.CallbackContext context)
     {
         if (!IsOwner) return;
+        if (_revive != null && _revive.IsDeadSync.Value) return;
 
         if (context.performed && Time.time >= lastMeleeTime + meleeCooldown)
         {
@@ -861,6 +999,8 @@ public class Player : NetworkBehaviour
     [Rpc(SendTo.Server)]
     public void RequestCastSpellServerRpc(int spellIndex)
     {
+        if (_revive != null && (_revive.IsDownedSync.Value || _revive.IsDeadSync.Value)) return;
+
         if (spellIndex < 0 || spellIndex >= spells.Count || spells[spellIndex] == null) return;
 
         if (IsWallBlockingCast()) return;
@@ -884,6 +1024,8 @@ public class Player : NetworkBehaviour
     [Rpc(SendTo.Server)]
     public void RequestStartChargingSpellServerRpc(int spellIndex)
     {
+        if (_revive != null && (_revive.IsDownedSync.Value || _revive.IsDeadSync.Value)) return;
+
         if (spellIndex < 0 || spellIndex >= spells.Count || spells[spellIndex] == null) return;
 
         if (IsWallBlockingCast()) return;

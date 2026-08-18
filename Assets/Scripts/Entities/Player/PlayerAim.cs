@@ -29,6 +29,8 @@ public class PlayerAim : NetworkBehaviour
 
     private void Update()
     {
+        if (_revive != null && _revive.IsDeadSync.Value) return;
+
         if (IsOwner)
         {
             if (Time.timeScale > 0)
@@ -45,7 +47,8 @@ public class PlayerAim : NetworkBehaviour
 
                 RotateFirePoint();
 
-                if (_isHoldingClick && !_isChargingSpell)
+                bool isDowned = _revive != null && _revive.IsDownedSync.Value;
+                if (!isDowned && _isHoldingClick && !_isChargingSpell)
                 {
                     TryCastActiveSpell();
                 }
@@ -138,6 +141,7 @@ public class PlayerAim : NetworkBehaviour
     public void OnClick(InputAction.CallbackContext context)
     {
         if (!IsOwner) return;
+        if (_revive != null && (_revive.IsDeadSync.Value || _revive.IsDownedSync.Value)) return;
 
         if (context.started)
         {
@@ -176,7 +180,7 @@ public class PlayerAim : NetworkBehaviour
 
     private void TryCastActiveSpell()
     {
-        if (_revive != null && _revive.IsDownedSync.Value) return;
+        if (_revive != null && (_revive.IsDownedSync.Value || _revive.IsDeadSync.Value)) return;
 
         if (player.activeSpell == null) return;
 

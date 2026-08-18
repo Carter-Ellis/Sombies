@@ -16,6 +16,7 @@ public sealed class UIManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI coinsTxt;
     [SerializeField] private TextMeshProUGUI roundTxt;
     [SerializeField] private TextMeshProUGUI enemyCountTxt;
+    [SerializeField] private TextMeshProUGUI spectatorTxt;
 
     [Header("Inventory UI Settings")]
     [SerializeField] private GameObject slotPrefab;
@@ -125,17 +126,76 @@ public sealed class UIManager : MonoBehaviour
     {
         if (spellSlotParent == null) return;
 
-        if (uiSpellSlots.Count != spells.Count && spells.Count > 0 && spellSlotPrefab != null)
+        if (spells == null || spells.Count == 0)
+        {
+            foreach (Transform child in spellSlotParent) Destroy(child.gameObject);
+            uiSpellSlots.Clear();
+            return;
+        }
+
+        if (uiSpellSlots.Count != spells.Count && spellSlotPrefab != null)
         {
             InitializeSpellUI(spells.Count);
         }
 
         for (int i = 0; i < uiSpellSlots.Count; i++)
         {
-            if (i < spells.Count)
+            Spell s = (i < spells.Count) ? spells[i] : null;
+            string label = (i < spellKeyLabels.Count) ? spellKeyLabels[i] : (i + 1).ToString();
+            uiSpellSlots[i].UpdateSlot(s, i == selectedIndex, label);
+        }
+    }
+
+    public void SetGameplayHUDVisible(bool visible)
+    {
+        if (healthTxt != null) healthTxt.gameObject.SetActive(visible);
+        if (manaTxt != null) manaTxt.gameObject.SetActive(visible);
+        if (coinsTxt != null) coinsTxt.gameObject.SetActive(visible);
+        if (roundTxt != null) roundTxt.gameObject.SetActive(visible);
+        if (enemyCountTxt != null) enemyCountTxt.gameObject.SetActive(visible);
+
+        if (slotParent != null) slotParent.gameObject.SetActive(visible);
+        if (spellSlotParent != null) spellSlotParent.gameObject.SetActive(visible);
+    }
+
+    public void SetSpectatorUI(bool active, string spectatedName = "")
+    {
+        if (hudCanvas != null)
+        {
+            hudCanvas.enabled = true;
+        }
+
+        SetGameplayHUDVisible(!active);
+
+        if (spectatorTxt == null && hudCanvas != null)
+        {
+            GameObject spectObj = new GameObject("SpectatorText", typeof(RectTransform), typeof(TextMeshProUGUI));
+            spectObj.transform.SetParent(hudCanvas.transform, false);
+            RectTransform rect = spectObj.GetComponent<RectTransform>();
+            rect.anchorMin = new Vector2(0.5f, 0.85f);
+            rect.anchorMax = new Vector2(0.5f, 0.85f);
+            rect.pivot = new Vector2(0.5f, 0.5f);
+            rect.anchoredPosition = Vector2.zero;
+            rect.sizeDelta = new Vector2(800f, 80f);
+
+            spectatorTxt = spectObj.GetComponent<TextMeshProUGUI>();
+            spectatorTxt.alignment = TextAlignmentOptions.Center;
+            spectatorTxt.fontSize = 26;
+            spectatorTxt.fontStyle = FontStyles.Bold;
+            spectatorTxt.color = new Color(1f, 0.3f, 0.3f, 1f);
+        }
+
+        if (spectatorTxt != null)
+        {
+            if (hudCanvas != null)
             {
-                string label = (i < spellKeyLabels.Count) ? spellKeyLabels[i] : (i + 1).ToString();
-                uiSpellSlots[i].UpdateSlot(spells[i], i == selectedIndex, label);
+                spectatorTxt.transform.SetParent(hudCanvas.transform, false);
+            }
+            spectatorTxt.transform.SetAsLastSibling();
+            spectatorTxt.gameObject.SetActive(active);
+            if (active)
+            {
+                spectatorTxt.text = $"SPECTATING: {spectatedName}\n<size=70%>(Left Click to Switch Target)</size>";
             }
         }
     }

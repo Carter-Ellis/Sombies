@@ -8,11 +8,15 @@ public class ReviveController : NetworkBehaviour
 {
     [Header("Network Variables")]
     public NetworkVariable<bool> IsDownedSync = new NetworkVariable<bool>(false, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+    public NetworkVariable<bool> IsDeadSync = new NetworkVariable<bool>(false, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+    public NetworkVariable<float> NetDownedTimer = new NetworkVariable<float>(30f, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 
     [Header("Visual Customization")]
     private SpriteRenderer[] playerSrs;
     private Color[] originalColors;
     [SerializeField] private Color downedColor = new Color(0.5f, 0.5f, 0.5f, 1f);
+    [SerializeField] private float downedBleedoutDuration = 30f;
+    private Coroutine bleedoutCoroutine;
 
     [Header("Physics")]
     [SerializeField] private string defaultLayerName = "Player";
@@ -100,6 +104,7 @@ public class ReviveController : NetworkBehaviour
     public override void OnNetworkSpawn()
     {
         IsDownedSync.OnValueChanged += OnDownedStateChanged;
+        IsDeadSync.OnValueChanged += OnDeadStateChanged;
 
         if (IsServer)
         {
@@ -107,16 +112,57 @@ public class ReviveController : NetworkBehaviour
         }
 
         UpdatePlayerColor(IsDownedSync.Value);
+        SetDeadVisuals(IsDeadSync.Value);
     }
 
     public override void OnNetworkDespawn()
     {
         IsDownedSync.OnValueChanged -= OnDownedStateChanged;
+        IsDeadSync.OnValueChanged -= OnDeadStateChanged;
     }
 
     private void OnDownedStateChanged(bool previousValue, bool newValue)
     {
         UpdatePlayerColor(newValue);
+    }
+
+    private void OnDeadStateChanged(bool previousValue, bool newValue)
+    {
+        SetDeadVisuals(newValue);
+    }
+
+    public void SetDeadVisuals(bool isDead)
+    {
+        if (playerSrs != null)
+        {
+            for (int i = 0; i < playerSrs.Length; i++)
+            {
+                if (playerSrs[i] != null)
+                {
+                    playerSrs[i].enabled = !isDead;
+                }
+            }
+        }
+
+        Collider2D col = GetComponent<Collider2D>();
+        if (col != null) col.enabled = !isDead;
+
+        Player player = GetComponent<Player>();
+        if (player != null && player.SpriteTransform != null)
+        {
+            foreach (var renderer in player.SpriteTransform.GetComponentsInChildren<Renderer>(true))
+            {
+                if (renderer != null && !renderer.gameObject.name.ToLower().Contains("melee"))
+                {
+                    renderer.enabled = !isDead;
+                }
+            }
+        }
+
+        if (reviveProgressSlider != null && isDead)
+        {
+            reviveProgressSlider.gameObject.SetActive(false);
+        }
     }
 
     private void UpdatePlayerColor(bool isDowned)
@@ -137,17 +183,91 @@ public class ReviveController : NetworkBehaviour
     {
         if (!IsServer) return;
 
-        if (IsDownedSync.Value) return;
+        if (IsDownedSync.Value || IsDeadSync.Value) return;
 
         Audio.PlayNetworkedSFX(FMODEvents.instance.downed, transform.position);
 
         IsDownedSync.Value = true;
+        IsDeadSync.Value = false;
+        NetDownedTimer.Value = downedBleedoutDuration;
         _playerStats.isHidden.Value = true;
 
         gameObject.layer = LayerMask.NameToLayer(downedLayerName);
 
         if (_rb != null)
         {
+            _rb.linearVelocity = Vector2.zero;
+        }
+
+        if (bleedoutCoroutine != null) StopCoroutine(bleedoutCoroutine);
+        bleedoutCoroutine = StartCoroutine(BleedoutTimerRoutine());
+    }
+
+    private IEnumerator BleedoutTimerRoutine()
+    {
+        float timer = downedBleedoutDuration;
+        while (timer > 0f && IsDownedSync.Value && !IsDeadSync.Value)
+        {
+            yield return null;
+            timer -= Time.deltaTime;
+            NetDownedTimer.Value = Mathf.Max(0f, timer);
+        }
+
+        if (IsDownedSync.Value && !IsDeadSync.Value && NetDownedTimer.Value <= 0f)
+        {
+            DieFromBleedout();
+        }
+    }
+
+    public void DieFromBleedout()
+    {
+        if (!IsServer) return;
+
+        StopBeingRevivedServerRpc();
+
+        IsDeadSync.Value = true;
+        IsDownedSync.Value = false;
+        _playerStats.isHidden.Value = true;
+
+        if (_rb != null) _rb.linearVelocity = Vector2.zero;
+    }
+
+    public void RespawnFromDeathServer(Vector3 spawnPos)
+    {
+        if (!IsServer) return;
+
+        if (bleedoutCoroutine != null)
+        {
+            StopCoroutine(bleedoutCoroutine);
+            bleedoutCoroutine = null;
+        }
+
+        IsDeadSync.Value = false;
+        IsDownedSync.Value = false;
+        _playerStats.isHidden.Value = false;
+
+        transform.position = spawnPos;
+        if (_rb != null)
+        {
+            _rb.position = spawnPos;
+            _rb.linearVelocity = Vector2.zero;
+        }
+
+        TeleportPlayerClientRpc(spawnPos);
+
+        gameObject.layer = LayerMask.NameToLayer(defaultLayerName);
+
+        SetDeadVisuals(false);
+        UpdatePlayerColor(false);
+    }
+
+    [Rpc(SendTo.Everyone)]
+    private void TeleportPlayerClientRpc(Vector3 newPos)
+    {
+        transform.position = newPos;
+        if (_rb != null)
+        {
+            _rb.position = newPos;
             _rb.linearVelocity = Vector2.zero;
         }
     }
@@ -232,7 +352,14 @@ public class ReviveController : NetworkBehaviour
         }
 
         // If the loop finishes without breaking, the revive is successful!
+        if (bleedoutCoroutine != null)
+        {
+            StopCoroutine(bleedoutCoroutine);
+            bleedoutCoroutine = null;
+        }
+
         IsDownedSync.Value = false;
+        IsDeadSync.Value = false;
         _playerStats.isHidden.Value = false;
         _playerStats.SetHealth(healthAfterRevive);
 

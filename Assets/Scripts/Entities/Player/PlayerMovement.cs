@@ -175,6 +175,11 @@ public class PlayerMovement : NetworkBehaviour
     void FixedUpdate()
     {
         if (!IsOwner) return;
+        if (_revive != null && _revive.IsDeadSync.Value)
+        {
+            rb.linearVelocity = Vector2.zero;
+            return;
+        }
         if (isKnockedBack) return;
         rb.linearVelocity = moveInput * CurrentSpeed;
     }
@@ -182,6 +187,11 @@ public class PlayerMovement : NetworkBehaviour
     public void OnMove(InputAction.CallbackContext context)
     {
         if (!IsOwner) return;
+        if (_revive != null && _revive.IsDeadSync.Value)
+        {
+            moveInput = Vector2.zero;
+            return;
+        }
 
         if (context.performed)
         {

@@ -127,6 +127,13 @@ public class PlayerStats : Entity
         Coins += amount;
     }
 
+    public void DeductCoinsPercentage(float percentage)
+    {
+        if (!IsServer) return;
+        int remainingCoins = Mathf.FloorToInt(Coins * (1f - Mathf.Clamp01(percentage)));
+        Coins = Mathf.Max(0, remainingCoins);
+    }
+
     private void UpdatePlayerUI()
     {
         if (IsOwner && UIManager.Instance != null)
