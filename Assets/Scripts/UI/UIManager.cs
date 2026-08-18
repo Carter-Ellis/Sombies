@@ -5,10 +5,26 @@ using UnityEngine.UI;
 
 public sealed class UIManager : MonoBehaviour
 {
-    public static UIManager Instance { get; private set; }
+    private static UIManager _instance;
+    public static UIManager Instance
+    {
+        get
+        {
+            if (_instance == null)
+            {
+                _instance = Object.FindAnyObjectByType<UIManager>();
+            }
+            return _instance;
+        }
+        private set
+        {
+            _instance = value;
+        }
+    }
 
     [Header("Canvas Groups")]
     [SerializeField] private Canvas hudCanvas;
+    public Canvas HudCanvas => hudCanvas;
 
     [Header("HUD Text References")]
     [SerializeField] private TextMeshProUGUI healthTxt;
@@ -48,7 +64,10 @@ public sealed class UIManager : MonoBehaviour
     {
         SetHUDVisibility(false);
 
-        if (hudCanvas != null && hudCanvas.GetComponent<DownedPlayerIndicatorUI>() == null)
+        DownedPlayerIndicatorUI onSelf = GetComponent<DownedPlayerIndicatorUI>();
+        DownedPlayerIndicatorUI onCanvas = hudCanvas != null ? hudCanvas.GetComponent<DownedPlayerIndicatorUI>() : null;
+
+        if (onSelf == null && onCanvas == null && hudCanvas != null)
         {
             hudCanvas.gameObject.AddComponent<DownedPlayerIndicatorUI>();
         }

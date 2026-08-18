@@ -469,7 +469,7 @@ public class Player : NetworkBehaviour
     {
         if (!IsServer) return;
 
-        if (_revive != null && (_revive.IsDeadSync.Value || _revive.IsDownedSync.Value))
+        if (_revive != null && _revive.IsDeadSync.Value)
         {
             PlayerStats stats = GetComponent<PlayerStats>();
             if (stats != null)

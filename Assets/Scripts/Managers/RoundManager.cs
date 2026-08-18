@@ -267,7 +267,7 @@ public class RoundManager : NetworkBehaviour
             if (client.PlayerObject != null && client.PlayerObject.TryGetComponent<Player>(out var player))
             {
                 ReviveController rc = client.PlayerObject.GetComponent<ReviveController>();
-                if (rc != null && (rc.IsDeadSync.Value || rc.IsDownedSync.Value))
+                if (rc != null && rc.IsDeadSync.Value)
                 {
                     Vector3 spawnPos = Vector3.zero;
                     if (availableSpawnPositions.Count > 0)

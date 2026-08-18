@@ -13,12 +13,13 @@ public class DownedPlayerIndicatorUI : MonoBehaviour
     [SerializeField] private float pulseSpeed = 6f;
     [SerializeField] private float minPulseScale = 0.88f;
     [SerializeField] private float maxPulseScale = 1.18f;
-    [SerializeField] private bool hideWhenOnScreen = true;
-    [SerializeField] private float hideDistance = 3.5f;
+    [SerializeField] private bool hideWhenOnScreen = false;
+    [SerializeField] private float hideDistance = 2.5f;
 
     [Header("Visual Customization")]
     [SerializeField] private Sprite customArrowSprite;
-    [SerializeField] private Color arrowColor = new Color(1f, 0.25f, 0.25f, 1f);
+    [SerializeField] private Color fullTimerColor = Color.white;
+    [SerializeField] private Color expiredTimerColor = new Color(0.5f, 0.05f, 0.05f, 1f);
 
     private Canvas _canvas;
     private Camera _mainCam;
@@ -34,6 +35,7 @@ public class DownedPlayerIndicatorUI : MonoBehaviour
         public Image arrowImage;
         public TextMeshProUGUI distanceText;
         public RectTransform textRect;
+        public Image bgImage;
     }
 
     private void Awake()
@@ -165,11 +167,27 @@ public class DownedPlayerIndicatorUI : MonoBehaviour
             ind.arrowRect.localRotation = Quaternion.Euler(0, 0, angle);
             ind.arrowRect.localScale = Vector3.one * pulse;
 
-            // Distance & timer display
+            // Bleedout timer color transition (White -> Dark Red as timer approaches 0)
+            float timerValue = ind.targetRevive.NetDownedTimer.Value;
+            float maxTimer = ind.targetRevive != null ? ind.targetRevive.DownedBleedoutDuration : 30f;
+            float timerRatio = Mathf.Clamp01(timerValue / maxTimer);
+            Color indicatorColor = Color.Lerp(expiredTimerColor, fullTimerColor, timerRatio);
+
+            if (ind.arrowImage != null)
+            {
+                ind.arrowImage.color = indicatorColor;
+            }
+
+            // Distance display
             if (ind.distanceText != null)
             {
-                int timerSecs = Mathf.CeilToInt(ind.targetRevive.NetDownedTimer.Value);
-                ind.distanceText.text = $"{Mathf.RoundToInt(dist)}m ({timerSecs}s)";
+                ind.distanceText.text = $"{Mathf.RoundToInt(dist)}m";
+                ind.distanceText.color = indicatorColor;
+            }
+
+            if (ind.bgImage != null)
+            {
+                ind.bgImage.color = new Color(indicatorColor.r * 0.2f, indicatorColor.g * 0.2f, indicatorColor.b * 0.2f, 0.75f);
             }
         }
     }
@@ -178,15 +196,15 @@ public class DownedPlayerIndicatorUI : MonoBehaviour
     {
         if (_canvas != null && _canvas.enabled) return _canvas;
 
+        if (UIManager.Instance != null && UIManager.Instance.HudCanvas != null)
+        {
+            _canvas = UIManager.Instance.HudCanvas;
+            return _canvas;
+        }
+
         _canvas = GetComponentInParent<Canvas>();
         if (_canvas == null) _canvas = GetComponent<Canvas>();
         if (_canvas == null) _canvas = GetComponentInChildren<Canvas>();
-
-        if (_canvas == null && UIManager.Instance != null)
-        {
-            Canvas[] canvases = UIManager.Instance.GetComponentsInChildren<Canvas>(true);
-            if (canvases.Length > 0) _canvas = canvases[0];
-        }
 
         if (_canvas == null)
         {
@@ -292,7 +310,7 @@ public class DownedPlayerIndicatorUI : MonoBehaviour
 
         Image arrowImg = arrowObj.GetComponent<Image>();
         arrowImg.sprite = _arrowSprite;
-        arrowImg.color = arrowColor;
+        arrowImg.color = fullTimerColor;
 
         // Text Badge Container
         GameObject textBg = new GameObject("TextBg", typeof(RectTransform), typeof(Image));
@@ -328,7 +346,8 @@ public class DownedPlayerIndicatorUI : MonoBehaviour
             arrowRect = arrowRect,
             arrowImage = arrowImg,
             distanceText = tmp,
-            textRect = textBgRect
+            textRect = textBgRect,
+            bgImage = bgImg
         };
 
         return data;

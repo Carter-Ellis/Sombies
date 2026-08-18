@@ -15,7 +15,9 @@ public class ReviveController : NetworkBehaviour
     private SpriteRenderer[] playerSrs;
     private Color[] originalColors;
     [SerializeField] private Color downedColor = new Color(0.5f, 0.5f, 0.5f, 1f);
+    [SerializeField] private Color downedExpiredColor = new Color(0.5f, 0.05f, 0.05f, 1f);
     [SerializeField] private float downedBleedoutDuration = 30f;
+    public float DownedBleedoutDuration => downedBleedoutDuration > 0f ? downedBleedoutDuration : 30f;
     private Coroutine bleedoutCoroutine;
 
     [Header("Physics")]
@@ -165,7 +167,42 @@ public class ReviveController : NetworkBehaviour
         }
     }
 
+    private void Update()
+    {
+        if (IsDownedSync.Value && !IsDeadSync.Value)
+        {
+            float maxDuration = DownedBleedoutDuration;
+            float timerRatio = Mathf.Clamp01(NetDownedTimer.Value / maxDuration);
+            Color currentColor = Color.Lerp(downedExpiredColor, downedColor, timerRatio);
+            ApplyPlayerColor(currentColor);
+        }
+    }
+
     private void UpdatePlayerColor(bool isDowned)
+    {
+        if (!isDowned)
+        {
+            if (playerSrs != null)
+            {
+                for (int i = 0; i < playerSrs.Length; i++)
+                {
+                    if (playerSrs[i] != null)
+                    {
+                        playerSrs[i].color = (originalColors != null && i < originalColors.Length) ? originalColors[i] : Color.white;
+                    }
+                }
+            }
+        }
+        else
+        {
+            float maxDuration = DownedBleedoutDuration;
+            float timerRatio = Mathf.Clamp01(NetDownedTimer.Value / maxDuration);
+            Color currentColor = Color.Lerp(downedExpiredColor, downedColor, timerRatio);
+            ApplyPlayerColor(currentColor);
+        }
+    }
+
+    private void ApplyPlayerColor(Color color)
     {
         if (playerSrs != null)
         {
@@ -173,7 +210,7 @@ public class ReviveController : NetworkBehaviour
             {
                 if (playerSrs[i] != null)
                 {
-                    playerSrs[i].color = isDowned ? downedColor : (originalColors != null && i < originalColors.Length ? originalColors[i] : Color.white);
+                    playerSrs[i].color = color;
                 }
             }
         }
