@@ -76,6 +76,7 @@ public abstract class Enemy : Entity
     [Header("Currency Components")]
     public int hitPrice = 1;
     public int killPrice = 5;
+    [SerializeField, Range(0f, 1f)] private float sharedKillCoinPercentage = 0.10f;
 
     [Header("Components")]
     protected Rigidbody2D rb;
@@ -306,6 +307,21 @@ public abstract class Enemy : Entity
             {
                 playerStats.AddCoins(killPrice);
                 playerStats.AddMana(manaReward);
+
+                int sharedCoinAmount = Mathf.Max(1, Mathf.FloorToInt(killPrice * sharedKillCoinPercentage));
+                if (NetworkManager.Singleton != null)
+                {
+                    foreach (var client in NetworkManager.Singleton.ConnectedClients.Values)
+                    {
+                        if (client.PlayerObject != null && client.PlayerObject.TryGetComponent<PlayerStats>(out var otherStats))
+                        {
+                            if (otherStats != playerStats)
+                            {
+                                otherStats.AddCoins(sharedCoinAmount);
+                            }
+                        }
+                    }
+                }
             }
         }
     }

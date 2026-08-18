@@ -165,31 +165,33 @@ public sealed class UIManager : MonoBehaviour
         }
     }
 
+    private Canvas spectatorCanvas;
+
     public void SetGameplayHUDVisible(bool visible)
     {
-        if (healthTxt != null) healthTxt.gameObject.SetActive(visible);
-        if (manaTxt != null) manaTxt.gameObject.SetActive(visible);
-        if (coinsTxt != null) coinsTxt.gameObject.SetActive(visible);
-        if (roundTxt != null) roundTxt.gameObject.SetActive(visible);
-        if (enemyCountTxt != null) enemyCountTxt.gameObject.SetActive(visible);
-
-        if (slotParent != null) slotParent.gameObject.SetActive(visible);
-        if (spellSlotParent != null) spellSlotParent.gameObject.SetActive(visible);
+        if (hudCanvas != null)
+        {
+            hudCanvas.gameObject.SetActive(visible);
+        }
     }
 
     public void SetSpectatorUI(bool active, string spectatedName = "")
     {
-        if (hudCanvas != null)
-        {
-            hudCanvas.enabled = true;
-        }
-
         SetGameplayHUDVisible(!active);
 
-        if (spectatorTxt == null && hudCanvas != null)
+        if (spectatorCanvas == null)
+        {
+            GameObject canvasObj = new GameObject("SpectatorCanvas", typeof(RectTransform), typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster));
+            canvasObj.transform.SetParent(transform, false);
+            spectatorCanvas = canvasObj.GetComponent<Canvas>();
+            spectatorCanvas.renderMode = RenderMode.ScreenSpaceOverlay;
+            spectatorCanvas.sortingOrder = 100;
+        }
+
+        if (spectatorTxt == null && spectatorCanvas != null)
         {
             GameObject spectObj = new GameObject("SpectatorText", typeof(RectTransform), typeof(TextMeshProUGUI));
-            spectObj.transform.SetParent(hudCanvas.transform, false);
+            spectObj.transform.SetParent(spectatorCanvas.transform, false);
             RectTransform rect = spectObj.GetComponent<RectTransform>();
             rect.anchorMin = new Vector2(0.5f, 0.85f);
             rect.anchorMax = new Vector2(0.5f, 0.85f);
@@ -206,11 +208,6 @@ public sealed class UIManager : MonoBehaviour
 
         if (spectatorTxt != null)
         {
-            if (hudCanvas != null)
-            {
-                spectatorTxt.transform.SetParent(hudCanvas.transform, false);
-            }
-            spectatorTxt.transform.SetAsLastSibling();
             spectatorTxt.gameObject.SetActive(active);
             if (active)
             {
