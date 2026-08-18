@@ -231,6 +231,40 @@ public class Player : NetworkBehaviour
         }
     }
 
+    private float _lastPushRpcTime = 0f;
+
+    private void OnTriggerStay2D(Collider2D collision)
+    {
+        if (!IsOwner || (_revive != null && _revive.IsDownedSync.Value)) return;
+
+        Item hitItem = collision.GetComponent<Item>();
+        if (hitItem != null && IsInventoryFull())
+        {
+            var itemNetObj = hitItem.GetComponent<NetworkObject>();
+            if (itemNetObj != null)
+            {
+                Vector2 pushDir = (hitItem.transform.position - transform.position).normalized;
+                PlayerMovement movement = GetComponent<PlayerMovement>();
+                float speed = movement != null ? movement.CurrentSpeed : 5f;
+                Vector2 pushVelocity = pushDir * (speed * 1.35f);
+
+                // 1. Instant local client physics response (0ms latency feeling)
+                Rigidbody2D itemRb = hitItem.GetComponent<Rigidbody2D>();
+                if (itemRb != null)
+                {
+                    itemRb.linearVelocity = pushVelocity;
+                }
+
+                // 2. Fast server sync RPC
+                if (Time.time >= _lastPushRpcTime + 0.03f)
+                {
+                    _lastPushRpcTime = Time.time;
+                    RequestPushItemServerRpc(itemNetObj.NetworkObjectId, pushVelocity);
+                }
+            }
+        }
+    }
+
     private void OnTriggerExit2D(Collider2D collision)
     {
         PurchaseSystem shop = collision.GetComponent<PurchaseSystem>();
@@ -526,6 +560,31 @@ public class Player : NetworkBehaviour
                         break;
                     }
                 }
+            }
+        }
+    }
+
+    public bool IsInventoryFull()
+    {
+        for (int i = 0; i < maxInventorySlots; i++)
+        {
+            if (_netInventory[i] == -1) return false;
+        }
+        return true;
+    }
+
+    [Rpc(SendTo.Server)]
+    private void RequestPushItemServerRpc(ulong itemNetId, Vector2 pushVelocity)
+    {
+        if (NetworkManager.Singleton.SpawnManager.SpawnedObjects.TryGetValue(itemNetId, out var netObj))
+        {
+            float distance = Vector3.Distance(transform.position, netObj.transform.position);
+            if (distance > 3.5f) return;
+
+            Rigidbody2D itemRb = netObj.GetComponent<Rigidbody2D>();
+            if (itemRb != null)
+            {
+                itemRb.linearVelocity = pushVelocity;
             }
         }
     }
