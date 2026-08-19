@@ -156,6 +156,8 @@ public abstract class Enemy : Entity
                     agent.SetDestination(currentTarget.position);
                     rb.linearVelocity = agent.desiredVelocity;
                     agent.nextPosition = transform.position;
+
+                    RotateTowards(currentTarget.position);
                 }
             }
             else
@@ -222,7 +224,27 @@ public abstract class Enemy : Entity
                 agent.SetDestination(_wanderTarget);
                 rb.linearVelocity = agent.desiredVelocity;
                 agent.nextPosition = transform.position;
+
+                if (rb.linearVelocity.sqrMagnitude > 0.01f)
+                {
+                    RotateTowards(transform.position + (Vector3)rb.linearVelocity);
+                }
             }
+        }
+    }
+
+    protected virtual void RotateTowards(Vector3 targetPos)
+    {
+        Vector2 dir = (targetPos - transform.position);
+        if (dir.sqrMagnitude > 0.001f)
+        {
+            float targetAngle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
+
+            if (rb != null)
+            {
+                rb.MoveRotation(targetAngle);
+            }
+            transform.rotation = Quaternion.Euler(0, 0, targetAngle);
         }
     }
 
